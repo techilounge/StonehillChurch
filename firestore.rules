@@ -1,0 +1,231 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function role() {
+      return signedIn() ? userProfile().role : null;
+    }
+
+    function approved() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        userProfile().approved == true &&
+        userProfile().disabled != true;
+    }
+
+    // Exact-match against the role list — NOT hierarchical.
+    // hasRole(["EDITOR"]) is true ONLY when role == "EDITOR"; ADMIN/SUPER_ADMIN
+    // return false here. Use the *OrHigher() helpers for hierarchical checks.
+    function hasRole(roles) {
+      return approved() && role() in roles;
+    }
+
+    function superAdmin() {
+      return hasRole(["SUPER_ADMIN"]);
+    }
+
+    function adminOrHigher() {
+      return hasRole(["SUPER_ADMIN", "ADMIN"]);
+    }
+
+    function editorOrHigher() {
+      return hasRole(["SUPER_ADMIN", "ADMIN", "EDITOR"]);
+    }
+
+    function viewerOrHigher() {
+      return hasRole(["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]);
+    }
+
+    function publicPublished(data) {
+      return data.status == "published" &&
+        (data.visibility == "public" || data.public == true);
+    }
+
+    function publicStatus(data) {
+      return data.status == "published";
+    }
+
+    function publicActive(data) {
+      return data.active == true;
+    }
+
+    function publicMediaAsset(data) {
+      return data.public == true && data.status == "approved";
+    }
+
+    function editorDraftOrReview() {
+      return hasRole(["EDITOR"]) &&
+        request.resource.data.status in ["draft", "in_review"];
+    }
+
+    // EDITOR may only update content while it is unpublished, and may not
+    // flip status into or out of "published" (publishing is admin-only).
+    // Status moves between draft <-> in_review are allowed.
+    function canPublishWrite() {
+      return adminOrHigher() ||
+        (hasRole(["EDITOR"]) &&
+          resource.data.status in ["draft", "in_review"] &&
+          request.resource.data.status in ["draft", "in_review"] &&
+          !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(["publishedAt"]));
+    }
+
+    function canCreateContent() {
+      return adminOrHigher() || editorDraftOrReview();
+    }
+
+    function canUpdateContent() {
+      return adminOrHigher() || (editorOrHigher() && canPublishWrite());
+    }
+
+    function validMediaAssetWrite() {
+      return request.resource.data.contentType == "image/webp" &&
+        request.resource.data.size <= 5 * 1024 * 1024 &&
+        request.resource.data.storagePath.matches("^media/.*\\.webp$") &&
+        request.resource.data.altText is string &&
+        request.resource.data.altText.size() > 0 &&
+        (!request.resource.data.public ||
+          (adminOrHigher() &&
+            request.resource.data.status == "approved" &&
+            request.resource.data.altText.size() >= 8));
+    }
+
+    match /users/{userId} {
+      allow get: if signedIn() && (request.auth.uid == userId || adminOrHigher());
+      allow list: if adminOrHigher();
+      allow create: if superAdmin();
+      // Self-update is restricted to profile fields. role/approved/disabled/email/uid
+      // are admin-only — the whitelist below intentionally excludes them so users
+      // cannot self-promote or bypass suspension.
+      allow update: if superAdmin() ||
+        (signedIn() && request.auth.uid == userId &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["name", "photoUrl", "lastLoginAt", "updatedAt"]));
+      allow delete: if superAdmin();
+    }
+
+    match /siteSettings/{settingId} {
+      allow read: if viewerOrHigher();
+      allow create, update: if superAdmin() ||
+        (adminOrHigher() && request.resource.data.critical != true);
+      allow delete: if superAdmin();
+    }
+
+    match /youtubeSettings/{settingId} {
+      allow read: if viewerOrHigher();
+      allow write: if superAdmin();
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if adminOrHigher();
+      allow create: if editorOrHigher() &&
+        request.resource.data.actorUid == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    match /formSubmissions/{submissionId} {
+      allow create: if true;
+      allow read, update: if adminOrHigher();
+      allow delete: if superAdmin();
+    }
+
+    match /media/{mediaId} {
+      allow read: if publicPublished(resource.data) || viewerOrHigher();
+      allow create, update: if editorOrHigher();
+      allow delete: if adminOrHigher();
+    }
+
+    match /mediaAssets/{mediaId} {
+      allow read: if publicMediaAsset(resource.data) || viewerOrHigher();
+      allow create: if editorOrHigher() &&
+        request.resource.data.uploadedBy == request.auth.uid &&
+        validMediaAssetWrite();
+      allow update: if editorOrHigher() &&
+        request.resource.data.uploadedBy == resource.data.uploadedBy &&
+        validMediaAssetWrite();
+      allow delete: if adminOrHigher();
+    }
+
+    match /homepageSlides/{slideId} {
+      allow read: if (publicStatus(resource.data) && publicActive(resource.data)) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /sermons/{sermonId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /pages/{pageId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /posts/{postId} {
+      allow read: if publicPublished(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /events/{eventId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /ministries/{ministryId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /leaders/{leaderId} {
+      allow read: if publicActive(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if editorOrHigher();
+      allow delete: if adminOrHigher();
+    }
+
+    match /resources/{resourceId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
+    match /admin/{document=**} {
+      allow read: if viewerOrHigher();
+      allow create, update: if adminOrHigher();
+      allow delete: if superAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

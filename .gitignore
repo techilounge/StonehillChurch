@@ -1,0 +1,29 @@
+.next/
+node_modules/
+out/
+build/
+dist/
+
+# Env files
+.env
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Firebase
+.firebase/
+firestore-debug.log
+firebase-debug.log
+ui-debug.log
+
+# System
+.DS_Store
+Thumbs.db
+
+# Misc
+*.tsbuildinfo
+vercel.json.local

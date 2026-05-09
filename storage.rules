@@ -1,0 +1,90 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return signedIn() ? request.auth.token.role : null;
+    }
+
+    function approved() {
+      return signedIn() && request.auth.token.approved == true;
+    }
+
+    function hasRole(roles) {
+      return approved() && role() in roles;
+    }
+
+    function adminOrHigher() {
+      return hasRole(["SUPER_ADMIN", "ADMIN"]);
+    }
+
+    function editorOrHigher() {
+      return hasRole(["SUPER_ADMIN", "ADMIN", "EDITOR"]);
+    }
+
+    function viewerOrHigher() {
+      return hasRole(["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]);
+    }
+
+    function publicApprovedMedia() {
+      return resource != null &&
+        resource.metadata.public == "true" &&
+        resource.metadata.approved == "true";
+    }
+
+    function validImageMimeType() {
+      return request.resource.contentType == "image/webp";
+    }
+
+    function isWebpUpload() {
+      return request.resource.contentType == "image/webp";
+    }
+
+    function hasCompressionPipelineMetadata() {
+      return request.resource.metadata.compression == "auto" ||
+        request.resource.metadata.uploadPipeline == "compressed";
+    }
+
+    function validImagePipeline() {
+      return isWebpUpload() && hasCompressionPipelineMetadata();
+    }
+
+    function validImageSize() {
+      return request.resource.size <= 5 * 1024 * 1024;
+    }
+
+    function editorCannotSelfApprovePublicMedia() {
+      return !hasRole(["EDITOR"]) ||
+        (request.resource.metadata.public != "true" &&
+          request.resource.metadata.approved != "true");
+    }
+
+    function validCmsImageUpload() {
+      return validImageMimeType() &&
+        validImageSize() &&
+        validImagePipeline() &&
+        request.resource.metadata.uploadedBy == request.auth.uid &&
+        editorCannotSelfApprovePublicMedia();
+    }
+
+    match /media/{allPaths=**} {
+      allow read: if publicApprovedMedia() || viewerOrHigher();
+      allow write: if editorOrHigher() && validCmsImageUpload();
+      allow delete: if adminOrHigher();
+    }
+
+    match /public/{allPaths=**} {
+      allow read: if publicApprovedMedia();
+      allow write: if adminOrHigher() && validCmsImageUpload();
+      allow delete: if adminOrHigher();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
