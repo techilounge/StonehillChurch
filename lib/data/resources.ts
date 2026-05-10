@@ -1,37 +1,49 @@
 import "server-only";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
-import { Resource } from "@/types/content";
-import { serializeData, Serialized } from "./utils";
+import type { Resource } from "@/types/content";
+import { serializeData, withReadTimeout, type Serialized } from "./utils";
 
 export async function getResources(): Promise<Serialized<Resource>[]> {
-  const db = getAdminFirestore();
-  const resourcesRef = db.collection("resources");
-  const snapshot = await resourcesRef
-    .where("status", "==", "published")
-    .orderBy("createdAt", "desc")
-    .get();
+  try {
+    const db = getAdminFirestore();
+    const resourcesRef = db.collection("resources");
+    const snapshot = await withReadTimeout(
+      resourcesRef
+        .where("status", "==", "published")
+        .orderBy("createdAt", "desc")
+        .get(),
+    );
 
-  const resources = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Resource[];
+    const resources = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as unknown as Resource[];
 
-  return resources.map(serializeData);
+    return resources.map(serializeData);
+  } catch {
+    return [];
+  }
 }
 
 export async function getBulletins(): Promise<Serialized<Resource>[]> {
-  const db = getAdminFirestore();
-  const resourcesRef = db.collection("resources");
-  const snapshot = await resourcesRef
-    .where("status", "==", "published")
-    .where("category", "==", "bulletin")
-    .orderBy("createdAt", "desc")
-    .get();
+  try {
+    const db = getAdminFirestore();
+    const resourcesRef = db.collection("resources");
+    const snapshot = await withReadTimeout(
+      resourcesRef
+        .where("status", "==", "published")
+        .where("category", "==", "bulletin")
+        .orderBy("createdAt", "desc")
+        .get(),
+    );
 
-  const bulletins = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Resource[];
+    const bulletins = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as unknown as Resource[];
 
-  return bulletins.map(serializeData);
+    return bulletins.map(serializeData);
+  } catch {
+    return [];
+  }
 }

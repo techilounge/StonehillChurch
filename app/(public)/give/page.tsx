@@ -1,12 +1,17 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Heart, CreditCard, Landmark, Smartphone } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Give | Stonehill Church",
-  description: "Support the ministry and mission of Stonehill Church through your tithes and offerings.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "give",
+    title: "Give",
+    description: "Support the ministry and mission of Stonehill Church through your tithes and offerings.",
+    path: "/give",
+  });
+}
 
 export default function GivePage() {
   return (
@@ -39,16 +44,9 @@ export default function GivePage() {
                 Make a secure one-time or recurring donation using your credit card, debit card, or bank account.
               </p>
               {/* Replace with actual giving link in production (e.g., AdventistGiving) */}
-              <a 
-                href="#" 
-                className="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-6 rounded-xl transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("Online giving link will be configured in the CMS.");
-                }}
-              >
-                Give Now
-              </a>
+              <span className="w-full rounded-xl bg-stonehill-muted px-6 py-3 font-medium text-white">
+                Giving Link Coming Soon
+              </span>
             </div>
 
             {/* In Person */}

@@ -1,13 +1,18 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { EventCard } from "@/components/public/EventCard";
 import { getUpcomingEvents } from "@/lib/data/events";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 
-export const metadata: Metadata = {
-  title: "Events | Stonehill Church",
-  description: "Join us for upcoming events, gatherings, and special services at Stonehill Church.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "events",
+    title: "Events",
+    description: "Join us for upcoming events, gatherings, and special services at Stonehill Church.",
+    path: "/events",
+  });
+}
 
 export default async function EventsIndexPage() {
   const events = await getUpcomingEvents();

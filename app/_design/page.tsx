@@ -17,12 +17,14 @@ export default function DesignShowcase() {
     <div className="min-h-screen bg-stonehill-cream/20">
       <AnnouncementBanner
         title="Welcome to the Design System Showcase!"
-        href="#"
-        actionLabel="Read more"
+        message="Core components and states for Stonehill."
+        priority="normal"
+        ctaHref="#"
+        ctaLabel="Read more"
       />
       <Container className="py-12 space-y-16">
         <div>
-          <SectionHeader title="Typography & Colors" description="Core brand tokens" />
+          <SectionHeader title="Typography & Colors" subtitle="Core brand tokens" />
           <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="h-24 rounded-lg bg-stonehill-evergreen flex items-end p-4 text-white font-bold">Evergreen</div>
             <div className="h-24 rounded-lg bg-stonehill-forest flex items-end p-4 text-white font-bold">Forest</div>
@@ -32,7 +34,7 @@ export default function DesignShowcase() {
         </div>
 
         <div>
-          <SectionHeader title="Buttons" description="All button variants" />
+          <SectionHeader title="Buttons" subtitle="All button variants" />
           <div className="mt-8 flex flex-wrap gap-4">
             <Button variant="default">Default Button</Button>
             <Button variant="primary">Primary (Gold)</Button>
@@ -55,7 +57,7 @@ export default function DesignShowcase() {
         </div>
 
         <div>
-          <SectionHeader title="Forms" description="Input primitives" />
+          <SectionHeader title="Forms" subtitle="Input primitives" />
           <Card className="mt-8 p-6 max-w-xl">
             <form className="space-y-6">
               <FormField label="Full Name" description="Enter your first and last name" id="name">
@@ -94,13 +96,21 @@ export default function DesignShowcase() {
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <SermonCard
               sermon={{
-                id: "1",
                 title: "Faith in Action",
+                slug: "faith-in-action",
                 speaker: "Pastor Smith",
-                date: new Date().toISOString(),
+                sermonDate: new Date().toISOString(),
+                scripture: "James 2:17",
                 series: "Hebrews",
-                videoUrl: "#",
-                audioUrl: "#",
+                description: "A message about living faith with love and courage.",
+                youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                youtubeVideoId: "dQw4w9WgXcQ",
+                thumbnailUrl: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+                thumbnailAlt: "Faith in Action sermon thumbnail",
+                featured: true,
+                status: "published",
+                seoTitle: "Faith in Action",
+                seoDescription: "A message about living faith with love and courage.",
               }}
             />
           </div>

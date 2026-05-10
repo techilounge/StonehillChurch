@@ -10,6 +10,8 @@ export const slugSchema = z
 
 export const urlSchema = z.string().url();
 export const optionalUrlSchema = z.string().url().nullable();
+export const configurableUrlSchema = z.union([z.string().url(), z.literal("")]);
+export const configurableOptionalUrlSchema = z.union([z.string().url(), z.literal(""), z.null()]);
 export const httpsUrlSchema = z
   .string()
   .url()
@@ -22,10 +24,9 @@ export const formTypeSchema = z.enum([
   "contact",
   "prayer_request",
   "volunteer",
-  "plan_visit",
+  "announcement_request",
   "membership_transfer",
   "maintenance_request",
-  "submit_announcement",
 ]);
 
 export const eventCategorySchema = z.enum([
@@ -261,7 +262,7 @@ export const formSubmissionPayloadSchema: z.ZodType<
 export const formSubmissionSchema = z.object({
   formType: formTypeSchema,
   name: z.string().min(2).max(120),
-  email: emailSchema,
+  email: emailSchema.nullable(),
   phone: z.string().min(7).max(40).nullable(),
   subject: z.string().max(200).nullable(),
   message: z.string().min(5).max(4000),
@@ -272,20 +273,94 @@ export const formSubmissionSchema = z.object({
 });
 
 // public-facing form input schemas (no status/assignedTo/internalNotes)
-export const contactFormSchema = z.object({
+const optionalFormText = (max = 4000) =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().max(max).optional(),
+  );
+
+const nullableFormText = (max = 4000) =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+    z.string().trim().max(max).nullable().optional(),
+  );
+
+const requiredFormText = (min: number, max: number) => z.string().trim().min(min).max(max);
+
+const formArraySchema = z.preprocess(
+  (value) => {
+    if (typeof value === "string" && value.trim()) {
+      return [value.trim()];
+    }
+    return value;
+  },
+  z.array(z.string().trim().min(1).max(120)).max(20).optional(),
+);
+
+const basePublicFormSchema = z.object({
   name: z.string().min(2).max(120),
   email: emailSchema,
-  phone: z.string().min(7).max(40).optional(),
-  subject: z.string().min(2).max(200).optional(),
+  phone: optionalFormText(40),
+  subject: optionalFormText(200),
+});
+
+export const contactFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("contact"),
   message: z.string().min(10).max(4000),
 });
 
-export const prayerRequestFormSchema = z.object({
-  name: z.string().min(2).max(120),
-  email: emailSchema,
-  phone: z.string().min(7).max(40).optional(),
+export const prayerRequestFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("prayer_request"),
   message: z.string().min(5).max(4000),
   shareWithPrayerTeam: z.boolean().default(true),
+  confidential: z.boolean().default(false),
+});
+
+export const volunteerFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("volunteer"),
+  areas: formArraySchema,
+  availability: optionalFormText(1000),
+  message: z.string().min(5).max(4000),
+});
+
+export const announcementRequestFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("announcement_request"),
+  announcementTitle: requiredFormText(2, 160),
+  announcementBody: requiredFormText(5, 2000),
+  requestedStartDate: optionalFormText(80),
+  requestedEndDate: optionalFormText(80),
+  message: z.string().max(4000).default("Announcement request submitted."),
+});
+
+export const membershipTransferFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("membership_transfer"),
+  transferDirection: z.enum(["to_stonehill", "from_stonehill", "other"]).default("to_stonehill"),
+  currentChurch: nullableFormText(200),
+  receivingChurch: nullableFormText(200),
+  message: z.string().min(5).max(4000),
+});
+
+export const maintenanceRequestFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("maintenance_request"),
+  location: requiredFormText(2, 200),
+  issue: requiredFormText(5, 2000),
+  urgency: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+  message: z.string().max(4000).default("Maintenance request submitted."),
+});
+
+export const publicFormSubmissionSchema = z.discriminatedUnion("formType", [
+  contactFormSchema,
+  prayerRequestFormSchema,
+  volunteerFormSchema,
+  announcementRequestFormSchema,
+  membershipTransferFormSchema,
+  maintenanceRequestFormSchema,
+]);
+
+export const formSubmissionStatusUpdateSchema = z.object({
+  status: formSubmissionStatusSchema,
+  assignedTo: z.string().trim().min(1).max(160).nullable().optional(),
+  internalNotes: z.string().trim().max(4000).optional(),
 });
 
 // siteSettings
@@ -328,11 +403,11 @@ export const pageSchema = z.object({
 
 // youtubeSettings
 export const youtubeSettingsSchema = z.object({
-  channelId: z.string().min(5).max(80),
-  channelUrl: urlSchema,
-  liveStreamUrl: urlSchema.nullable(),
-  uploadsPlaylistId: z.string().min(5).max(80).nullable(),
-  featuredVideoId: z.string().min(5).max(40).nullable(),
+  channelId: z.string().max(80),
+  channelUrl: configurableUrlSchema,
+  liveStreamUrl: configurableOptionalUrlSchema,
+  uploadsPlaylistId: z.string().max(80).nullable(),
+  featuredVideoId: z.string().max(40).nullable(),
   autoFetchLatestSermons: z.boolean(),
   showLiveBanner: z.boolean(),
 });

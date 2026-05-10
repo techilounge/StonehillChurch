@@ -589,6 +589,78 @@ export const siteSettingsSeed: SeedDoc<SiteSettingDoc>[] = [
     },
   },
   {
+    id: "seo.siteUrl",
+    data: {
+      key: "seo.siteUrl",
+      value: "https://stonehillsda.org",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.defaultDescription",
+    data: {
+      key: "seo.defaultDescription",
+      value: "A welcoming Seventh-day Adventist church community worshiping, growing, and serving together in Christ.",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.defaultImage",
+    data: {
+      key: "seo.defaultImage",
+      value: "/og-default.png",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.twitterHandle",
+    data: {
+      key: "seo.twitterHandle",
+      value: "@stonehillsda",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.address.street",
+    data: {
+      key: "seo.address.street",
+      value: "1487 Stonehill Ridge Road",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.address.city",
+    data: {
+      key: "seo.address.city",
+      value: "Spokane",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.address.region",
+    data: {
+      key: "seo.address.region",
+      value: "WA",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.address.postalCode",
+    data: {
+      key: "seo.address.postalCode",
+      value: "99203",
+      group: "seo",
+    },
+  },
+  {
+    id: "seo.address.country",
+    data: {
+      key: "seo.address.country",
+      value: "US",
+      group: "seo",
+    },
+  },
+  {
     id: "contact.email",
     data: {
       key: "contact.email",
@@ -673,12 +745,12 @@ export const siteSettingsSeed: SeedDoc<SiteSettingDoc>[] = [
 export const youtubeSettingsSeed: { id: string; data: Omit<YoutubeSettings, "updatedAt" | "updatedBy"> } = {
   id: "default",
   data: {
-    channelId: "UCstonehillsdachurchplaceholder",
-    channelUrl: "https://www.youtube.com/@stonehillsda",
-    liveStreamUrl: "https://www.youtube.com/@stonehillsda/live",
-    uploadsPlaylistId: "UUstonehillsdachurchplaceholder",
-    featuredVideoId: "dQw4w9WgXcQ",
-    autoFetchLatestSermons: true,
+    channelId: "",
+    channelUrl: "",
+    liveStreamUrl: null,
+    uploadsPlaylistId: null,
+    featuredVideoId: null,
+    autoFetchLatestSermons: false,
     showLiveBanner: false,
   },
 };

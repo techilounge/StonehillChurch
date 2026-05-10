@@ -1,13 +1,18 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { getResources } from "@/lib/data/resources";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { FileText, Download, ExternalLink } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Resources | Stonehill Church",
-  description: "Access church resources, documents, study guides, and forms.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "resources",
+    title: "Resources",
+    description: "Access church resources, documents, study guides, and forms.",
+    path: "/resources",
+  });
+}
 
 export default async function ResourcesPage() {
   const resources = await getResources();

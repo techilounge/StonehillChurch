@@ -1,14 +1,19 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { getSiteSettings } from "@/lib/data/siteSettings";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Clock, MapPin, Heart, Users, Coffee } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "I'm New | Stonehill Church",
-  description: "Welcome to Stonehill Church! Find out what to expect, where we are located, and how to get connected.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "im-new",
+    title: "I'm New",
+    description: "Welcome to Stonehill Church! Find out what to expect, where we are located, and how to get connected.",
+    path: "/im-new",
+  });
+}
 
 export default async function ImNewPage() {
   const settings = await getSiteSettings();

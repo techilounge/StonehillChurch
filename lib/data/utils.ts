@@ -1,5 +1,7 @@
 import "server-only";
 
+const DEFAULT_READ_TIMEOUT_MS = 5000;
+
 export type Serialized<T> = Omit<T, "createdAt" | "updatedAt" | "publishedAt" | "sermonDate" | "startDateTime" | "endDateTime" | "startDate" | "endDate"> & {
   id: string;
   createdAt?: string | null;
@@ -41,4 +43,16 @@ export function serializeData<T extends { id?: string; [key: string]: any }>(dat
   }
 
   return serialized as Serialized<T>;
+}
+
+export function withReadTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs = DEFAULT_READ_TIMEOUT_MS,
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("Firestore read timed out.")), timeoutMs);
+    }),
+  ]);
 }

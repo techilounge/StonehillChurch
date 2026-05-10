@@ -1,12 +1,34 @@
 import type { Metadata } from "next";
+import {
+  DEFAULT_SITE_DESCRIPTION,
+  DEFAULT_SITE_NAME,
+  DEFAULT_SITE_URL,
+  normalizeSiteUrl,
+} from "@/lib/seo";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Stonehill Seventh-day Adventist Church",
+    default: DEFAULT_SITE_NAME,
     template: "%s | Stonehill SDA Church",
   },
-  description: "A welcoming Seventh-day Adventist church community.",
+  description: DEFAULT_SITE_DESCRIPTION,
+  metadataBase: new URL(normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL)),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: DEFAULT_SITE_NAME,
+    description: DEFAULT_SITE_DESCRIPTION,
+    url: "/",
+    siteName: DEFAULT_SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: DEFAULT_SITE_NAME,
+    description: DEFAULT_SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

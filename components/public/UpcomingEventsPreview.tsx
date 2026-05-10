@@ -10,6 +10,8 @@ interface UpcomingEventsPreviewProps {
   events: Serialized<ChurchEvent>[];
 }
 
+type EventCardEvent = Parameters<typeof EventCard>[0]["event"];
+
 export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
   if (!events || events.length === 0) {
     return (
@@ -34,7 +36,7 @@ export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
     ...e,
     startDateTime: e.startDateTime ? new Date(e.startDateTime) : new Date(),
     endDateTime: e.endDateTime ? new Date(e.endDateTime) : new Date(),
-  })) as unknown as ChurchEvent[];
+  })) as EventCardEvent[];
 
   return (
     <section className="py-16 bg-stonehill-cream sm:py-24">
@@ -59,7 +61,7 @@ export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {eventData.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.slug} event={event} />
           ))}
         </div>
         

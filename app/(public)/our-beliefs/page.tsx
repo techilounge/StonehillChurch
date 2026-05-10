@@ -1,12 +1,17 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { getPageBySlug } from "@/lib/data/pages";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 
-export const metadata: Metadata = {
-  title: "Our Beliefs | Stonehill Church",
-  description: "Learn about the core beliefs and doctrines of Stonehill Church.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "our-beliefs",
+    title: "Our Beliefs",
+    description: "Learn about the core beliefs and doctrines of Stonehill Church.",
+    path: "/our-beliefs",
+  });
+}
 
 export default async function OurBeliefsPage() {
   const pageContent = await getPageBySlug("our-beliefs");

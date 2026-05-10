@@ -1,13 +1,18 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { getSiteSettings } from "@/lib/data/siteSettings";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Calendar } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Church Calendar | Stonehill Church",
-  description: "View the official church calendar for Stonehill Church events and gatherings.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "church-calendar",
+    title: "Church Calendar",
+    description: "View the official church calendar for Stonehill Church events and gatherings.",
+    path: "/church-calendar",
+  });
+}
 
 export default async function ChurchCalendarPage() {
   const settings = await getSiteSettings();

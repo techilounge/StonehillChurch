@@ -1,9 +1,17 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { PageHero } from "@/components/public/PageHero";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getEventBySlug } from "@/lib/data/events";
+import { getSiteSettings } from "@/lib/data/siteSettings";
+import {
+  breadcrumbJsonLd,
+  createEventMetadata,
+  createMetadata,
+  eventJsonLd,
+  siteSettingsToSeoSettings,
+} from "@/lib/seo";
 import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
 
 interface EventPageProps {
@@ -12,28 +20,37 @@ interface EventPageProps {
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
+  const [event, siteSettings] = await Promise.all([
+    getEventBySlug(slug),
+    getSiteSettings(),
+  ]);
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   if (!event) {
-    return {
-      title: "Event Not Found | Stonehill Church",
-    };
+    return createMetadata({
+      title: "Event Not Found",
+      description: "This event could not be found.",
+      path: `/events/${slug}`,
+      settings: seoSettings,
+      noIndex: true,
+    });
   }
 
-  return {
-    title: event.seoTitle || `${event.title} | Stonehill Church`,
-    description: event.seoDescription || event.description,
-  };
+  return createEventMetadata(event, seoSettings);
 }
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
+  const [event, siteSettings] = await Promise.all([
+    getEventBySlug(slug),
+    getSiteSettings(),
+  ]);
 
   if (!event) {
     notFound();
   }
 
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
   const startDate = event.startDateTime ? new Date(event.startDateTime) : null;
   const endDate = event.endDateTime ? new Date(event.endDateTime) : null;
 
@@ -48,6 +65,19 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+      <JsonLd
+        data={[
+          eventJsonLd(event, seoSettings.siteUrl),
+          breadcrumbJsonLd(
+            [
+              { name: "Home", path: "/" },
+              { name: "Events", path: "/events" },
+              { name: event.title, path: `/events/${event.slug}` },
+            ],
+            seoSettings.siteUrl,
+          ),
+        ]}
+      />
       <PageHero
         title={event.title}
         imageUrl={event.imageUrl}

@@ -1,14 +1,21 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { getSiteSettings } from "@/lib/data/siteSettings";
 import { LocationMapSection } from "@/components/public/LocationMapSection";
+import { ContactForm } from "@/components/forms/public/ContactForm";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Contact Us | Stonehill Church",
-  description: "Get in touch with Stonehill Church. Find our address, phone number, email, and service times.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "contact",
+    title: "Contact Us",
+    description: "Get in touch with Stonehill Church. Find our address, phone number, email, and service times.",
+    path: "/contact",
+    noIndexFollow: true,
+  });
+}
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();
@@ -86,17 +93,10 @@ export default async function ContactPage() {
               </div>
             </div>
 
-            {/* Contact Form Placeholder (Phase 13) */}
-            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-stone-100">
+            {/* Contact Form */}
+            <div>
               <h2 className="text-2xl font-bold font-serif mb-6 text-stone-900">Send a Message</h2>
-              
-              <div className="bg-stone-50 border-2 border-dashed border-stone-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-64">
-                <Mail className="w-12 h-12 text-stone-300 mb-4" />
-                <p className="text-stone-500 font-medium italic">
-                  [ Contact Form will be available in a future update ]<br/>
-                  For now, please email us directly at <a href={`mailto:${settings?.email || 'contact@stonehillchurch.org'}`} className="text-primary hover:underline">{settings?.email || 'contact@stonehillchurch.org'}</a>.
-                </p>
-              </div>
+              <ContactForm />
             </div>
 
           </div>

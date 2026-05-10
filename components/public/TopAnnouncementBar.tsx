@@ -1,8 +1,27 @@
-import { getActiveAnnouncements } from "@/lib/data/homepage";
 import { AnnouncementBanner } from "./AnnouncementBanner";
 
 export async function TopAnnouncementBar() {
-  const activeAnnouncements = await getActiveAnnouncements();
+  const [{ getActiveAnnouncements }, { getYoutubeSettings }] = await Promise.all([
+    import("@/lib/data/homepage"),
+    import("@/lib/data/youtubeSettings"),
+  ]);
+  const [activeAnnouncements, youtubeSettings] = await Promise.all([
+    getActiveAnnouncements(),
+    getYoutubeSettings(),
+  ]);
+
+  if (youtubeSettings.showLiveBanner) {
+    return (
+      <AnnouncementBanner
+        title="Live now"
+        message="Join the Stonehill worship service online."
+        priority="urgent"
+        ctaLabel="Watch live"
+        ctaHref="/live"
+        dismissible={false}
+      />
+    );
+  }
 
   if (activeAnnouncements.length === 0) {
     return null;

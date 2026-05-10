@@ -1,9 +1,19 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { PageHero } from "@/components/public/PageHero";
+import { YouTubeLiteEmbed } from "@/components/public/YouTubeLiteEmbed";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { getSiteSettings } from "@/lib/data/siteSettings";
 import { getSermonBySlug } from "@/lib/data/sermons";
+import {
+  breadcrumbJsonLd,
+  createMetadata,
+  createSermonMetadata,
+  siteSettingsToSeoSettings,
+  videoObjectJsonLd,
+} from "@/lib/seo";
 import { Calendar, User } from "lucide-react";
 
 interface SermonPageProps {
@@ -12,28 +22,37 @@ interface SermonPageProps {
 
 export async function generateMetadata({ params }: SermonPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const sermon = await getSermonBySlug(slug);
+  const [sermon, siteSettings] = await Promise.all([
+    getSermonBySlug(slug),
+    getSiteSettings(),
+  ]);
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   if (!sermon) {
-    return {
-      title: "Sermon Not Found | Stonehill Church",
-    };
+    return createMetadata({
+      title: "Sermon Not Found",
+      description: "This sermon could not be found.",
+      path: `/sermons/${slug}`,
+      settings: seoSettings,
+      noIndex: true,
+    });
   }
 
-  return {
-    title: sermon.seoTitle || `${sermon.title} | Stonehill Church`,
-    description: sermon.seoDescription || sermon.description,
-  };
+  return createSermonMetadata(sermon, seoSettings);
 }
 
 export default async function SermonDetailPage({ params }: SermonPageProps) {
   const { slug } = await params;
-  const sermon = await getSermonBySlug(slug);
+  const [sermon, siteSettings] = await Promise.all([
+    getSermonBySlug(slug),
+    getSiteSettings(),
+  ]);
 
   if (!sermon) {
     notFound();
   }
 
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
   const formattedDate = sermon.sermonDate
     ? new Date(sermon.sermonDate).toLocaleDateString("en-US", {
         month: "long",
@@ -44,6 +63,19 @@ export default async function SermonDetailPage({ params }: SermonPageProps) {
 
   return (
     <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+      <JsonLd
+        data={[
+          videoObjectJsonLd(sermon, seoSettings.siteUrl),
+          breadcrumbJsonLd(
+            [
+              { name: "Home", path: "/" },
+              { name: "Sermons", path: "/sermons" },
+              { name: sermon.title, path: `/sermons/${sermon.slug}` },
+            ],
+            seoSettings.siteUrl,
+          ),
+        ]}
+      />
       <PageHero
         title={sermon.title}
         subtitle={sermon.series ? `Part of the ${sermon.series} series` : undefined}
@@ -54,15 +86,12 @@ export default async function SermonDetailPage({ params }: SermonPageProps) {
           
           {/* Video Player */}
           {sermon.youtubeVideoId ? (
-            <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black mb-8 shadow-inner">
-              <iframe
-                src={`https://www.youtube.com/embed/${sermon.youtubeVideoId}`}
-                title={sermon.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full border-0"
-              />
-            </div>
+            <YouTubeLiteEmbed
+              videoId={sermon.youtubeVideoId}
+              title={sermon.title}
+              thumbnailUrl={sermon.thumbnailUrl}
+              className="mb-8 rounded-2xl shadow-inner"
+            />
           ) : sermon.thumbnailUrl ? (
             <div className="aspect-video w-full rounded-2xl overflow-hidden mb-8 relative shadow-sm">
               <Image

@@ -1,13 +1,18 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { LeaderCard } from "@/components/public/LeaderCard";
 import { getLeaders } from "@/lib/data/leaders";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 
-export const metadata: Metadata = {
-  title: "Our Leaders | Stonehill Church",
-  description: "Meet the pastoral team and leaders at Stonehill Church.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "our-leaders",
+    title: "Our Leaders",
+    description: "Meet the pastoral team and leaders at Stonehill Church.",
+    path: "/our-leaders",
+  });
+}
 
 export default async function OurLeadersPage() {
   const leaders = await getLeaders();

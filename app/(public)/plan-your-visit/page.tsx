@@ -1,14 +1,19 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { PageHero } from "@/components/public/PageHero";
 import { getSiteSettings } from "@/lib/data/siteSettings";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Clock, MapPin } from "lucide-react";
 import { LocationMapSection } from "@/components/public/LocationMapSection";
 
-export const metadata: Metadata = {
-  title: "Plan Your Visit | Stonehill Church",
-  description: "Plan your visit to Stonehill Church. Find service times, directions, and let us know you're coming.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    cmsSlug: "plan-your-visit",
+    title: "Plan Your Visit",
+    description: "Plan your visit to Stonehill Church. Find service times, directions, and let us know you're coming.",
+    path: "/plan-your-visit",
+  });
+}
 
 export default async function PlanYourVisitPage() {
   const settings = await getSiteSettings();

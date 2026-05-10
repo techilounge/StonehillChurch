@@ -35,3 +35,5 @@ export type YoutubeSettings = {
   updatedAt: FirestoreTimestampLike;
   updatedBy: string | null;
 };
+
+export type YoutubeSettingsConfig = Omit<YoutubeSettings, "updatedAt" | "updatedBy">;

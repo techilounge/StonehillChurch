@@ -1,9 +1,17 @@
 import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { PageHero } from "@/components/public/PageHero";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getMinistryBySlug } from "@/lib/data/ministries";
+import { getSiteSettings } from "@/lib/data/siteSettings";
+import {
+  breadcrumbJsonLd,
+  createMetadata,
+  createMinistryMetadata,
+  siteSettingsToSeoSettings,
+} from "@/lib/seo";
 import { Clock, User, Mail, Users } from "lucide-react";
 
 interface MinistryPageProps {
@@ -12,30 +20,50 @@ interface MinistryPageProps {
 
 export async function generateMetadata({ params }: MinistryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const ministry = await getMinistryBySlug(slug);
+  const [ministry, siteSettings] = await Promise.all([
+    getMinistryBySlug(slug),
+    getSiteSettings(),
+  ]);
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   if (!ministry) {
-    return {
-      title: "Ministry Not Found | Stonehill Church",
-    };
+    return createMetadata({
+      title: "Ministry Not Found",
+      description: "This ministry could not be found.",
+      path: `/ministries/${slug}`,
+      settings: seoSettings,
+      noIndex: true,
+    });
   }
 
-  return {
-    title: ministry.seoTitle || `${ministry.name} | Stonehill Church`,
-    description: ministry.seoDescription || ministry.shortDescription,
-  };
+  return createMinistryMetadata(ministry, seoSettings);
 }
 
 export default async function MinistryDetailPage({ params }: MinistryPageProps) {
   const { slug } = await params;
-  const ministry = await getMinistryBySlug(slug);
+  const [ministry, siteSettings] = await Promise.all([
+    getMinistryBySlug(slug),
+    getSiteSettings(),
+  ]);
 
   if (!ministry) {
     notFound();
   }
 
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
+
   return (
     <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+      <JsonLd
+        data={breadcrumbJsonLd(
+          [
+            { name: "Home", path: "/" },
+            { name: "Ministries", path: "/ministries" },
+            { name: ministry.name, path: `/ministries/${ministry.slug}` },
+          ],
+          seoSettings.siteUrl,
+        )}
+      />
       <PageHero
         title={ministry.name}
         subtitle={ministry.shortDescription}

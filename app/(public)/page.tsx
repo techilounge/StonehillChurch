@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import { 
   getHomepageSlides
 } from "@/lib/data/homepage";
@@ -16,8 +17,17 @@ import { MinistriesPreview } from "@/components/public/MinistriesPreview";
 import { UpcomingEventsPreview } from "@/components/public/UpcomingEventsPreview";
 import { ConnectSection } from "@/components/public/ConnectSection";
 import { LocationMapSection } from "@/components/public/LocationMapSection";
+import { createPublicPageMetadata } from "@/lib/seoMetadata";
 
 export const revalidate = 60; // Revalidate at most every 60 seconds
+
+export async function generateMetadata(): Promise<Metadata> {
+  return createPublicPageMetadata({
+    title: { absolute: "Stonehill Seventh-day Adventist Church" },
+    description: "A welcoming Seventh-day Adventist church community.",
+    path: "/",
+  });
+}
 
 export default async function HomePage() {
   // Fetch data in parallel

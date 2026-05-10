@@ -45,6 +45,7 @@ export function PublicFooter() {
           <div className="mt-4 flex space-x-4 sm:mt-0 text-xs text-stonehill-muted">
             <Link href="/privacy" className="hover:text-stonehill-evergreen transition">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-stonehill-evergreen transition">Terms of Service</Link>
+            <Link href="/admin/dashboard" className="hover:text-stonehill-evergreen transition">Admin Login</Link>
           </div>
         </div>
       </div>
