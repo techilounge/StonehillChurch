@@ -1,11 +1,20 @@
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { YouTubeSettingsForm } from "@/components/admin/YouTubeSettingsForm";
+import { adminLoginRedirectPath } from "@/lib/adminRoutes";
+import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { getYoutubeSettings } from "@/lib/data/youtubeSettings";
-import { isYouTubeApiConfigured } from "@/lib/youtube";
+import { isYouTubeApiConfigured } from "@/lib/youtubeServer";
 
 export const dynamic = "force-dynamic";
 
 export default async function YouTubeAdminPage() {
+  const authResult = await getCurrentAdminSession("youtube:manage");
+
+  if (!authResult.ok) {
+    redirect(adminLoginRedirectPath("/admin/youtube", authResult.reason));
+  }
+
   const settings = await getYoutubeSettings();
 
   return (

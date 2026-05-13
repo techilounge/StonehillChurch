@@ -8,9 +8,11 @@ import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { SelectInput } from "@/components/forms/SelectInput";
 import { CheckboxField } from "@/components/forms/CheckboxField";
-import { SermonCard } from "@/components/public/cards/SermonCard";
+import { SermonCard } from "@/components/public/SermonCard";
 import { AnnouncementBanner } from "@/components/public/AnnouncementBanner";
 import { LoadingState } from "@/components/shared/LoadingState";
+import { PageHero } from "@/components/public/PageHero";
+import { HeroCarousel } from "@/components/public/HeroCarousel";
 
 export default function DesignShowcase() {
   return (
@@ -92,10 +94,65 @@ export default function DesignShowcase() {
         </div>
 
         <div>
+          <SectionHeader title="Heroes" subtitle="Page and Carousel Heroes" />
+          <div className="mt-8 space-y-8">
+            <div className="rounded-2xl overflow-hidden border border-stonehill-line shadow-sm">
+              <PageHero 
+                title="Page Hero Example" 
+                subtitle="With guaranteed text contrast overlay"
+                imageUrl="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=2073&auto=format&fit=crop"
+                imageAlt="Sample background"
+              />
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-stonehill-line shadow-sm">
+              <HeroCarousel 
+                slides={[
+                  {
+                    id: "1",
+                    title: "Carousel Slide 1",
+                    subtitle: "Testing the new flat overlay and dots",
+                    imageUrl: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=2073&auto=format&fit=crop",
+                    imageAlt: "Sample background",
+                    primaryCtaLabel: "Learn More",
+                    primaryCtaHref: "#",
+                    secondaryCtaLabel: "",
+                    secondaryCtaHref: "",
+                    overlayOpacity: 60,
+                    active: true,
+                    status: "published",
+                    sortOrder: 1,
+                    createdBy: "mock",
+                    updatedBy: "mock",
+                  },
+                  {
+                    id: "2",
+                    title: "Carousel Slide 2",
+                    subtitle: "Second slide to test pagination",
+                    imageUrl: "https://images.unsplash.com/photo-1444858291040-58f756a3bdd6?q=80&w=1978&auto=format&fit=crop",
+                    imageAlt: "Sample background 2",
+                    primaryCtaLabel: "",
+                    primaryCtaHref: "",
+                    secondaryCtaLabel: "",
+                    secondaryCtaHref: "",
+                    overlayOpacity: 60,
+                    active: true,
+                    status: "published",
+                    sortOrder: 2,
+                    createdBy: "mock",
+                    updatedBy: "mock",
+                  }
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
           <SectionHeader title="Cards & Content" />
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <SermonCard
               sermon={{
+                id: "sermon-1",
                 title: "Faith in Action",
                 slug: "faith-in-action",
                 speaker: "Pastor Smith",
@@ -111,6 +168,8 @@ export default function DesignShowcase() {
                 status: "published",
                 seoTitle: "Faith in Action",
                 seoDescription: "A message about living faith with love and courage.",
+                createdBy: "mock-user-1",
+                updatedBy: "mock-user-1",
               }}
             />
           </div>

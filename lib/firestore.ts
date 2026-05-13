@@ -20,30 +20,18 @@ import {
   type WhereFilterOp,
 } from "firebase/firestore";
 import { getFirebaseFirestore } from "@/lib/firebaseClient";
-import type { ContentStatus } from "@/types/shared";
-
-export const collections = {
-  users: "users",
-  homepageSlides: "homepageSlides",
-  sermons: "sermons",
-  events: "events",
-  ministries: "ministries",
-  leaders: "leaders",
-  announcements: "announcements",
-  resources: "resources",
-  mediaAssets: "mediaAssets",
-  formSubmissions: "formSubmissions",
-  siteSettings: "siteSettings",
-  pages: "pages",
-  youtubeSettings: "youtubeSettings",
-  auditLogs: "auditLogs",
-} as const;
-
-export type CollectionName = (typeof collections)[keyof typeof collections];
-
-export const SINGLETON_DOCS = {
-  youtubeSettings: "default",
-} as const;
+import type { CollectionName } from "@/lib/constants/collections";
+export {
+  APPROVED_COLLECTION_NAMES,
+  SINGLETON_DOCS,
+  collections,
+} from "@/lib/constants/collections";
+export type {
+  CollectionKey,
+  CollectionName,
+} from "@/lib/constants/collections";
+import { PUBLISHED } from "@/types/shared";
+export { PUBLISHED } from "@/types/shared";
 
 export function createConverter<T extends DocumentData>(): FirestoreDataConverter<T> {
   return {
@@ -144,8 +132,6 @@ export async function patchDocument<T extends DocumentData>(
     updatedAt: serverTimestamp(),
   });
 }
-
-export const PUBLISHED: ContentStatus = "published";
 
 export function publishedQuery(extra?: QueryOptions): QueryOptions {
   return {

@@ -12,15 +12,18 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }>) {
   const { getCachedSiteSettings } = await import("@/lib/data/siteSettings");
-  const seoSettings = siteSettingsToSeoSettings(await getCachedSiteSettings());
+  const siteSettings = await getCachedSiteSettings();
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
     <div className="min-h-screen bg-stonehill-cream text-stonehill-ink">
       <JsonLd data={[organizationJsonLd(seoSettings), placeJsonLd(seoSettings)]} />
       <TopAnnouncementBar />
       <PublicHeader />
-      <main>{children}</main>
-      <PublicFooter />
+      <main id="main-content" tabIndex={-1}>
+        {children}
+      </main>
+      <PublicFooter settings={siteSettings} />
     </div>
   );
 }

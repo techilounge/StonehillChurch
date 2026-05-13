@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
-import { EventCard } from "./cards/EventCard";
+import { EventCard } from "./EventCard";
 import type { Serialized } from "@/lib/data/homepage";
 import type { ChurchEvent } from "@/types/content";
 
@@ -10,12 +10,10 @@ interface UpcomingEventsPreviewProps {
   events: Serialized<ChurchEvent>[];
 }
 
-type EventCardEvent = Parameters<typeof EventCard>[0]["event"];
-
 export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
   if (!events || events.length === 0) {
     return (
-      <section className="py-16 bg-stonehill-cream sm:py-24">
+      <section className="py-16 bg-stonehill-cream sm:py-24 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
             Upcoming Events
@@ -31,15 +29,8 @@ export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
     );
   }
 
-  // Convert string dates back to Date objects for EventCard if necessary
-  const eventData = events.map(e => ({
-    ...e,
-    startDateTime: e.startDateTime ? new Date(e.startDateTime) : new Date(),
-    endDateTime: e.endDateTime ? new Date(e.endDateTime) : new Date(),
-  })) as EventCardEvent[];
-
   return (
-    <section className="py-16 bg-stonehill-cream sm:py-24">
+    <section className="py-16 bg-stonehill-cream sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div className="max-w-2xl">
@@ -47,8 +38,8 @@ export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
               Upcoming Events
             </h2>
             <p className="text-lg text-stonehill-ink/80">
-              Stay connected with our church family. Check out what's happening this month 
-              and RSVP to let us know you're coming.
+              Stay connected with our church family. Check out what&apos;s happening this month 
+              and RSVP to let us know you&apos;re coming.
             </p>
           </div>
           <Link 
@@ -60,7 +51,7 @@ export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {eventData.map((event) => (
+          {events.map((event) => (
             <EventCard key={event.slug} event={event} />
           ))}
         </div>

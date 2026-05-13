@@ -5,7 +5,7 @@ import {
 } from "@/lib/data/homepage";
 import { getUpcomingEvents } from "@/lib/data/events";
 import { getFeaturedMinistries } from "@/lib/data/ministries";
-import { getSiteSettings } from "@/lib/data/siteSettings";
+import { getCachedSiteSettings } from "@/lib/data/siteSettings";
 import { getLatestSermon } from "@/lib/data/sermons";
 
 import { HeroCarousel } from "@/components/public/HeroCarousel";
@@ -42,7 +42,7 @@ export default async function HomePage() {
     getLatestSermon(),
     getUpcomingEvents(3),
     getFeaturedMinistries(4),
-    getSiteSettings()
+    getCachedSiteSettings()
   ]);
 
   return (

@@ -1,16 +1,17 @@
 import "server-only";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
+import { collections } from "@/lib/constants/collections";
 import type { Leader } from "@/types/content";
-import { serializeData, withReadTimeout, type Serialized } from "./utils";
+import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 
 export async function getLeaders(): Promise<Serialized<Leader>[]> {
   try {
     const db = getAdminFirestore();
-    const leadersRef = db.collection("leaders");
+    const leadersRef = db.collection(collections.leaders);
     const snapshot = await withReadTimeout(
       leadersRef
-        .where("status", "==", "published")
-        .orderBy("order", "asc")
+        .where("active", "==", true)
+        .orderBy("sortOrder", "asc")
         .get(),
     );
 
@@ -20,7 +21,8 @@ export async function getLeaders(): Promise<Serialized<Leader>[]> {
     })) as unknown as Leader[];
 
     return leaders.map(serializeData);
-  } catch {
+  } catch (error) {
+    logDataFallback("getLeaders", error);
     return [];
   }
 }

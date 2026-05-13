@@ -94,21 +94,26 @@ export function YouTubeSettingsForm({
     setMessage(null);
     setError(null);
 
-    if (!user) {
-      setError("Sign in with an approved admin account before saving YouTube settings.");
+    if (!authReady) {
+      setError("Admin session is still loading. Please try again in a moment.");
       return;
     }
 
     setSaving(true);
 
     try {
-      const token = await user.getIdToken();
+      const token = user ? await user.getIdToken() : null;
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch("/api/youtube", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
         body: JSON.stringify(payloadFromForm(form)),
       });
       const result = (await response.json()) as { message?: string };
@@ -127,7 +132,7 @@ export function YouTubeSettingsForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <section className="rounded-lg border border-stonehill-line bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-stonehill-line bg-white p-6 shadow-sm">
         <div className="grid gap-5">
           <FormField
             id="channelId"
@@ -198,7 +203,7 @@ export function YouTubeSettingsForm({
             </FormField>
           </div>
 
-          <div className="grid gap-4 rounded-lg border border-stonehill-line bg-stonehill-cream p-4">
+          <div className="grid gap-4 rounded-xl border border-stonehill-line bg-stonehill-cream p-4">
             <CheckboxField
               id="showLiveBanner"
               checked={form.showLiveBanner}
@@ -229,7 +234,7 @@ export function YouTubeSettingsForm({
           <div className="flex flex-col gap-3 border-t border-stonehill-line pt-5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-stonehill-ink/65">
               {authReady && !user
-                ? "A Firebase admin session is required to save changes."
+                ? "Your secure admin session cookie will be used to save changes."
                 : "Changes are stored in youtubeSettings/default."}
             </p>
             <Button type="submit" disabled={saving || !authReady}>
@@ -241,7 +246,7 @@ export function YouTubeSettingsForm({
       </section>
 
       <aside className="space-y-5">
-        <section className="rounded-lg border border-stonehill-line bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-stonehill-line bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3 text-stonehill-evergreen">
             <Youtube className="h-5 w-5" aria-hidden="true" />
             <h2 className="text-lg font-semibold">Connection</h2>
@@ -264,7 +269,7 @@ export function YouTubeSettingsForm({
           </dl>
         </section>
 
-        <section className="rounded-lg border border-stonehill-line bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-stonehill-line bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-stonehill-evergreen">Public Links</h2>
           <div className="mt-5 grid gap-3">
             <a

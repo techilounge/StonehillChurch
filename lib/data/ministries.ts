@@ -1,9 +1,10 @@
 import "server-only";
 
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
-import { collections, PUBLISHED } from "@/lib/firestore";
+import { collections } from "@/lib/constants/collections";
 import type { Ministry } from "@/types/content";
-import { serializeData, withReadTimeout, type Serialized } from "./utils";
+import { PUBLISHED } from "@/types/shared";
+import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 
 export async function getMinistries(): Promise<Serialized<Ministry>[]> {
   try {
@@ -19,7 +20,8 @@ export async function getMinistries(): Promise<Serialized<Ministry>[]> {
     return snapshot.docs.map((doc) =>
       serializeData({ id: doc.id, ...doc.data() } as unknown as Ministry),
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getMinistries", error);
     return [];
   }
 }
@@ -41,7 +43,8 @@ export async function getFeaturedMinistries(limit?: number): Promise<Serialized<
     return snapshot.docs.map((doc) =>
       serializeData({ id: doc.id, ...doc.data() } as unknown as Ministry),
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getFeaturedMinistries", error);
     return [];
   }
 }
@@ -62,7 +65,8 @@ export async function getMinistryBySlug(slug: string): Promise<Serialized<Minist
     return serializeData(
       { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as unknown as Ministry,
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getMinistryBySlug", error);
     return null;
   }
 }

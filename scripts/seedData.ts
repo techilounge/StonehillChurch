@@ -4,6 +4,7 @@ import type {
   HomepageSlide,
   Leader,
   Ministry,
+  PageContent,
   Resource,
   Sermon,
   SiteSettingDoc,
@@ -16,7 +17,7 @@ export const homepageSlidesSeed: SeedDoc<HomepageSlide>[] = [
   {
     id: "welcome",
     data: {
-      title: "Welcome Home to Stonehill",
+      title: "Welcome Home to Stonehill SDA Church",
       subtitle: "A Seventh-day Adventist family worshiping, growing, and serving together in Christ.",
       imageUrl: "https://images.unsplash.com/photo-1438032005730-c779502df39b?auto=format&fit=crop&w=2400&q=80",
       imageAlt: "Sunrise over a quiet hillside chapel",
@@ -34,7 +35,7 @@ export const homepageSlidesSeed: SeedDoc<HomepageSlide>[] = [
     id: "sabbath-worship",
     data: {
       title: "Sabbath Worship Every Saturday",
-      subtitle: "Sabbath School at 9:30am · Divine Worship at 11:00am · Fellowship lunch follows.",
+      subtitle: "Breakfast Service at 9:00am · Sabbath School at 10:00am · Divine Worship at 11:00am.",
       imageUrl: "https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=2400&q=80",
       imageAlt: "Open Bible resting on a wooden pew",
       primaryCtaLabel: "Service Times",
@@ -51,7 +52,7 @@ export const homepageSlidesSeed: SeedDoc<HomepageSlide>[] = [
     id: "ministries",
     data: {
       title: "Find Your Place to Belong",
-      subtitle: "From Adventurers to Adult Sabbath School, every age has a community at Stonehill.",
+      subtitle: "From Adventurers to Adult Sabbath School, every age has a community at Stonehill SDA Church.",
       imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2400&q=80",
       imageAlt: "Group of friends laughing together outdoors",
       primaryCtaLabel: "Explore Ministries",
@@ -168,7 +169,7 @@ export const eventsSeed: SeedDoc<ChurchEvent>[] = [
       location: "Stonehill Sanctuary",
       description:
         "Six evenings of prayer, testimony, and Spirit-led worship as we ask God to renew our church and community.",
-      imageUrl: "https://images.unsplash.com/photo-1490126018903-3a0c0f0a3c43?auto=format&fit=crop&w=2000&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=2000&q=80",
       imageAlt: "Hands folded over an open Bible at sunset",
       registrationUrl: null,
       recurring: false,
@@ -346,7 +347,7 @@ export const ministriesSeed: SeedDoc<Ministry>[] = [
       sortOrder: 40,
       seoTitle: "Adult Sabbath School | Stonehill SDA",
       seoDescription:
-        "Six adult Sabbath School classes meet every Sabbath at Stonehill SDA at 9:30am.",
+        "Six adult Sabbath School classes meet every Sabbath at Stonehill SDA at 10:00am.",
     },
   },
   {
@@ -571,6 +572,51 @@ export const resourcesSeed: SeedDoc<Resource>[] = [
   },
 ];
 
+export const pagesSeed: SeedDoc<PageContent>[] = [
+  {
+    id: "home",
+    data: {
+      title: "Stonehill Seventh-day Adventist Church",
+      slug: "home",
+      content:
+        "<p>Welcome to Stonehill Seventh-day Adventist Church, a family worshiping, growing, and serving together in Christ.</p>",
+      sections: [],
+      seoTitle: "Stonehill Seventh-day Adventist Church",
+      seoDescription:
+        "A welcoming Seventh-day Adventist church community worshiping, growing, and serving together in Christ.",
+      status: "published",
+    },
+  },
+  {
+    id: "about",
+    data: {
+      title: "About Stonehill SDA Church",
+      slug: "about",
+      content:
+        "<p>Stonehill SDA Church is a Seventh-day Adventist community committed to worship, discipleship, service, and hope in Jesus Christ.</p>",
+      sections: [],
+      seoTitle: "About Stonehill Seventh-day Adventist Church",
+      seoDescription:
+        "Learn about the mission, vision, and church family at Stonehill Seventh-day Adventist Church.",
+      status: "published",
+    },
+  },
+  {
+    id: "our-beliefs",
+    data: {
+      title: "Our Beliefs",
+      slug: "our-beliefs",
+      content:
+        "<p>We believe the Bible is the inspired Word of God and points every person to salvation and new life in Jesus Christ.</p>",
+      sections: [],
+      seoTitle: "Our Beliefs | Stonehill Seventh-day Adventist Church",
+      seoDescription:
+        "Learn about the core Bible-based beliefs of Stonehill Seventh-day Adventist Church.",
+      status: "published",
+    },
+  },
+];
+
 export const siteSettingsSeed: SeedDoc<SiteSettingDoc>[] = [
   {
     id: "general.churchName",
@@ -685,10 +731,18 @@ export const siteSettingsSeed: SeedDoc<SiteSettingDoc>[] = [
     },
   },
   {
+    id: "service_times.breakfast_service",
+    data: {
+      key: "service_times.breakfast_service",
+      value: "Saturdays · 9:00am",
+      group: "service_times",
+    },
+  },
+  {
     id: "service_times.sabbath_school",
     data: {
       key: "service_times.sabbath_school",
-      value: "Saturdays · 9:30am",
+      value: "Saturdays · 10:00am",
       group: "service_times",
     },
   },

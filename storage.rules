@@ -40,6 +40,10 @@ service firebase.storage {
       return request.resource.contentType == "image/webp";
     }
 
+    function validImagePath() {
+      return request.resource.name.matches(".*\\.webp$");
+    }
+
     function isWebpUpload() {
       return request.resource.contentType == "image/webp";
     }
@@ -57,6 +61,12 @@ service firebase.storage {
       return request.resource.size <= 5 * 1024 * 1024;
     }
 
+    function validAltTextMetadata() {
+      return request.resource.metadata.altText is string &&
+        request.resource.metadata.altText.size() >= 8 &&
+        request.resource.metadata.altText.size() <= 200;
+    }
+
     function editorCannotSelfApprovePublicMedia() {
       return !hasRole(["EDITOR"]) ||
         (request.resource.metadata.public != "true" &&
@@ -65,8 +75,10 @@ service firebase.storage {
 
     function validCmsImageUpload() {
       return validImageMimeType() &&
+        validImagePath() &&
         validImageSize() &&
         validImagePipeline() &&
+        validAltTextMetadata() &&
         request.resource.metadata.uploadedBy == request.auth.uid &&
         editorCannotSelfApprovePublicMedia();
     }

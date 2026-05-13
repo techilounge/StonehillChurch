@@ -1,4 +1,5 @@
 import type { FirestoreTimestampLike } from "./shared";
+import type { CollectionName } from "@/lib/constants/collections";
 
 export type AuditAction =
   | "create"
@@ -15,7 +16,7 @@ export type AuditLog = {
   actorUid: string;
   actorEmail: string;
   action: AuditAction;
-  collection: string;
+  collection: CollectionName;
   documentId: string;
   details: Record<string, string | number | boolean | null> | null;
   createdAt: FirestoreTimestampLike;

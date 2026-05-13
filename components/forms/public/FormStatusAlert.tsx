@@ -8,7 +8,11 @@ export interface FormStatusAlertProps {
   className?: string;
 }
 
-export function FormStatusAlert({ status, message, className }: FormStatusAlertProps) {
+export function FormStatusAlert({
+  status,
+  message,
+  className,
+}: FormStatusAlertProps) {
   if (status === "idle" || !message) return null;
 
   const isSuccess = status === "success";
@@ -18,7 +22,7 @@ export function FormStatusAlert({ status, message, className }: FormStatusAlertP
       className={cn(
         "rounded-lg p-4 flex items-start gap-3",
         isSuccess ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800",
-        className
+        className,
       )}
       role="alert"
     >

@@ -1,8 +1,13 @@
 import type { FirestoreTimestampLike } from "./shared";
 
-export type UserRole = "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "VIEWER";
+export const SUPER_ADMIN = "SUPER_ADMIN";
+export const ADMIN = "ADMIN";
+export const EDITOR = "EDITOR";
+export const VIEWER = "VIEWER";
 
-export const USER_ROLES: UserRole[] = ["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"];
+export const USER_ROLES = [SUPER_ADMIN, ADMIN, EDITOR, VIEWER] as const;
+
+export type UserRole = (typeof USER_ROLES)[number];
 
 export type AppUser = {
   uid: string;

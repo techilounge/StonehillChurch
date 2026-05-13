@@ -6,23 +6,28 @@ import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
 
 interface LocationMapSectionProps {
-  settings?: Record<string, any>;
+  settings?: Record<string, string | undefined>;
 }
 
 export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // Defaults fallback
-  const address = settings["contact.address"] || "123 Stonehill Way, Cityville, ST 12345";
-  const phone = settings["contact.phone"] || "(555) 123-4567";
-  const email = settings["contact.email"] || "info@stonehillchurch.org";
-  const mapUrl = settings["contact.google_maps_url"] || "https://maps.google.com";
-
-  // If we had a Google Maps Embed API key, we could load it here on demand.
-  // For now, we will use an image fallback or a button to open in maps.
+  const address = settings["contact.address"] || "1487 Stonehill Ridge Road, Spokane, WA 99203";
+  const phone = settings["contact.phone"] || "+1-509-555-0117";
+  const email = settings["contact.email"] || "office@stonehillsda.org";
+  const breakfastServiceTime = settings["service_times.breakfast_service"] || "Saturdays · 9:00am";
+  const sabbathSchoolTime = settings["service_times.sabbath_school"] || "Saturdays · 10:00am";
+  const worshipServiceTime =
+    settings["service_times.divine_worship"] ||
+    settings["service_times.worship_service"] ||
+    "Saturdays · 11:00am";
+  const prayerMeetingTime = settings["service_times.prayer_meeting"] || "Wednesdays · 7:00pm";
+  const mapUrl =
+    settings["contact.google_maps_url"] ||
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   
   return (
-    <section className="py-16 bg-stonehill-evergreen text-white sm:py-24">
+    <section className="py-16 bg-stonehill-evergreen text-white sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           
@@ -32,7 +37,7 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
                 Location & Service Times
               </h2>
               <p className="text-lg text-white/80">
-                We'd love to have you worship with us. Join us this weekend.
+                We&apos;d love to have you worship with us. Join us this weekend.
               </p>
             </div>
 
@@ -50,8 +55,11 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
                 <div>
                   <h3 className="font-bold text-lg">Service Times</h3>
                   <div className="text-white/80 mt-1 space-y-1">
-                    <p>Sabbath School: 9:30 AM</p>
-                    <p>Worship Service: 11:00 AM</p>
+                    <p>Breakfast Service: {breakfastServiceTime}</p>
+                    <p>Sabbath School: {sabbathSchoolTime}</p>
+                    <div className="h-2" aria-hidden="true" />
+                    <p>Divine Worship: {worshipServiceTime}</p>
+                    <p>Prayer Meeting: {prayerMeetingTime}</p>
                   </div>
                 </div>
               </div>

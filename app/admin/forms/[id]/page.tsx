@@ -1,10 +1,14 @@
 import React from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { adminLoginRedirectPath } from "@/lib/adminRoutes";
+import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { getFormSubmissionById } from "@/lib/data/formSubmissions";
 import { AdminFormDetail } from "@/components/admin/forms/AdminFormDetail";
+
+export const dynamic = "force-dynamic";
 
 type RouteParams = {
   params: Promise<{ id: string }>;
@@ -39,6 +43,12 @@ function formatSubmittedDate(value: string | Date | null | undefined) {
 
 export default async function AdminFormDetailPage({ params }: RouteParams) {
   const { id } = await params;
+  const authResult = await getCurrentAdminSession("forms:manage");
+
+  if (!authResult.ok) {
+    redirect(adminLoginRedirectPath(`/admin/forms/${id}`, authResult.reason));
+  }
+
   const submission = await getFormSubmissionById(id);
 
   if (!submission) {

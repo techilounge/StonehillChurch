@@ -16,22 +16,26 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function SubmitAnnouncementPage() {
   return (
-    <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+    <main className="flex min-h-screen flex-col bg-stonehill-cream">
       <PageHero
         title="Submit an Announcement"
         subtitle="Have news or an upcoming event to share with the church family?"
       />
 
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-3xl">
+      <section className="py-16 md:py-24 overflow-hidden">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-bold font-serif mb-4 text-stone-900">Announcement Request</h2>
-            <p className="text-lg text-stone-600">
-              Please submit announcements by Wednesday evening to be included in that weekend's bulletin and slides. All submissions are subject to review and approval by the church staff.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight mb-4 text-stonehill-evergreen">Announcement Request</h2>
+            <div className="bg-white border-l-4 border-stonehill-gold p-6 rounded-r-2xl shadow-sm text-left">
+              <p className="text-lg text-stonehill-ink/80 leading-relaxed m-0">
+                Please submit announcements by <span className="font-semibold text-stonehill-ink">Wednesday evening</span> to be included in that weekend&apos;s bulletin and slides. All submissions are subject to review and approval by the church staff.
+              </p>
+            </div>
           </div>
           
-          <AnnouncementRequestForm />
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-stonehill-line">
+            <AnnouncementRequestForm />
+          </div>
         </div>
       </section>
     </main>

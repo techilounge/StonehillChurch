@@ -24,7 +24,7 @@ export function YouTubeLiteEmbed({
   const thumbnail = thumbnailUrl || getYouTubeThumbnailUrl(videoId);
 
   return (
-    <div className={cn("relative aspect-video overflow-hidden rounded-lg bg-stone-950", className)}>
+    <div className={cn("relative aspect-video overflow-hidden rounded-lg bg-stonehill-ink", className)}>
       {isPlaying ? (
         <iframe
           src={getYouTubeEmbedUrl(videoId)}
@@ -47,9 +47,9 @@ export function YouTubeLiteEmbed({
             type="button"
             aria-label={buttonLabel ?? `Play ${title}`}
             onClick={() => setIsPlaying(true)}
-            className="group absolute inset-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2 focus-visible:ring-offset-stone-950"
+            className="group absolute inset-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2 focus-visible:ring-offset-stonehill-ink"
           >
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-lg transition group-hover:scale-105 group-hover:bg-white sm:h-20 sm:w-20">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-red-600 shadow-lg motion-safe:transition motion-safe:group-hover:scale-105 group-hover:bg-white sm:h-20 sm:w-20">
               <PlayCircle className="h-9 w-9 sm:h-11 sm:w-11" aria-hidden="true" />
             </span>
           </button>

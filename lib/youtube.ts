@@ -15,10 +15,6 @@ function clean(value: string | null | undefined): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
-export function isYouTubeApiConfigured(): boolean {
-  return Boolean(process.env.YOUTUBE_API_KEY);
-}
-
 export function extractYouTubeVideoId(value: string | null | undefined): string | null {
   const input = clean(value);
 
@@ -72,6 +68,22 @@ export function getYouTubeEmbedUrl(videoId: string): string {
 
 export function getYouTubeThumbnailUrl(videoId: string): string {
   return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+export function getYouTubeUploadsPlaylistId(
+  settings: Pick<YoutubeSettingsConfig, "uploadsPlaylistId" | "channelId">,
+): string | null {
+  const configuredPlaylistId = clean(settings.uploadsPlaylistId);
+  if (configuredPlaylistId) {
+    return configuredPlaylistId;
+  }
+
+  const channelId = clean(settings.channelId);
+  if (channelId.startsWith("UC") && channelId.length > 2) {
+    return `UU${channelId.slice(2)}`;
+  }
+
+  return null;
 }
 
 export function getYouTubeChannelUrl(settings: Pick<YoutubeSettingsConfig, "channelId" | "channelUrl">): string {

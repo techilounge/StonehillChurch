@@ -24,6 +24,7 @@ export function MaintenanceRequestForm() {
       issue: formData.get("issue"),
       urgency: formData.get("urgency") || "normal",
       message: "Maintenance request submitted.", // Default required by base schema
+      website: formData.get("website") || undefined,
     };
 
     try {
@@ -45,7 +46,9 @@ export function MaintenanceRequestForm() {
         return;
       }
       setStatus("success");
-      setMessage("Your maintenance request has been submitted to the facilities team.");
+      setMessage(
+        "Your maintenance request has been submitted to the facilities team.",
+      );
     } catch (e) {
       setStatus("error");
       setMessage("A network error occurred. Please try again later.");
@@ -57,48 +60,100 @@ export function MaintenanceRequestForm() {
   }
 
   return (
-    <form action={action} className="space-y-8 bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-stone-100">
+    <form
+      action={action}
+      className="space-y-8 "
+    >
       <FormStatusAlert status={status} message={message} />
-      
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Reporter Info</h3>
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Reporter Info
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField label="Full Name *" id="name">
             <TextInput id="name" name="name" required placeholder="Jane Doe" />
           </FormField>
-          
+
           <FormField label="Email Address *" id="email">
-            <TextInput id="email" name="email" type="email" required placeholder="jane@example.com" />
+            <TextInput
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="jane@example.com"
+            />
           </FormField>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField label="Phone Number" id="phone" description="Optional">
-            <TextInput id="phone" name="phone" type="tel" placeholder="(555) 123-4567" />
+            <TextInput
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="(555) 123-4567"
+            />
           </FormField>
         </div>
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Issue Details</h3>
-        
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Issue Details
+        </h3>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField label="Location *" id="location" description="Where is the issue?">
-            <TextInput id="location" name="location" required placeholder="e.g. Fellowship Hall Women's Restroom" />
+          <FormField
+            label="Location *"
+            id="location"
+            description="Where is the issue?"
+          >
+            <TextInput
+              id="location"
+              name="location"
+              required
+              placeholder="e.g. Fellowship Hall Women's Restroom"
+            />
           </FormField>
 
           <FormField label="Urgency *" id="urgency">
-            <SelectInput id="urgency" name="urgency" required defaultValue="normal">
+            <SelectInput
+              id="urgency"
+              name="urgency"
+              required
+              defaultValue="normal"
+            >
               <option value="low">Low - When possible</option>
               <option value="normal">Normal - Standard maintenance</option>
               <option value="high">High - Needs attention soon</option>
-              <option value="urgent">Urgent - Safety hazard / Active leak</option>
+              <option value="urgent">
+                Urgent - Safety hazard / Active leak
+              </option>
             </SelectInput>
           </FormField>
         </div>
 
-        <FormField label="Issue Description *" id="issue" description="Describe the problem in detail">
-          <TextArea id="issue" name="issue" required rows={4} placeholder="The sink is leaking..." />
+        <FormField
+          label="Issue Description *"
+          id="issue"
+          description="Describe the problem in detail"
+        >
+          <TextArea
+            id="issue"
+            name="issue"
+            required
+            rows={4}
+            placeholder="The sink is leaking..."
+          />
         </FormField>
       </div>
 

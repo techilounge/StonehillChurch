@@ -1,7 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { adminLoginRedirectPath } from "@/lib/adminRoutes";
+import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { listFormSubmissions } from "@/lib/data/formSubmissions";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 function getStatusBadgeClass(status: string) {
   switch (status) {
@@ -44,6 +49,12 @@ function formatSubmissionDate(value: string | Date | null | undefined) {
 }
 
 export default async function AdminFormsPage() {
+  const authResult = await getCurrentAdminSession("forms:manage");
+
+  if (!authResult.ok) {
+    redirect(adminLoginRedirectPath("/admin/forms", authResult.reason));
+  }
+
   const submissions = await listFormSubmissions();
 
   return (
@@ -51,10 +62,10 @@ export default async function AdminFormsPage() {
       title="Form Submissions"
       description="Review and manage submissions from public forms."
     >
-      <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-stonehill-line overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-stone-50 border-b border-stone-200 text-stone-600">
+            <thead className="bg-stonehill-cream border-b border-stonehill-line text-stonehill-ink/80">
               <tr>
                 <th className="px-6 py-4 font-semibold">Date</th>
                 <th className="px-6 py-4 font-semibold">Type</th>
@@ -64,29 +75,29 @@ export default async function AdminFormsPage() {
                 <th className="px-6 py-4 text-right font-semibold">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100">
+            <tbody className="divide-y divide-stonehill-line/50">
               {submissions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-stone-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-stonehill-ink/65">
                     No form submissions found.
                   </td>
                 </tr>
               ) : (
                 submissions.map((submission) => (
-                  <tr key={submission.id} className="hover:bg-stone-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-stone-600">
+                  <tr key={submission.id} className="hover:bg-stonehill-cream transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-stonehill-ink/80">
                       {formatSubmissionDate(submission.createdAt)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-stone-900">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-stonehill-ink">
                       {formatFormType(submission.formType)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-stone-900">{submission.name}</div>
+                      <div className="font-medium text-stonehill-ink">{submission.name}</div>
                       {submission.email && (
-                        <div className="text-stone-500 text-xs mt-0.5">{submission.email}</div>
+                        <div className="text-stonehill-ink/65 text-xs mt-0.5">{submission.email}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-stone-600 max-w-[200px] truncate">
+                    <td className="px-6 py-4 text-stonehill-ink/80 max-w-[200px] truncate">
                       {submission.subject || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

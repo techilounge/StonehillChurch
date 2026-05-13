@@ -28,9 +28,9 @@ export function AnnouncementBanner({
 
   const bgColors = {
     low: "bg-stonehill-cream text-stonehill-ink",
-    normal: "bg-stonehill-leaf text-white",
+    normal: "bg-stonehill-leaf text-stonehill-ink",
     high: "bg-stonehill-gold text-stonehill-ink",
-    urgent: "bg-red-600 text-white",
+    urgent: "bg-red-700 text-white",
   };
 
   const Icon = priority === "urgent" || priority === "high" ? AlertTriangle : Info;
@@ -46,7 +46,7 @@ export function AnnouncementBanner({
             {ctaLabel && ctaHref && (
               <Link 
                 href={ctaHref} 
-                className="ml-2 inline-flex whitespace-nowrap underline underline-offset-2 hover:opacity-80"
+                className="ml-2 inline-flex whitespace-nowrap rounded-sm underline underline-offset-2 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               >
                 {ctaLabel}
               </Link>

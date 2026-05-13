@@ -1,17 +1,19 @@
 import type { FieldValue, Timestamp } from "firebase-admin/firestore";
 
-export type ContentStatus = "draft" | "published" | "archived";
+export const PUBLISHED = "published";
 
-export const CONTENT_STATUSES: ContentStatus[] = ["draft", "published", "archived"];
+export const CONTENT_STATUSES = ["draft", PUBLISHED, "archived"] as const;
 
-export type FormSubmissionStatus = "new" | "in_review" | "completed" | "archived";
+export type ContentStatus = (typeof CONTENT_STATUSES)[number];
 
-export const FORM_SUBMISSION_STATUSES: FormSubmissionStatus[] = [
+export const FORM_SUBMISSION_STATUSES = [
   "new",
   "in_review",
   "completed",
   "archived",
-];
+] as const;
+
+export type FormSubmissionStatus = (typeof FORM_SUBMISSION_STATUSES)[number];
 
 export type FirestoreTimestampLike = Timestamp | FieldValue | Date | string | null;
 

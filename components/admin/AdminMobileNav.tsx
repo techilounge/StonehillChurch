@@ -6,16 +6,20 @@ import { usePathname } from "next/navigation";
 import { Dialog, Transition } from "@headlessui/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { adminNavigation } from "./AdminSidebar";
+import { filterAdminNavigation } from "./AdminSidebar";
+import type { PermissionSubject } from "@/lib/permissions";
 
 export function AdminMobileNav({
+  session,
   sidebarOpen,
   setSidebarOpen,
 }: {
+  session: PermissionSubject;
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
 }) {
   const pathname = usePathname();
+  const visibleNavigation = filterAdminNavigation(session);
 
   return (
     <Transition.Root show={sidebarOpen} as={Fragment}>
@@ -69,7 +73,7 @@ export function AdminMobileNav({
                   <ul role="list" className="flex flex-1 flex-col gap-y-7">
                     <li>
                       <ul role="list" className="-mx-2 space-y-1">
-                        {adminNavigation.map((item) => {
+                        {visibleNavigation.map((item) => {
                           const isActive = pathname?.startsWith(item.href);
                           return (
                             <li key={item.href}>
