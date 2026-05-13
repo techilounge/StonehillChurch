@@ -1,13 +1,14 @@
 import "server-only";
 
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
-import { collections, PUBLISHED } from "@/lib/firestore";
+import { collections } from "@/lib/constants/collections";
+import { PUBLISHED } from "@/types/shared";
 import type {
   HomepageSlide,
   Announcement,
 } from "@/types/content";
 
-import { serializeData, withReadTimeout, type Serialized } from "./utils";
+import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 
 export type { Serialized } from "./utils";
 
@@ -26,7 +27,8 @@ export async function getHomepageSlides(): Promise<Serialized<HomepageSlide>[]> 
     return snapshot.docs.map((doc) =>
       serializeData({ id: doc.id, ...doc.data() } as unknown as HomepageSlide),
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getHomepageSlides", error);
     return [];
   }
 }
@@ -65,7 +67,8 @@ export async function getActiveAnnouncements(): Promise<Serialized<Announcement>
       .map(serializeData);
 
     return active;
-  } catch {
+  } catch (error) {
+    logDataFallback("getActiveAnnouncements", error);
     return [];
   }
 }

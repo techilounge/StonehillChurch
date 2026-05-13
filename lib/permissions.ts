@@ -1,11 +1,11 @@
+import { USER_ROLES } from "@/types/auth";
+import type { UserRole } from "@/types/auth";
+
 export const ADMIN_ROLES = [
-  "SUPER_ADMIN",
-  "ADMIN",
-  "EDITOR",
-  "VIEWER",
+  ...USER_ROLES,
 ] as const;
 
-export type AdminRole = (typeof ADMIN_ROLES)[number];
+export type AdminRole = UserRole;
 
 export const ADMIN_PERMISSIONS = [
   "admin:access",

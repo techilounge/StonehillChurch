@@ -8,7 +8,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return createPublicPageMetadata({
     cmsSlug: "volunteer",
     title: "Volunteer",
-    description: "Get involved and serve at Stonehill Church. Discover ways to volunteer your time and talents.",
+    description: "Get involved and serve at Stonehill SDA Church. Discover ways to volunteer your time and talents.",
     path: "/volunteer",
     noIndexFollow: true,
   });
@@ -16,22 +16,24 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function VolunteerPage() {
   return (
-    <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+    <main className="flex min-h-screen flex-col bg-stonehill-cream">
       <PageHero
         title="Volunteer with Us"
         subtitle="God has given each of us unique gifts to serve others. Find your place to serve at Stonehill."
       />
 
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-3xl">
+      <section className="py-16 md:py-24 overflow-hidden">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-bold font-serif mb-4 text-stone-900">Serve the Community</h2>
-            <p className="text-lg text-stone-600">
-              Whether you want to greet guests, lead a children's class, or help with tech, there is a place for you to make a difference.
+            <h2 className="text-3xl font-bold tracking-tight mb-4 text-stonehill-evergreen">Serve the Community</h2>
+            <p className="text-lg text-stonehill-ink/80 leading-relaxed max-w-2xl mx-auto">
+              Whether you want to greet guests, lead a children&apos;s class, or help with tech, there is a place for you to make a difference. Let us know how you'd like to get involved!
             </p>
           </div>
           
-          <VolunteerForm />
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-stonehill-line">
+            <VolunteerForm />
+          </div>
         </div>
       </section>
     </main>

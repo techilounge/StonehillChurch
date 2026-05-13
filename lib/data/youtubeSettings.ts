@@ -2,9 +2,9 @@ import "server-only";
 
 import { FieldValue } from "firebase-admin/firestore";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
-import { SINGLETON_DOCS, collections } from "@/lib/firestore";
+import { SINGLETON_DOCS, collections } from "@/lib/constants/collections";
 import type { YoutubeSettings, YoutubeSettingsConfig } from "@/types/settings";
-import { withReadTimeout } from "./utils";
+import { logDataFallback, withReadTimeout } from "./utils";
 
 export const DEFAULT_YOUTUBE_SETTINGS: YoutubeSettingsConfig = {
   channelId: "",
@@ -69,7 +69,8 @@ export async function getYoutubeSettings(): Promise<YoutubeSettings> {
     }
 
     return normalizeYoutubeSettings(await getLegacyYoutubeSettings());
-  } catch {
+  } catch (error) {
+    logDataFallback("getYoutubeSettings", error);
     return normalizeYoutubeSettings(null);
   }
 }

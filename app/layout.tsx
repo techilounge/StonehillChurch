@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   DEFAULT_SITE_DESCRIPTION,
   DEFAULT_SITE_NAME,
@@ -29,6 +29,10 @@ export const metadata: Metadata = {
     title: DEFAULT_SITE_NAME,
     description: DEFAULT_SITE_DESCRIPTION,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#163b33",
 };
 
 export default function RootLayout({

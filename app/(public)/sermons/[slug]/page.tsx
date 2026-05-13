@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { YouTubeLiteEmbed } from "@/components/public/YouTubeLiteEmbed";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -14,7 +15,9 @@ import {
   siteSettingsToSeoSettings,
   videoObjectJsonLd,
 } from "@/lib/seo";
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, ArrowLeft } from "lucide-react";
+import { buttonVariants } from "@/lib/buttonVariants";
+import { cn } from "@/lib/utils";
 
 interface SermonPageProps {
   params: Promise<{ slug: string }>;
@@ -62,7 +65,7 @@ export default async function SermonDetailPage({ params }: SermonPageProps) {
     : "";
 
   return (
-    <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+    <main className="flex min-h-screen flex-col bg-stonehill-cream">
       <JsonLd
         data={[
           videoObjectJsonLd(sermon, seoSettings.siteUrl),
@@ -81,58 +84,98 @@ export default async function SermonDetailPage({ params }: SermonPageProps) {
         subtitle={sermon.series ? `Part of the ${sermon.series} series` : undefined}
       />
 
-      <div className="container mx-auto px-4 -mt-12 relative z-20">
-        <div className="bg-white rounded-3xl shadow-lg p-6 md:p-10 max-w-4xl mx-auto">
+      <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           
-          {/* Video Player */}
-          {sermon.youtubeVideoId ? (
-            <YouTubeLiteEmbed
-              videoId={sermon.youtubeVideoId}
-              title={sermon.title}
-              thumbnailUrl={sermon.thumbnailUrl}
-              className="mb-8 rounded-2xl shadow-inner"
-            />
-          ) : sermon.thumbnailUrl ? (
-            <div className="aspect-video w-full rounded-2xl overflow-hidden mb-8 relative shadow-sm">
-              <Image
-                src={sermon.thumbnailUrl}
-                alt={sermon.thumbnailAlt || sermon.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ) : null}
-
-          {/* Details */}
-          <div className="flex flex-wrap gap-6 text-stone-600 mb-8 border-b border-stone-100 pb-8">
-            {sermon.speaker && (
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
-                <span className="font-medium text-lg">{sermon.speaker}</span>
-              </div>
-            )}
-            {formattedDate && (
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-primary" />
-                <span className="font-medium text-lg">{formattedDate}</span>
-              </div>
-            )}
+          {/* Back Link */}
+          <div className="mb-6">
+            <Link 
+              href="/sermons" 
+              className="inline-flex items-center gap-2 text-stonehill-ink/60 hover:text-stonehill-gold font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Sermons
+            </Link>
           </div>
 
-          <div className="prose prose-stone max-w-none prose-lg">
-            {sermon.scripture && (
-              <blockquote className="border-l-4 border-primary pl-4 italic text-stone-700 bg-stone-50 p-4 rounded-r-lg mb-8">
-                <p className="m-0 font-serif text-xl">{sermon.scripture}</p>
-              </blockquote>
-            )}
+          <div className="bg-white rounded-3xl shadow-lg p-6 md:p-10 border border-stonehill-line">
             
-            <h2 className="text-2xl font-bold font-serif mb-4 text-stone-900">About this Message</h2>
-            <div className="whitespace-pre-wrap text-stone-700 leading-relaxed">
-              {sermon.description}
+            {/* Video Player */}
+            {sermon.youtubeVideoId ? (
+              <div className="rounded-2xl overflow-hidden shadow-sm mb-8 ring-1 ring-stonehill-line bg-stonehill-ink">
+                <YouTubeLiteEmbed
+                  videoId={sermon.youtubeVideoId}
+                  title={sermon.title}
+                  thumbnailUrl={sermon.thumbnailUrl}
+                  className="w-full aspect-video"
+                />
+              </div>
+            ) : sermon.thumbnailUrl ? (
+              <div className="aspect-video w-full rounded-2xl overflow-hidden mb-8 relative shadow-sm ring-1 ring-stonehill-line bg-stonehill-cream">
+                <Image
+                  src={sermon.thumbnailUrl}
+                  alt={sermon.thumbnailAlt || sermon.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ) : null}
+
+            {/* Details */}
+            <div className="flex flex-wrap gap-6 text-stonehill-ink/80 mb-8 border-b border-stonehill-line pb-8">
+              {sermon.speaker && (
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-stonehill-evergreen" />
+                  <span className="font-medium text-lg">{sermon.speaker}</span>
+                </div>
+              )}
+              {formattedDate && (
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-stonehill-evergreen" />
+                  <span className="font-medium text-lg">{formattedDate}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="prose prose-lg max-w-none prose-headings:text-stonehill-evergreen prose-p:text-stonehill-ink/80 leading-relaxed">
+              {sermon.scripture && (
+                <blockquote className="border-l-4 border-stonehill-gold pl-6 italic text-stonehill-ink bg-stonehill-cream p-6 rounded-r-2xl mb-10 shadow-sm">
+                  <p className="m-0 text-xl leading-relaxed">{sermon.scripture}</p>
+                </blockquote>
+              )}
+              
+              <h2 className="text-2xl font-bold tracking-tight mb-4 text-stonehill-ink">About this Message</h2>
+              <div className="whitespace-pre-wrap">
+                {sermon.description}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="py-16 bg-white border-t border-stonehill-line overflow-hidden">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen">Did this message bless you?</h2>
+          <p className="text-stonehill-ink/80 text-lg max-w-2xl mx-auto">
+            We would love for you to join us in person this Sabbath, or feel free to share this message with a friend.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link 
+              href="/plan-your-visit"
+              className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
+            >
+              Plan a Visit
+            </Link>
+            <Link 
+              href="/give"
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto border-transparent hover:bg-stonehill-line/50")}
+            >
+              Support Our Ministry
+            </Link>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

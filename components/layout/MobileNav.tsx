@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/shared/Button";
 
 export interface NavItem {
@@ -51,8 +50,12 @@ export function MobileNav({ items }: MobileNavProps) {
           />
           <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-stonehill-ink/10 shadow-2xl">
             <div className="flex items-center justify-between">
-              <Link href="/" className="-m-1.5 p-1.5 text-lg font-bold text-stonehill-evergreen" onClick={() => setIsOpen(false)}>
-                Stonehill
+              <Link
+                href="/"
+                className="-m-1.5 rounded-sm p-1.5 text-lg font-bold text-stonehill-evergreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
+                onClick={() => setIsOpen(false)}
+              >
+                Stonehill SDA Church
               </Link>
               <Button
                 variant="ghost"
@@ -71,7 +74,7 @@ export function MobileNav({ items }: MobileNavProps) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-stonehill-ink hover:bg-stonehill-cream hover:text-stonehill-forest transition-colors"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-stonehill-ink hover:bg-stonehill-cream hover:text-stonehill-forest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
                       onClick={() => setIsOpen(false)}
                     >
                       {item.label}

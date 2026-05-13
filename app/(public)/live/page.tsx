@@ -8,7 +8,7 @@ import { YouTubeLiteEmbed } from "@/components/public/YouTubeLiteEmbed";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { getSermons } from "@/lib/data/sermons";
 import { getSiteSettings } from "@/lib/data/siteSettings";
-import { getLatestYoutubeUploads } from "@/lib/data/youtubeVideos";
+import { getLatestYoutubeUploads, getLiveYoutubeBroadcast } from "@/lib/data/youtubeVideos";
 import { getYoutubeSettings } from "@/lib/data/youtubeSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import {
@@ -33,11 +33,15 @@ export const dynamic = "force-dynamic";
 function serviceTimes(settings: Record<string, unknown>) {
   return [
     {
-      label: "Sabbath School",
-      time: settings["service_times.sabbath_school"] || "Saturdays · 9:30am",
+      label: "Breakfast Service",
+      time: settings["service_times.breakfast_service"] || "Saturdays · 9:00am",
     },
     {
-      label: "Worship Service",
+      label: "Sabbath School",
+      time: settings["service_times.sabbath_school"] || "Saturdays · 10:00am",
+    },
+    {
+      label: "Divine Worship",
       time:
         settings["service_times.divine_worship"] ||
         settings["service_times.worship_service"] ||
@@ -69,11 +73,28 @@ export default async function LiveStreamPage() {
     getSermons(),
   ]);
 
-  const latestYoutubeVideos = await getLatestYoutubeUploads(youtubeSettings, 3);
+  const [latestYoutubeVideos, liveBroadcast] = await Promise.all([
+    getLatestYoutubeUploads(youtubeSettings, 3),
+    getLiveYoutubeBroadcast(youtubeSettings),
+  ]);
   const channelUrl = getYouTubeChannelUrl(youtubeSettings);
   const liveUrl = getYouTubeLiveUrl(youtubeSettings);
+  const configuredLiveVideoId = extractYouTubeVideoId(youtubeSettings.liveStreamUrl);
+  const featuredVideoId = extractYouTubeVideoId(youtubeSettings.featuredVideoId);
   const liveVideoId =
-    extractYouTubeVideoId(youtubeSettings.liveStreamUrl) ?? youtubeSettings.featuredVideoId;
+    configuredLiveVideoId ??
+    liveBroadcast?.id ??
+    (youtubeSettings.liveStreamUrl ? null : featuredVideoId);
+  const liveVideoTitle =
+    liveBroadcast?.id === liveVideoId
+      ? liveBroadcast.title
+      : "Stonehill SDA Church livestream";
+  const liveThumbnailUrl =
+    liveBroadcast?.id === liveVideoId
+      ? liveBroadcast.thumbnailUrl
+      : liveVideoId
+        ? getYouTubeThumbnailUrl(liveVideoId)
+        : null;
   const hasConfiguredChannel = Boolean(youtubeSettings.channelId || youtubeSettings.channelUrl);
   const times = serviceTimes(siteSettings);
 
@@ -86,7 +107,7 @@ export default async function LiveStreamPage() {
 
       <section className="py-12 sm:py-16 lg:py-20">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8">
-          <div className="overflow-hidden rounded-lg border border-stonehill-line bg-white shadow-soft">
+          <div className="overflow-hidden rounded-3xl border border-stonehill-line bg-white shadow-soft">
             <div className="border-b border-stonehill-line px-5 py-4 sm:px-6">
               <div className="flex flex-wrap items-center gap-3">
                 <span
@@ -101,7 +122,7 @@ export default async function LiveStreamPage() {
                   {youtubeSettings.showLiveBanner ? "Live Stream" : "Online Worship"}
                 </span>
                 <h2 className="text-xl font-semibold text-stonehill-evergreen">
-                  Stonehill Church Worship
+                  Stonehill SDA Church Worship
                 </h2>
               </div>
             </div>
@@ -110,13 +131,13 @@ export default async function LiveStreamPage() {
               {liveVideoId ? (
                 <YouTubeLiteEmbed
                   videoId={liveVideoId}
-                  title="Stonehill Church livestream"
-                  thumbnailUrl={getYouTubeThumbnailUrl(liveVideoId)}
+                  title={liveVideoTitle}
+                  thumbnailUrl={liveThumbnailUrl}
                   className="shadow-inner"
-                  buttonLabel="Play Stonehill Church livestream"
+                  buttonLabel={`Play ${liveVideoTitle}`}
                 />
               ) : (
-                <div className="flex aspect-video flex-col items-center justify-center rounded-lg border border-dashed border-stonehill-line bg-stonehill-cream px-6 text-center">
+                <div className="flex aspect-video flex-col items-center justify-center rounded-2xl border border-dashed border-stonehill-line bg-stonehill-cream px-6 text-center">
                   <Youtube className="h-14 w-14 text-stonehill-forest/50" aria-hidden="true" />
                   <h2 className="mt-5 text-2xl font-semibold text-stonehill-evergreen">
                     Livestream Opens on YouTube
@@ -160,7 +181,7 @@ export default async function LiveStreamPage() {
             </div>
           </div>
 
-          <aside className="rounded-lg border border-stonehill-line bg-white p-6 shadow-sm">
+          <aside className="rounded-3xl border border-stonehill-line bg-white p-6 md:p-8 shadow-sm">
             <div className="flex items-center gap-3 text-stonehill-evergreen">
               <CalendarDays className="h-5 w-5" aria-hidden="true" />
               <h2 className="text-lg font-semibold">Service Times</h2>
@@ -208,7 +229,7 @@ export default async function LiveStreamPage() {
                 return (
                   <article
                     key={video.id}
-                    className="overflow-hidden rounded-lg border border-stonehill-line bg-stonehill-cream shadow-sm"
+                    className="overflow-hidden rounded-2xl border border-stonehill-line bg-stonehill-cream shadow-sm hover:shadow-md transition-shadow"
                   >
                     <YouTubeLiteEmbed
                       videoId={video.id}
@@ -246,7 +267,7 @@ export default async function LiveStreamPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-lg border border-dashed border-stonehill-line bg-stonehill-cream p-8 text-center text-stonehill-ink/70">
+            <div className="rounded-3xl border border-dashed border-stonehill-line bg-stonehill-cream p-12 text-center text-stonehill-ink/70">
               Recent sermons will appear here once they are published.
             </div>
           )}

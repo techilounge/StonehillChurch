@@ -14,6 +14,13 @@ interface HeroCarouselProps {
   slides: Serialized<HomepageSlide>[];
 }
 
+function normalizeOverlayOpacity(value: number | null | undefined) {
+  const raw = typeof value === "number" && Number.isFinite(value) ? value : 0.45;
+  const decimal = raw > 1 ? raw / 100 : raw;
+
+  return Math.min(Math.max(decimal, 0.25), 0.85);
+}
+
 export function HeroCarousel({ slides }: HeroCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -55,33 +62,37 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
     <div className="relative w-full group">
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y">
-          {slides.map((slide) => (
-            <div key={slide.id} className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px]">
-              <Image
-                src={slide.imageUrl || "/placeholder-hero.jpg"}
-                alt={slide.imageAlt || slide.title}
-                fill
-                priority
-                className="object-cover"
-                sizes="100vw"
-              />
+          {slides.map((slide, index) => (
+            <div key={slide.id} className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px] bg-stonehill-evergreen">
+              {slide.imageUrl ? (
+                <Image
+                  src={slide.imageUrl}
+                  alt={slide.imageAlt || slide.title}
+                  fill
+                  priority={index === 0}
+                  className="object-cover"
+                  sizes="100vw"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-stonehill-evergreen via-stonehill-evergreen to-stonehill-ink" />
+              )}
               <div 
                 className="absolute inset-0 z-10" 
-                style={{ backgroundColor: `rgba(0, 0, 0, ${(slide.overlayOpacity || 40) / 100})` }}
+                style={{ backgroundColor: `rgba(0, 0, 0, ${normalizeOverlayOpacity(slide.overlayOpacity)})` }}
               />
               <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4">
                 <div className="max-w-4xl mx-auto space-y-6">
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white drop-shadow-sm">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
                     {slide.title}
                   </h1>
-                  <p className="text-xl text-stonehill-cream/90 max-w-2xl mx-auto drop-shadow-sm">
+                  <p className="text-xl text-stonehill-cream/90 max-w-2xl mx-auto drop-shadow-lg">
                     {slide.subtitle}
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                     {slide.primaryCtaLabel && slide.primaryCtaHref && (
                       <Link
                         href={slide.primaryCtaHref}
-                        className={cn(buttonVariants({ variant: "default", size: "lg" }))}
+                        className={cn(buttonVariants({ variant: "default", size: "lg" }), "bg-stonehill-gold text-stonehill-ink hover:bg-stonehill-gold/90 border-none")}
                       >
                         {slide.primaryCtaLabel}
                       </Link>
@@ -89,7 +100,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                     {slide.secondaryCtaLabel && slide.secondaryCtaHref && (
                       <Link
                         href={slide.secondaryCtaHref}
-                        className={cn(buttonVariants({ variant: "outline", size: "lg" }), "bg-transparent text-white border-white hover:bg-white hover:text-stonehill-ink")}
+                        className={cn(buttonVariants({ variant: "outline", size: "lg" }), "bg-white/10 text-white border-white/30 backdrop-blur-sm hover:bg-white/20")}
                       >
                         {slide.secondaryCtaLabel}
                       </Link>
@@ -106,17 +117,17 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
         <>
           <button
             onClick={scrollPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/20 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/40 disabled:opacity-0"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/40 disabled:opacity-0"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-8 h-8" />
           </button>
           <button
             onClick={scrollNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-black/20 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/40 disabled:opacity-0"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/40 disabled:opacity-0"
             aria-label="Next slide"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-8 h-8" />
           </button>
         </>
       )}

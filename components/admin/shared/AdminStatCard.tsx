@@ -17,7 +17,7 @@ interface AdminStatCardProps {
 
 export function AdminStatCard({ title, value, icon: Icon, trend, className }: AdminStatCardProps) {
   return (
-    <Card className={cn("overflow-hidden border-stonehill-line shadow-sm", className)}>
+    <Card className={cn("overflow-hidden border-stonehill-line shadow-sm hover:shadow-md hover:border-stonehill-gold/30 motion-safe:transition-all", className)}>
       <CardContent className="p-6">
         <div className="flex items-center">
           <div className="flex-1">

@@ -1,9 +1,10 @@
 import "server-only";
 
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
-import { collections, PUBLISHED } from "@/lib/firestore";
+import { collections } from "@/lib/constants/collections";
 import type { Sermon } from "@/types/content";
-import { serializeData, withReadTimeout, type Serialized } from "./utils";
+import { PUBLISHED } from "@/types/shared";
+import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 
 export async function getSermons(): Promise<Serialized<Sermon>[]> {
   try {
@@ -19,7 +20,8 @@ export async function getSermons(): Promise<Serialized<Sermon>[]> {
     return snapshot.docs.map((doc) =>
       serializeData({ id: doc.id, ...doc.data() } as unknown as Sermon),
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getSermons", error);
     return [];
   }
 }
@@ -40,7 +42,8 @@ export async function getSermonBySlug(slug: string): Promise<Serialized<Sermon> 
     return serializeData(
       { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as unknown as Sermon,
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getSermonBySlug", error);
     return null;
   }
 }
@@ -61,7 +64,8 @@ export async function getLatestSermon(): Promise<Serialized<Sermon> | null> {
     return serializeData(
       { id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as unknown as Sermon,
     );
-  } catch {
+  } catch (error) {
+    logDataFallback("getLatestSermon", error);
     return null;
   }
 }

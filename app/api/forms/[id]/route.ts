@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminSessionForRequest } from "@/lib/api/adminSession";
+import {
+  requireAdminSessionForRequest,
+  type AdminRequestAuthResult,
+} from "@/lib/api/adminSession";
 import {
   getFormSubmissionById,
   updateFormSubmissionStatus,
@@ -34,19 +37,30 @@ function jsonError(
   );
 }
 
+function jsonAuthError(authResult: Extract<AdminRequestAuthResult, { ok: false }>) {
+  return jsonError(authResult.reason, authResult.message, authResult.status);
+}
+
 async function requireFormsAdmin(request: NextRequest) {
-  return getAdminSessionForRequest(request, "forms:manage");
+  return requireAdminSessionForRequest(request, "forms:manage");
 }
 
 export async function GET(request: NextRequest, context: RouteContext) {
-  const session = await requireFormsAdmin(request);
+  const authResult = await requireFormsAdmin(request);
 
-  if (!session) {
-    return jsonError("FORBIDDEN", "You are not authorized to review form submissions.", 403);
+  if (!authResult.ok) {
+    return jsonAuthError(authResult);
   }
 
   const { id } = await context.params;
-  const submission = await getFormSubmissionById(id);
+  let submission;
+
+  try {
+    submission = await getFormSubmissionById(id);
+  } catch (error) {
+    console.error("[forms] Failed to load form submission.", error);
+    return jsonError("LOAD_FAILED", "Could not load the form submission.", 500);
+  }
 
   if (!submission) {
     return jsonError("NOT_FOUND", "Form submission not found.", 404);
@@ -56,10 +70,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
-  const session = await requireFormsAdmin(request);
+  const authResult = await requireFormsAdmin(request);
 
-  if (!session) {
-    return jsonError("FORBIDDEN", "You are not authorized to update form submissions.", 403);
+  if (!authResult.ok) {
+    return jsonAuthError(authResult);
   }
 
   let body: unknown;
@@ -82,7 +96,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const submission = await updateFormSubmissionStatus(id, parsed.data, session.uid);
+  let submission;
+
+  try {
+    submission = await updateFormSubmissionStatus(id, parsed.data, authResult.session.uid);
+  } catch (error) {
+    console.error("[forms] Failed to update form submission.", error);
+    return jsonError("UPDATE_FAILED", "Could not update the form submission.", 500);
+  }
 
   if (!submission) {
     return jsonError("NOT_FOUND", "Form submission not found.", 404);

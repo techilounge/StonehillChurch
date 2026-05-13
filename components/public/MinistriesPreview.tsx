@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
-import { MinistryCard } from "./cards/MinistryCard";
+import { MinistryCard } from "./MinistryCard";
 import type { Serialized } from "@/lib/data/homepage";
 import type { Ministry } from "@/types/content";
 
@@ -13,7 +13,7 @@ interface MinistriesPreviewProps {
 export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
   if (!ministries || ministries.length === 0) {
     return (
-      <section className="py-16 bg-white sm:py-24">
+      <section className="py-16 bg-white sm:py-24 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
             Find Your Place
@@ -31,7 +31,7 @@ export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
   }
 
   return (
-    <section className="py-16 bg-white sm:py-24">
+    <section className="py-16 bg-white sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div className="max-w-2xl">
@@ -39,7 +39,7 @@ export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
               Find Your Place
             </h2>
             <p className="text-lg text-stonehill-ink/80">
-              There's a place for everyone at Stonehill. Browse our featured ministries below or 
+              There&apos;s a place for everyone at Stonehill. Browse our featured ministries below or 
               explore all the ways you can get connected.
             </p>
           </div>
@@ -53,7 +53,7 @@ export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {ministries.map((ministry) => (
-            <MinistryCard key={ministry.id} ministry={ministry as unknown as Ministry} />
+            <MinistryCard key={ministry.id} ministry={ministry} />
           ))}
         </div>
         

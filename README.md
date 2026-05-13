@@ -1,17 +1,17 @@
 # Stonehill Seventh-day Adventist Church Website
 
-Full-stack Next.js foundation for the Stonehill SDA public website, custom admin console, and Firebase-backed CMS.
+Full-stack Next.js App Router rebuild for the Stonehill SDA public website, custom admin console, and Firebase-backed CMS.
 
 ## Stack
 
 - Next.js App Router
-- React and TypeScript with strict mode
-- Tailwind CSS with Stonehill design tokens
-- Firebase Authentication for admin sign-in
-- Firestore for CMS content
-- Firebase Storage for media uploads
-- Vercel-ready deployment configuration
-- YouTube/live streaming configuration placeholders
+- React and TypeScript
+- Tailwind CSS v3.4.x with the Stonehill color theme
+- Firebase Authentication
+- Firestore
+- Firebase Storage
+- Firebase Admin SDK for server-only operations
+- Vercel deployment
 
 ## Local Setup
 
@@ -21,267 +21,253 @@ Full-stack Next.js foundation for the Stonehill SDA public website, custom admin
 npm install
 ```
 
-2. Create local environment variables:
+2. Create your local environment file:
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
-3. Fill server-only secrets in `.env.local`. Public Firebase values can be exposed to the browser, but Firebase Admin credentials must only exist in server environments.
+3. Fill in `.env.local` with values from your Firebase project and integration providers. Keep Firebase Admin, YouTube, Resend, and seed credentials server-only. Do not commit `.env.local`.
 
-4. Run the dev server:
+4. Start the dev server:
 
 ```bash
 npm run dev
 ```
 
-5. Validate the project:
+The `predev` and `prebuild` scripts move `.next` aside before continuing so Next starts from a fresh cache without recursively deleting folders that Windows may have locked. Moved folders are named `.next-stale-*` and are ignored by Git. After stopping Node processes, you can delete stale folders manually or set `CLEAN_NEXT_DEV_CACHE=1` for a one-time forced cleanup.
+
+## Environment Variables
+
+`.env.local.example` documents every expected variable with placeholder values only.
+
+Public Firebase Web App values:
+
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`
+- `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY`
+- `NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN`
+- `NEXT_PUBLIC_SITE_URL`
+
+Server-only Firebase Admin values:
+
+- `FIREBASE_ADMIN_PROJECT_ID`
+- `FIREBASE_ADMIN_CLIENT_EMAIL`
+- `FIREBASE_ADMIN_PRIVATE_KEY`
+
+Integration values:
+
+- `YOUTUBE_API_KEY`
+- `YOUTUBE_CHANNEL_ID`
+- `RESEND_API_KEY`
+
+Seed values:
+
+- `ADMIN_SEED_EMAIL`
+- `ADMIN_SEED_PASSWORD`
+- `ADMIN_SEED_NAME`
+
+Local emulator values:
+
+- `FIRESTORE_EMULATOR_HOST`
+- `FIREBASE_AUTH_EMULATOR_HOST`
+- `FIREBASE_STORAGE_EMULATOR_HOST`
+
+Never prefix server-only secrets with `NEXT_PUBLIC_`. Store Firebase Admin private keys as escaped newline strings, for example with `\n` between key lines.
+
+## Firebase Project Setup
+
+1. Create or select a Firebase project.
+2. Register a Web App and copy its config into the `NEXT_PUBLIC_FIREBASE_*` values.
+3. Enable Firebase Authentication. Email/Password is required for the seed admin path.
+4. Create a Firestore database.
+5. Create or confirm the default Firebase Storage bucket.
+6. Create a Firebase Admin SDK service account for local server scripts and Vercel server runtime.
+7. Register the Web App in Firebase App Check with reCAPTCHA and set `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY`.
+8. Review Firestore and Storage rules from `firestore.rules` and `storage.rules` before deploying rules.
+
+Firebase Admin credentials must only be used in `.env.local`, Vercel environment variables, or other trusted server environments. Do not commit service account JSON files.
+
+### Firebase Rules Deployment
+
+This repository includes `firebase.json`, which points Firebase CLI deploys at `firestore.rules` and `storage.rules`.
+
+Authenticate and select a project before deploying rules:
 
 ```bash
-npm run typecheck
+firebase login
+firebase use --add
+```
+
+If you do not have a `.firebaserc` alias configured, pass the project explicitly:
+
+```bash
+firebase deploy --only firestore --project your_project_id
+firebase deploy --only storage --project your_project_id
+```
+
+With a selected alias, the shorter commands also work:
+
+```bash
+firebase deploy --only firestore
+firebase deploy --only storage
+```
+
+Do not deploy rules to production until public write paths, including form submissions, have been reviewed with App Check and abuse protection in mind.
+
+### App Check Local Development
+
+App Check is initialized in the browser when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` is set. For localhost testing, use Firebase's debug token flow rather than adding `localhost` to reCAPTCHA allowed domains.
+
+1. Set `NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN="true"` in `.env.local`.
+2. Start the dev server and open the app in a browser.
+3. Open DevTools Console and copy the printed App Check debug token.
+4. Firebase Console → App Check → Apps → StonehillChurch Web App → Manage debug tokens.
+5. Register the token, then refresh localhost.
+
+Do not set `NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN` in production.
+
+## Firebase Emulator Setup
+
+Install the Firebase CLI if you do not already have it:
+
+```bash
+npm install -g firebase-tools
+```
+
+Start local emulators from the project root:
+
+```bash
+firebase emulators:start --only auth,firestore,storage
+```
+
+When using emulators, set these in `.env.local`:
+
+```bash
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099
+FIREBASE_STORAGE_EMULATOR_HOST=127.0.0.1:9199
+```
+
+For emulator seeding, `FIREBASE_ADMIN_PROJECT_ID`, `ADMIN_SEED_EMAIL`, and `ADMIN_SEED_PASSWORD` are still required. Firebase Admin private key credentials are only required when seeding a hosted Firebase project.
+
+## Vercel Setup
+
+1. Import this repository as a Vercel Next.js project.
+2. Add every value from `.env.local.example` to Vercel Project Settings as needed.
+3. Do not add emulator host variables in production.
+4. Keep `FIREBASE_ADMIN_*`, `YOUTUBE_API_KEY`, `RESEND_API_KEY`, and seed credentials server-only.
+5. Set `NEXT_PUBLIC_SITE_URL` to the deployed public site URL so canonical URLs and the sitemap use the correct domain.
+
+Vercel automatically provides `VERCEL_URL`, but the project prefers `NEXT_PUBLIC_SITE_URL` when it is set.
+
+## Package Scripts
+
+```bash
+npm run dev
 npm run build
+npm run typecheck
+npm run lint
+npm run seed:firestore
 ```
 
-## Firebase Setup
+Script behavior:
 
-Create or confirm the Firebase project:
-
-- Project ID: `stonehill-sda-ch-1723416406673`
-- Authentication: enable Email/Password sign-in for admin users.
-- Firestore: create the database in production mode, then add security rules during the auth phase.
-- Storage: create the default bucket and add upload rules during the media phase.
-- Service account: create a Firebase Admin SDK service account for server-side operations.
-
-Use these environment variables locally and in Vercel:
-
-```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
-FIREBASE_ADMIN_PROJECT_ID=
-FIREBASE_ADMIN_CLIENT_EMAIL=
-FIREBASE_ADMIN_PRIVATE_KEY=
-YOUTUBE_API_KEY=
-YOUTUBE_CHANNEL_ID=
-RESEND_API_KEY=
-ADMIN_SEED_EMAIL=
-ADMIN_SEED_PASSWORD=
-```
-
-When entering `FIREBASE_ADMIN_PRIVATE_KEY` in Vercel, preserve newline characters as escaped `\n` values.
+- `dev`: starts Next.js development mode after `predev` moves `.next` aside.
+- `build`: runs `next build` after `prebuild` moves `.next` aside.
+- `typecheck`: runs `tsc --noEmit`.
+- `lint`: runs `next lint`. This command is supported by the current package script, though Next.js reports that `next lint` is deprecated in newer Next versions. Follow-up migration should move to ESLint CLI with the flat config, for example `eslint .`.
+- `seed:firestore`: runs `scripts/seedFirestore.ts` with `tsx`.
 
 ## Firestore Seed
 
-After Firebase Admin credentials and seed admin credentials are configured:
+The seed script creates or updates:
+
+- `users/{uid}` for the seed admin
+- `siteSettings`
+- `youtubeSettings`
+- `homepageSlides`
+- `sermons`
+- `events`
+- `ministries`
+- `leaders`
+- `announcements`
+- `resources`
+- `pages`
+
+Seed a hosted Firebase project:
 
 ```bash
 npm run seed:firestore
 ```
 
-This creates or updates:
+Required hosted seed variables:
 
-- `users/{uid}` with the seed admin as `owner`
-- `settings/site` with base site settings
+- `FIREBASE_ADMIN_PROJECT_ID`
+- `FIREBASE_ADMIN_CLIENT_EMAIL`
+- `FIREBASE_ADMIN_PRIVATE_KEY`
+- `ADMIN_SEED_EMAIL`
+- `ADMIN_SEED_PASSWORD`
+
+Required emulator seed variables:
+
+- `FIREBASE_ADMIN_PROJECT_ID`
+- `ADMIN_SEED_EMAIL`
+- `ADMIN_SEED_PASSWORD`
+- `FIRESTORE_EMULATOR_HOST`
+- `FIREBASE_AUTH_EMULATOR_HOST`
+
+The seed script is idempotent and uses deterministic document IDs where practical.
+
+### Creating the First Admin User
+
+Set `ADMIN_SEED_EMAIL` and `ADMIN_SEED_PASSWORD` in `.env.local`, then run:
+
+```bash
+npm run seed:firestore
+```
+
+The seed creates or updates the Firebase Auth user, writes the matching `users/{uid}` document, and syncs custom claims with `role: SUPER_ADMIN`, `approved: true`, and `disabled: false`. After seeding, sign in at `/admin/login` with that email and password. Re-run the seed after changing the seed admin email, password, approval state, or role claims.
+
+### Creating Additional Admin Users
+
+Once the first SUPER_ADMIN exists, additional admins are managed in-app:
+
+1. Sign in at `/admin/login` as the SUPER_ADMIN.
+2. Open `/admin/users` (visible only to SUPER_ADMIN).
+3. Use the role selector and approve/disable buttons to assign roles
+   (`SUPER_ADMIN`, `ADMIN`, `EDITOR`, `VIEWER`) and toggle approval/disabled
+   status. Each change writes the Firestore `users/{uid}` doc and syncs
+   Firebase custom claims via the existing helper.
+
+New admin accounts must first be created in Firebase Auth (manually via the
+Firebase console or programmatically) and have an `emailVerified` flag set
+before they can sign in. Role/status assignment is then handled from
+`/admin/users`.
 
 ## Project Structure
 
 - `app/(public)`: public website routes and layout shell
-- `app/admin`: custom CMS/admin route shell
-- `app/api`: route handlers for auth, forms, media, and YouTube placeholders
-- `components`: public, admin, layout, shared, home, and forms components
-- `lib`: Firebase, Firestore, Storage, Auth, permissions, SEO, YouTube, utilities, validators
-- `types`: shared TypeScript content, auth, form, and media models
-- `scripts`: operational scripts, including Firestore seed
-- `public/images`: static image assets
+- `app/admin`: custom CMS/admin routes
+- `app/api`: route handlers
+- `components`: public, admin, layout, shared, home, SEO, and form components
+- `lib`: Firebase, Firestore, Storage, Auth, permissions, data access, SEO, YouTube, utilities, and validators
+- `types`: shared TypeScript models
+- `scripts`: seed and local maintenance scripts
+- `public`: static assets
+- `firebase.json`: Firebase CLI configuration for Firestore and Storage rules
+- `src`: legacy migration reference code from the previous app structure. It is excluded from `tsconfig.json` and is not part of the active Next.js App Router build.
 
-## Deployment
+## Security Notes
 
-Deploy to Vercel as a Next.js project and add every variable from `.env.example` in the Vercel project settings. Keep all `FIREBASE_ADMIN_*`, `YOUTUBE_API_KEY`, `RESEND_API_KEY`, and seed credentials server-only. Do not prefix secrets with `NEXT_PUBLIC_`.
-
-The current admin routes are intentionally placeholder-protected only. The next phase should add middleware/session checks, Firestore security rules, admin UI forms, and CMS workflows.
-## Stonehill CMS Authentication and Roles
-
-The Admin Console is planned to be protected by Firebase Authentication. UI checks are not enough for CMS security, so role enforcement must also happen in server-side helpers and Firebase Security Rules.
-
-Admin users should receive Firebase custom claims with:
-
-- `role`: one of `SUPER_ADMIN`, `ADMIN`, `EDITOR`, or `VIEWER`
-- `approved`: `true` after the account is approved for Admin Console access
-
-Role expectations:
-
-- `SUPER_ADMIN`: full access, user management, critical settings, YouTube settings, media, publishing, deletion, and audit log visibility.
-- `ADMIN`: manages most content, publishing, form submissions, and media. Admins must not delete users or change critical settings unless explicitly allowed.
-- `EDITOR`: creates and edits content, saves drafts, uploads media, and submits content for publishing. Editors cannot manage users, settings, publishing, or important deletes.
-- `VIEWER`: read-only Admin Console access.
-
-Implemented planning files:
-
-- `lib/permissions.ts`: shared role and permission checks.
-- `lib/auth.ts`: server-side guard helpers and audit log entry helper.
-- `src/components/AdminRouteGuard.tsx`: placeholder React guard for wrapping Admin Console routes once Firebase Auth state is wired into the app.
-- `firestore.rules`: draft Firestore rules for public published content, admin-only collections, users, settings, YouTube settings, audit logs, and form submissions.
-- `storage.rules`: draft Storage rules for public approved media, WEBP uploads, JPEG/PNG uploads that pass compression-pipeline metadata, image MIME validation, and file size limits.
-
-Temporary limitations:
-
-- Firebase Admin SDK token verification is not wired into this client app yet. Server endpoints or server actions must verify ID tokens before trusting `lib/auth.ts` helpers.
-- Custom claims must be set from a trusted server environment, never from client code.
-- Audit logs should be written by trusted server code where practical. Client-created audit logs are constrained in the draft rules but are not a replacement for server-side audit logging.
-- JPEG and PNG uploads are allowed only when marked by the upload pipeline as compressed. The intended upload path is automatic compression/conversion before upload, with WEBP supported as the preferred public media format.
-## Phase 7: Firebase Authentication for Admin Console
-
-The Admin Console uses Firebase Authentication for identity and the Firestore
-`users/{uid}` document for authorization. Do not store passwords in Firestore or
-any CMS collection. Passwords are handled only by Firebase Authentication.
-
-Required Firebase client environment variables:
-
-- `VITE_FIREBASE_API_KEY`
-- `VITE_FIREBASE_AUTH_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_STORAGE_BUCKET`
-- `VITE_FIREBASE_MESSAGING_SENDER_ID`
-- `VITE_FIREBASE_APP_ID`
-
-Admin routes:
-
-- `/admin/login` is the public login route.
-- `/admin` and every `/admin/*` route are protected by Firebase Auth and a
-  Firestore profile lookup.
-
-Create the first admin user:
-
-1. Enable Firebase Authentication providers in the Firebase Console, such as
-   Email/Password or Google.
-2. Sign in once at `/admin/login` with the intended first admin account. The
-   app will deny access until a Firestore profile exists.
-3. In Firestore, create `users/{uid}` where `{uid}` is the Firebase Auth UID:
-
-```json
-{
-  "email": "admin@example.com",
-  "firstName": "Stonehill",
-  "lastName": "Admin",
-  "role": "SUPER_ADMIN",
-  "approved": true,
-  "disabled": false
-}
-```
-
-Supported roles are `SUPER_ADMIN`, `ADMIN`, `EDITOR`, and `VIEWER`. If role
-loading fails, the app denies access by default and shows the unauthorized
-screen.
-
-Security notes:
-
-- UI hiding is only convenience. Firestore rules must enforce writes using the
-  `users` collection role document.
-- Firebase Storage rules cannot query Firestore documents directly. Keep Storage
-  rules restrictive, sync privileged upload claims only from trusted server
-  code if needed, and enforce upload authorization in the Admin Console before
-  creating media records.
-- Server actions, API routes, and Cloud Functions must verify Firebase ID tokens
-  and re-check the caller's `users/{uid}` role before privileged actions.
-- `lib/adminUsers.ts` provides adapter-based server helpers for re-checking a
-  caller's Firestore user role before privileged actions.
-- Never expose Firebase Admin SDK credentials in client code.
-
-## Phase 8: Media Library
-
-The Admin Console includes a responsive Media Library at `/admin/media`.
-`/admin/media/upload` opens the same Media Library with the upload panel visible.
-
-Media upload flow:
-
-1. The admin selects a WEBP, JPEG, or PNG image.
-2. The browser validates MIME type and rejects files over 15 MB before
-   processing.
-3. The browser draws the image to a canvas, resizes large images to a maximum
-   dimension of 2200 px, and exports an optimized WEBP.
-4. Optimized uploads must be 5 MB or less.
-5. The optimized WEBP is uploaded to Firebase Storage under a clean
-   `media/{year}/{month}/{uid}/...webp` path.
-6. Metadata is saved to Firestore in the `mediaAssets` collection.
-
-`mediaAssets` documents include:
-
-- `originalFilename`
-- `storagePath`
-- `url`
-- `contentType`
-- `size`
-- `originalSize`
-- `width`
-- `height`
-- `uploadedBy`
-- `uploadedByEmail`
-- `altText`
-- `public`
-- `status`
-- `createdAt`
-- `updatedAt`
-
-Role behavior:
-
-- `SUPER_ADMIN` and `ADMIN` can upload, approve public media, edit alt text,
-  copy URLs, and delete media.
-- `EDITOR` can upload private optimized media and edit alt text.
-- `VIEWER` can browse and copy media URLs but cannot upload, edit, or delete.
-
-Public-facing images require meaningful alt text. The UI enforces alt text on
-upload and update, and the Firestore rules require longer alt text for public
-approved assets.
-
-Storage note: the local `storage.rules` file was tightened for Phase 8 to accept
-optimized WEBP uploads with compressed-pipeline metadata and a 5 MB limit. If
-you manually copied Storage rules before Phase 8, copy or deploy the updated
-rules again. Firebase Storage rules cannot read Firestore user documents, so
-direct client uploads need trusted Firebase Auth custom claims that mirror the
-Firestore role, or a future Cloud Function upload endpoint that verifies the
-Firestore `users/{uid}` role before writing to Storage.
-
-## Phase 9: CMS Content CRUD
-
-The Admin Console includes Firestore CRUD management for:
-
-- Homepage Slides
-- Sermons
-- Events
-- Ministries
-- Leaders
-- Announcements
-- Resources
-- Pages
-- Site Settings
-- YouTube Settings
-
-Content modules are available under `/admin/content/{module}`. Site Settings
-are available at `/admin/site-settings`, and YouTube Settings are available at
-`/admin/youtube-settings`.
-
-Each content module includes a responsive list/table view, create/edit form,
-validation, delete confirmation, status actions where the collection supports
-statuses, success/error states, permission-gated controls, and best-effort audit
-log writes to `auditLogs`.
-
-Slug fields marked as unique are checked in Firestore before save. Media URL
-fields can select an existing `mediaAssets` item or accept a temporary direct
-URL until a richer media picker is added.
-
-Role behavior:
-
-- `SUPER_ADMIN`: full content/settings access.
-- `ADMIN`: create, edit, publish/unpublish, archive, delete content, manage
-  site settings, and manage media.
-- `EDITOR`: create and edit draft content, but cannot publish, archive, delete,
-  manage users, or change site settings.
-- `VIEWER`: read-only Admin Console access.
-
-Public Firestore reads are limited in `firestore.rules` to published content or
-active leader/homepage records where appropriate. Admin reads and writes are
-based on the Firestore `users/{uid}` role document, not hidden UI.
+- `.env.local` is ignored by Git.
+- Never commit Firebase Admin private keys or service account JSON.
+- Do not expose Firebase Admin credentials to client-side code.
+- Only `NEXT_PUBLIC_*` values are browser-visible.
+- API routes and server helpers must verify Firebase ID tokens and permissions before privileged work.
+- Firebase App Check must be configured before public form submission endpoints go live in production.

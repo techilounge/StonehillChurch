@@ -1,15 +1,17 @@
 import "server-only";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
+import { collections } from "@/lib/constants/collections";
 import type { Resource } from "@/types/content";
-import { serializeData, withReadTimeout, type Serialized } from "./utils";
+import { PUBLISHED } from "@/types/shared";
+import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 
 export async function getResources(): Promise<Serialized<Resource>[]> {
   try {
     const db = getAdminFirestore();
-    const resourcesRef = db.collection("resources");
+    const resourcesRef = db.collection(collections.resources);
     const snapshot = await withReadTimeout(
       resourcesRef
-        .where("status", "==", "published")
+        .where("status", "==", PUBLISHED)
         .orderBy("createdAt", "desc")
         .get(),
     );
@@ -20,7 +22,8 @@ export async function getResources(): Promise<Serialized<Resource>[]> {
     })) as unknown as Resource[];
 
     return resources.map(serializeData);
-  } catch {
+  } catch (error) {
+    logDataFallback("getResources", error);
     return [];
   }
 }
@@ -28,10 +31,10 @@ export async function getResources(): Promise<Serialized<Resource>[]> {
 export async function getBulletins(): Promise<Serialized<Resource>[]> {
   try {
     const db = getAdminFirestore();
-    const resourcesRef = db.collection("resources");
+    const resourcesRef = db.collection(collections.resources);
     const snapshot = await withReadTimeout(
       resourcesRef
-        .where("status", "==", "published")
+        .where("status", "==", PUBLISHED)
         .where("category", "==", "bulletin")
         .orderBy("createdAt", "desc")
         .get(),
@@ -43,7 +46,8 @@ export async function getBulletins(): Promise<Serialized<Resource>[]> {
     })) as unknown as Resource[];
 
     return bulletins.map(serializeData);
-  } catch {
+  } catch (error) {
+    logDataFallback("getBulletins", error);
     return [];
   }
 }

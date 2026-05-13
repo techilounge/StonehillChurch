@@ -274,6 +274,34 @@ export function createMinistryMetadata(
   });
 }
 
+function postalAddressJsonLd(settings: SiteSeoSettings): JsonLd | undefined {
+  if (
+    settings.addressStreet ||
+    settings.addressCity ||
+    settings.addressRegion ||
+    settings.addressPostalCode ||
+    settings.addressCountry
+  ) {
+    return {
+      "@type": "PostalAddress",
+      streetAddress: settings.addressStreet,
+      addressLocality: settings.addressCity,
+      addressRegion: settings.addressRegion,
+      postalCode: settings.addressPostalCode,
+      addressCountry: settings.addressCountry,
+    };
+  }
+
+  if (settings.address) {
+    return {
+      "@type": "PostalAddress",
+      streetAddress: settings.address,
+    };
+  }
+
+  return undefined;
+}
+
 export function organizationJsonLd(settings: SiteSeoSettings): JsonLd {
   const sameAs = [
     settings.youtubeUrl,
@@ -289,38 +317,18 @@ export function organizationJsonLd(settings: SiteSeoSettings): JsonLd {
     description: settings.description,
     email: settings.email,
     telephone: settings.phone,
+    address: postalAddressJsonLd(settings),
     sameAs,
   };
 }
 
 export function placeJsonLd(settings: SiteSeoSettings): JsonLd {
-  const postalAddress =
-    settings.addressStreet ||
-    settings.addressCity ||
-    settings.addressRegion ||
-    settings.addressPostalCode ||
-    settings.addressCountry
-      ? {
-          "@type": "PostalAddress",
-          streetAddress: settings.addressStreet,
-          addressLocality: settings.addressCity,
-          addressRegion: settings.addressRegion,
-          postalCode: settings.addressPostalCode,
-          addressCountry: settings.addressCountry,
-        }
-      : settings.address
-        ? {
-            "@type": "PostalAddress",
-            streetAddress: settings.address,
-          }
-        : undefined;
-
   return {
     "@context": "https://schema.org",
     "@type": "Place",
     name: settings.siteName,
     url: settings.siteUrl,
-    address: postalAddress,
+    address: postalAddressJsonLd(settings),
     telephone: settings.phone,
   };
 }
@@ -352,11 +360,12 @@ export function eventJsonLd(event: SeoEvent, siteUrl: string): JsonLd {
     endDate: toIsoString(event.endDateTime),
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
-    location: {
-      "@type": "Place",
-      name: event.location,
-      address: event.location,
-    },
+    location: event.location
+      ? {
+          "@type": "Place",
+          name: event.location,
+        }
+      : undefined,
     image: event.imageUrl ? [absoluteUrl(event.imageUrl, siteUrl)] : undefined,
   };
 }

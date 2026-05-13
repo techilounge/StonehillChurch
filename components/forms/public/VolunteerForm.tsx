@@ -17,7 +17,7 @@ const VOLUNTEER_AREAS = [
   "Greeting & Hospitality",
   "Community Service",
   "Prayer Ministry",
-  "Other"
+  "Other",
 ];
 
 export function VolunteerForm() {
@@ -35,6 +35,7 @@ export function VolunteerForm() {
       areas: formData.getAll("areas"),
       availability: formData.get("availability") || undefined,
       message: formData.get("message"),
+      website: formData.get("website") || undefined,
     };
 
     try {
@@ -56,7 +57,9 @@ export function VolunteerForm() {
         return;
       }
       setStatus("success");
-      setMessage("Thank you for your willingness to serve! A ministry leader will contact you soon.");
+      setMessage(
+        "Thank you for your willingness to serve! A ministry leader will contact you soon.",
+      );
     } catch (e) {
       setStatus("error");
       setMessage("A network error occurred. Please try again later.");
@@ -68,38 +71,72 @@ export function VolunteerForm() {
   }
 
   return (
-    <form action={action} className="space-y-8 bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-stone-100">
+    <form
+      action={action}
+      className="space-y-8"
+    >
       <FormStatusAlert status={status} message={message} />
-      
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Personal Information</h3>
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Personal Information
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField label="Full Name *" id="name">
             <TextInput id="name" name="name" required placeholder="Jane Doe" />
           </FormField>
-          
+
           <FormField label="Email Address *" id="email">
-            <TextInput id="email" name="email" type="email" required placeholder="jane@example.com" />
+            <TextInput
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="jane@example.com"
+            />
           </FormField>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField label="Phone Number" id="phone" description="Optional">
-            <TextInput id="phone" name="phone" type="tel" placeholder="(555) 123-4567" />
+            <TextInput
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="(555) 123-4567"
+            />
           </FormField>
-          
+
           <FormField label="Subject" id="subject" description="Optional">
-            <TextInput id="subject" name="subject" placeholder="General Volunteer Inquiry" />
+            <TextInput
+              id="subject"
+              name="subject"
+              placeholder="General Volunteer Inquiry"
+            />
           </FormField>
         </div>
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Service Areas</h3>
-        <FormField label="Areas of Interest" id="areas" description="Select all that apply">
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Service Areas
+        </h3>
+        <FormField
+          label="Areas of Interest"
+          id="areas"
+          description="Select all that apply"
+        >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
             {VOLUNTEER_AREAS.map((area) => (
-              <CheckboxField 
+              <CheckboxField
                 key={area}
                 id={`area-${area}`}
                 name="areas"
@@ -112,13 +149,34 @@ export function VolunteerForm() {
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Details</h3>
-        <FormField label="Availability" id="availability" description="When are you generally available? (e.g., Saturday mornings, Wednesday evenings)">
-          <TextArea id="availability" name="availability" rows={3} placeholder="I am available on..." />
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Details
+        </h3>
+        <FormField
+          label="Availability"
+          id="availability"
+          description="When are you generally available? (e.g., Saturday mornings, Wednesday evenings)"
+        >
+          <TextArea
+            id="availability"
+            name="availability"
+            rows={3}
+            placeholder="I am available on..."
+          />
         </FormField>
 
-        <FormField label="Message *" id="message" description="Tell us a bit about your experience or why you want to serve.">
-          <TextArea id="message" name="message" required rows={4} placeholder="I have experience with..." />
+        <FormField
+          label="Message *"
+          id="message"
+          description="Tell us a bit about your experience or why you want to serve."
+        >
+          <TextArea
+            id="message"
+            name="message"
+            required
+            rows={4}
+            placeholder="I have experience with..."
+          />
         </FormField>
       </div>
 

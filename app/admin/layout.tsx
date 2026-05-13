@@ -1,28 +1,38 @@
-"use client";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { AdminShell } from "@/components/admin/AdminShell";
+import {
+  adminLoginRedirectPath,
+  ADMIN_DEFAULT_PATH,
+  isAdminPublicPath,
+} from "@/lib/adminRoutes";
+import { getCurrentAdminSession } from "@/lib/api/adminSession";
 
-import { useState } from "react";
-import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { AdminHeader } from "@/components/admin/AdminHeader";
-import { AdminMobileNav } from "@/components/admin/AdminMobileNav";
+export const dynamic = "force-dynamic";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const requestHeaders = await headers();
+  const pathname = requestHeaders.get("x-stonehill-pathname") ?? "";
+  const search = requestHeaders.get("x-stonehill-search") ?? "";
 
-  return (
-    <div className="min-h-screen bg-[#f4f6f4]">
-      <AdminMobileNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <AdminSidebar />
-      
-      <div className="md:pl-72 flex flex-col min-h-screen">
-        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </main>
-      </div>
-    </div>
-  );
+  if (pathname && isAdminPublicPath(pathname)) {
+    return <>{children}</>;
+  }
+
+  const authResult = await getCurrentAdminSession("admin:access");
+
+  if (!authResult.ok) {
+    redirect(
+      adminLoginRedirectPath(
+        pathname ? `${pathname}${search}` : ADMIN_DEFAULT_PATH,
+        authResult.reason,
+      ),
+    );
+  }
+
+  return <AdminShell session={authResult.session}>{children}</AdminShell>;
 }

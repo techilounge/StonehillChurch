@@ -3,9 +3,11 @@
 import { usePathname } from "next/navigation";
 import { User, LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/shared/Button";
+import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 
 export function AdminHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const pathname = usePathname();
+  const { session, signingOut, signOutAdmin } = useAdminAuth();
   
   // Basic breadcrumb logic based on pathname
   const segments = pathname?.split("/").filter(Boolean) || [];
@@ -37,12 +39,19 @@ export function AdminHeader({ onMenuClick }: { onMenuClick: () => void }) {
           {/* Profile dropdown / Profile placeholder */}
           <div className="flex items-center gap-x-4">
             <span className="hidden text-sm font-medium leading-6 text-stonehill-ink/80 lg:block">
-              Admin User
+              {session.email ?? session.role}
             </span>
             <div className="h-8 w-8 rounded-full bg-stonehill-evergreen/10 flex items-center justify-center text-stonehill-evergreen">
               <User className="h-5 w-5" />
             </div>
-            <Button variant="ghost" size="icon" className="text-stonehill-ink/70 hover:text-red-600" title="Sign out">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-stonehill-ink/70 hover:text-red-600"
+              title="Sign out"
+              onClick={signOutAdmin}
+              disabled={signingOut}
+            >
               <LogOut className="h-5 w-5" />
               <span className="sr-only">Sign out</span>
             </Button>

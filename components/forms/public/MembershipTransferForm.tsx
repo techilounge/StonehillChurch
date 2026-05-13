@@ -24,6 +24,7 @@ export function MembershipTransferForm() {
       currentChurch: formData.get("currentChurch") || undefined,
       receivingChurch: formData.get("receivingChurch") || undefined,
       message: formData.get("message"),
+      website: formData.get("website") || undefined,
     };
 
     try {
@@ -45,7 +46,9 @@ export function MembershipTransferForm() {
         return;
       }
       setStatus("success");
-      setMessage("Your membership transfer request has been submitted. The church clerk will contact you.");
+      setMessage(
+        "Your membership transfer request has been submitted. The church clerk will contact you.",
+      );
     } catch (e) {
       setStatus("error");
       setMessage("A network error occurred. Please try again later.");
@@ -57,51 +60,112 @@ export function MembershipTransferForm() {
   }
 
   return (
-    <form action={action} className="space-y-8 bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-stone-100">
+    <form
+      action={action}
+      className="space-y-8 "
+    >
       <FormStatusAlert status={status} message={message} />
-      
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="hidden"
+      />
+
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Your Information</h3>
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Your Information
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField label="Full Name *" id="name">
             <TextInput id="name" name="name" required placeholder="Jane Doe" />
           </FormField>
-          
+
           <FormField label="Email Address *" id="email">
-            <TextInput id="email" name="email" type="email" required placeholder="jane@example.com" />
+            <TextInput
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="jane@example.com"
+            />
           </FormField>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField label="Phone Number" id="phone" description="Optional">
-            <TextInput id="phone" name="phone" type="tel" placeholder="(555) 123-4567" />
+            <TextInput
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="(555) 123-4567"
+            />
           </FormField>
         </div>
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold font-serif text-stone-900 border-b border-stone-100 pb-2">Transfer Details</h3>
-        
+        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+          Transfer Details
+        </h3>
+
         <FormField label="Type of Transfer *" id="transferDirection">
-          <SelectInput id="transferDirection" name="transferDirection" required defaultValue="to_stonehill">
-            <option value="to_stonehill">Transferring TO Stonehill Church</option>
-            <option value="from_stonehill">Transferring FROM Stonehill Church</option>
+          <SelectInput
+            id="transferDirection"
+            name="transferDirection"
+            required
+            defaultValue="to_stonehill"
+          >
+            <option value="to_stonehill">
+              Transferring TO Stonehill SDA Church
+            </option>
+            <option value="from_stonehill">
+              Transferring FROM Stonehill SDA Church
+            </option>
             <option value="other">Other / Not Sure</option>
           </SelectInput>
         </FormField>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField label="Current Church" id="currentChurch" description="The church you are currently a member of">
-            <TextInput id="currentChurch" name="currentChurch" placeholder="Name of church, City, State" />
+          <FormField
+            label="Current Church"
+            id="currentChurch"
+            description="The church you are currently a member of"
+          >
+            <TextInput
+              id="currentChurch"
+              name="currentChurch"
+              placeholder="Name of church, City, State"
+            />
           </FormField>
-          
-          <FormField label="Receiving Church" id="receivingChurch" description="The church you are transferring to (if leaving Stonehill)">
-            <TextInput id="receivingChurch" name="receivingChurch" placeholder="Name of church, City, State" />
+
+          <FormField
+            label="Receiving Church"
+            id="receivingChurch"
+            description="The church you are transferring to (if leaving Stonehill)"
+          >
+            <TextInput
+              id="receivingChurch"
+              name="receivingChurch"
+              placeholder="Name of church, City, State"
+            />
           </FormField>
         </div>
 
-        <FormField label="Additional Information *" id="message" description="Any other details the church clerk should know">
-          <TextArea id="message" name="message" required rows={4} placeholder="Please process my transfer..." />
+        <FormField
+          label="Additional Information *"
+          id="message"
+          description="Any other details the church clerk should know"
+        >
+          <TextArea
+            id="message"
+            name="message"
+            required
+            rows={4}
+            placeholder="Please process my transfer..."
+          />
         </FormField>
       </div>
 

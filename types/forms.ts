@@ -8,14 +8,14 @@ export type FormType =
   | "membership_transfer"
   | "maintenance_request";
 
-export const FORM_TYPES: FormType[] = [
+export const FORM_TYPES = [
   "contact",
   "prayer_request",
   "volunteer",
   "announcement_request",
   "membership_transfer",
   "maintenance_request",
-];
+] as const satisfies readonly FormType[];
 
 export type FormSubmissionPayload = Record<
   string,

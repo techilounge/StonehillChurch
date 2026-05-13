@@ -8,6 +8,7 @@ import {
   FileText, 
   CreditCard 
 } from "lucide-react";
+import { SectionHeader } from "@/components/shared/SectionHeader";
 
 const actions = [
   {
@@ -30,13 +31,13 @@ const actions = [
   },
   {
     title: "Prayer Request",
-    href: "/prayer",
+    href: "/prayer-request",
     icon: HeartHandshake,
     description: "How can we pray for you?",
   },
   {
     title: "Church Bulletin",
-    href: "/resources?category=bulletin",
+    href: "/church-bulletin",
     icon: FileText,
     description: "This week's updates",
   },
@@ -50,14 +51,18 @@ const actions = [
 
 export function QuickActions() {
   return (
-    <section className="py-12 bg-white sm:py-16">
+    <section className="py-12 bg-white sm:py-16 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <SectionHeader 
+          title="Quick Links" 
+          eyebrow="Connect"
+        />
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 mt-8">
           {actions.map((action) => (
             <Link
               key={action.title}
               href={action.href}
-              className="group flex flex-col items-center justify-center rounded-2xl border border-stonehill-line bg-stonehill-cream p-6 text-center shadow-sm transition-all hover:border-stonehill-gold hover:bg-white hover:shadow-md"
+              className="group flex flex-col items-center justify-center rounded-2xl border border-stonehill-line bg-stonehill-cream p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-stonehill-gold hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
             >
               <div className="mb-4 rounded-full bg-stonehill-evergreen/10 p-3 text-stonehill-evergreen transition-colors group-hover:bg-stonehill-gold/20 group-hover:text-stonehill-gold">
                 <action.icon className="h-6 w-6" aria-hidden="true" />

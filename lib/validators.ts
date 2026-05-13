@@ -18,6 +18,8 @@ export const httpsUrlSchema = z
   .refine((value) => value.startsWith("https://"), "URL must use HTTPS.");
 
 export const userRoleSchema = z.enum(["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]);
+export const invitableUserRoleSchema = z.enum(["ADMIN", "EDITOR", "VIEWER"]);
+export const userInviteStatusSchema = z.enum(["pending", "accepted", "expired", "revoked"]);
 export const contentStatusSchema = z.enum(["draft", "published", "archived"]);
 export const formSubmissionStatusSchema = z.enum(["new", "in_review", "completed", "archived"]);
 export const formTypeSchema = z.enum([
@@ -107,6 +109,8 @@ export const homepageSlideSchema = z.object({
   subtitle: z.string().max(280),
   imageUrl: urlSchema,
   imageAlt: z.string().min(2).max(200),
+  imageAlignment: z.enum(["center", "top", "bottom", "left", "right", "top center", "bottom center"]).default("center"),
+  focalPointZoom: z.number().int().min(-40).max(40).default(0),
   primaryCtaLabel: z.string().min(1).max(40),
   primaryCtaHref: z.string().min(1).max(300),
   secondaryCtaLabel: z.string().min(1).max(40).nullable(),
@@ -361,6 +365,21 @@ export const formSubmissionStatusUpdateSchema = z.object({
   status: formSubmissionStatusSchema,
   assignedTo: z.string().trim().min(1).max(160).nullable().optional(),
   internalNotes: z.string().trim().max(4000).optional(),
+});
+
+// userInvites
+export const userInviteSchema = z.object({
+  email: emailSchema,
+  name: z.string().min(2).max(120).nullable(),
+  role: invitableUserRoleSchema,
+  tokenHash: z.string().length(64),
+  status: userInviteStatusSchema,
+  expiresAt: isoOrDate,
+  invitedByUid: z.string().min(1),
+  invitedByEmail: emailSchema.nullable(),
+  acceptedByUid: z.string().min(1).nullable(),
+  revokedByUid: z.string().min(1).nullable(),
+  resendMessageId: z.string().min(1).nullable(),
 });
 
 // siteSettings

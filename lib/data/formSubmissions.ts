@@ -2,7 +2,7 @@ import "server-only";
 
 import { FieldValue, type DocumentData, type Query } from "firebase-admin/firestore";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
-import { collections } from "@/lib/firestore";
+import { collections } from "@/lib/constants/collections";
 import type {
   FormSubmission,
   FormSubmissionListOptions,
@@ -10,11 +10,10 @@ import type {
   PublicFormSubmissionInput,
 } from "@/types/forms";
 import type { FormSubmissionStatus } from "@/types/shared";
-import { serializeData, type Serialized } from "./utils";
+import { serializeData, withReadTimeout, type Serialized } from "./utils";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 100;
-const FIRESTORE_READ_TIMEOUT_MS = 5000;
 
 function normalizeLimit(limit?: number): number {
   if (!Number.isFinite(limit) || !limit) {
@@ -29,15 +28,6 @@ function serializeSubmission(
   data: DocumentData,
 ): Serialized<FormSubmission> {
   return serializeData({ id, ...data } as unknown as FormSubmission);
-}
-
-function withReadTimeout<T>(promise: Promise<T>): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) => {
-      setTimeout(() => reject(new Error("Firestore read timed out.")), FIRESTORE_READ_TIMEOUT_MS);
-    }),
-  ]);
 }
 
 export async function createFormSubmission(
@@ -82,8 +72,9 @@ export async function listFormSubmissions(
   try {
     const snapshot = await withReadTimeout(query.limit(normalizeLimit(options.limit)).get());
     return snapshot.docs.map((doc) => serializeSubmission(doc.id, doc.data()));
-  } catch {
-    return [];
+  } catch (error) {
+    console.error("[data] listFormSubmissions failed.", error);
+    throw error;
   }
 }
 
@@ -95,8 +86,9 @@ export async function getFormSubmissionById(
 
   try {
     snapshot = await withReadTimeout(db.collection(collections.formSubmissions).doc(id).get());
-  } catch {
-    return null;
+  } catch (error) {
+    console.error("[data] getFormSubmissionById failed.", error);
+    throw error;
   }
 
   if (!snapshot.exists) {

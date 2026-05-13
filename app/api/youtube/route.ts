@@ -1,19 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth, getAdminFirestore } from "@/lib/firebaseAdmin";
-import { requirePermission } from "@/lib/auth";
-import { collections } from "@/lib/firestore";
-import { getLatestYoutubeUploads } from "@/lib/data/youtubeVideos";
+import { requireAdminSessionForRequest } from "@/lib/api/adminSession";
+import { getLatestYoutubeUploads, getLiveYoutubeBroadcast } from "@/lib/data/youtubeVideos";
 import {
   DEFAULT_YOUTUBE_SETTINGS,
   getYoutubeSettings,
   saveYoutubeSettings,
 } from "@/lib/data/youtubeSettings";
-import { getYouTubeChannelUrl, getYouTubeLiveUrl, isYouTubeApiConfigured } from "@/lib/youtube";
+import {
+  extractYouTubeVideoId,
+  getYouTubeChannelUrl,
+  getYouTubeLiveUrl,
+  getYouTubeUploadsPlaylistId,
+} from "@/lib/youtube";
+import { isYouTubeApiConfigured } from "@/lib/youtubeServer";
 import type { YoutubeSettingsConfig } from "@/types/settings";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authResult = await requireAdminSessionForRequest(request, "admin:access");
+
+  if (!authResult.ok) {
+    return NextResponse.json(
+      { status: "error", code: authResult.reason, message: authResult.message },
+      { status: authResult.status },
+    );
+  }
+
   const settings = await getYoutubeSettings();
-  const latestVideos = await getLatestYoutubeUploads(settings, 6);
+  const [latestVideos, liveBroadcast] = await Promise.all([
+    getLatestYoutubeUploads(settings, 6),
+    getLiveYoutubeBroadcast(settings),
+  ]);
 
   return NextResponse.json({
     status: "ok",
@@ -24,21 +40,14 @@ export async function GET() {
       channelId: settings.channelId,
       channelUrl: getYouTubeChannelUrl(settings),
       liveStreamUrl: getYouTubeLiveUrl(settings),
-      uploadsPlaylistId: settings.uploadsPlaylistId,
+      uploadsPlaylistId: getYouTubeUploadsPlaylistId(settings),
       featuredVideoId: settings.featuredVideoId,
       autoFetchLatestSermons: settings.autoFetchLatestSermons,
       showLiveBanner: settings.showLiveBanner,
     },
+    liveBroadcast,
     latestVideos,
   });
-}
-
-function bearerToken(request: NextRequest): string | null {
-  const header = request.headers.get("authorization");
-  if (!header?.startsWith("Bearer ")) {
-    return null;
-  }
-  return header.slice("Bearer ".length).trim() || null;
 }
 
 function clean(value: unknown): string {
@@ -63,6 +72,25 @@ function validOptionalUrl(value: string | null): boolean {
   }
 }
 
+function optionalVideoId(value: unknown): { ok: true; value: string | null } | { ok: false; message: string } {
+  const cleaned = optionalString(value);
+
+  if (!cleaned) {
+    return { ok: true, value: null };
+  }
+
+  const videoId = extractYouTubeVideoId(cleaned);
+
+  if (!videoId) {
+    return {
+      ok: false,
+      message: "Featured video must be an 11-character YouTube video ID or a valid YouTube video URL.",
+    };
+  }
+
+  return { ok: true, value: videoId };
+}
+
 function parseSettingsPayload(payload: unknown): {
   ok: true;
   settings: YoutubeSettingsConfig;
@@ -77,6 +105,7 @@ function parseSettingsPayload(payload: unknown): {
   const body = payload as Record<string, unknown>;
   const channelUrl = clean(body.channelUrl);
   const liveStreamUrl = optionalString(body.liveStreamUrl);
+  const featuredVideoId = optionalVideoId(body.featuredVideoId);
 
   if (!validOptionalUrl(channelUrl)) {
     return { ok: false, message: "Channel URL must be a valid URL." };
@@ -84,6 +113,10 @@ function parseSettingsPayload(payload: unknown): {
 
   if (!validOptionalUrl(liveStreamUrl)) {
     return { ok: false, message: "Livestream URL must be a valid URL." };
+  }
+
+  if (!featuredVideoId.ok) {
+    return { ok: false, message: featuredVideoId.message };
   }
 
   return {
@@ -94,61 +127,41 @@ function parseSettingsPayload(payload: unknown): {
       channelUrl,
       liveStreamUrl,
       uploadsPlaylistId: optionalString(body.uploadsPlaylistId),
-      featuredVideoId: optionalString(body.featuredVideoId),
+      featuredVideoId: featuredVideoId.value,
       autoFetchLatestSermons: body.autoFetchLatestSermons === true,
       showLiveBanner: body.showLiveBanner === true,
     },
   };
 }
 
-async function getYoutubeAdminSession(request: NextRequest) {
-  const token = bearerToken(request);
-  if (!token) {
-    return null;
-  }
-
-  const decoded = await getAdminAuth().verifyIdToken(token);
-  const profileSnapshot = await getAdminFirestore()
-    .collection(collections.users)
-    .doc(decoded.uid)
-    .get();
-
-  if (!profileSnapshot.exists) {
-    return null;
-  }
-
-  const profile = profileSnapshot.data() ?? {};
-  const authResult = requirePermission(
-    {
-      uid: decoded.uid,
-      email: typeof profile.email === "string" ? profile.email : decoded.email ?? null,
-      role: profile.role,
-      approved: profile.approved === true,
-      disabled: profile.disabled === true,
-    },
-    "youtube:manage",
-  );
-
-  return authResult.ok ? authResult.session : null;
-}
-
 export async function POST(request: NextRequest) {
-  const session = await getYoutubeAdminSession(request);
+  const authResult = await requireAdminSessionForRequest(request, "youtube:manage");
 
-  if (!session) {
+  if (!authResult.ok) {
     return NextResponse.json(
-      { status: "error", message: "You are not authorized to manage YouTube settings." },
-      { status: 403 },
+      { status: "error", code: authResult.reason, message: authResult.message },
+      { status: authResult.status },
     );
   }
 
-  const parsed = parseSettingsPayload(await request.json());
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { status: "error", message: "Request body must be valid JSON." },
+      { status: 400 },
+    );
+  }
+
+  const parsed = parseSettingsPayload(body);
 
   if (!parsed.ok) {
     return NextResponse.json({ status: "error", message: parsed.message }, { status: 400 });
   }
 
-  await saveYoutubeSettings(parsed.settings, session.uid);
+  await saveYoutubeSettings(parsed.settings, authResult.session.uid);
 
   return NextResponse.json({
     status: "ok",

@@ -5,6 +5,8 @@ export type HomepageSlide = AuditFields & {
   subtitle: string;
   imageUrl: string;
   imageAlt: string;
+  imageAlignment?: string;
+  focalPointZoom?: number;
   primaryCtaLabel: string;
   primaryCtaHref: string;
   secondaryCtaLabel: string | null;

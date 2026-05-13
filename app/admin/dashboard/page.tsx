@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/admin/PageHeader";
 import { AdminStatCard } from "@/components/admin/shared/AdminStatCard";
 import { Button } from "@/components/shared/Button";
+import { getDashboardMetrics } from "@/lib/data/dashboardMetrics";
 import {
   Mic2,
   CalendarDays,
@@ -12,11 +13,17 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-export default function AdminDashboardPage() {
+function formatMetric(value: number | null): string {
+  return value === null ? "—" : value.toLocaleString("en-US");
+}
+
+export default async function AdminDashboardPage() {
+  const metrics = await getDashboardMetrics();
+
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader 
-        title="Dashboard" 
+      <PageHeader
+        title="Dashboard"
         description="Welcome back. Here is what's happening at Stonehill."
       >
         <Button variant="outline">View Site</Button>
@@ -27,35 +34,33 @@ export default function AdminDashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <AdminStatCard
-          title="Total Sermons"
-          value="142"
+          title="Published Sermons"
+          value={formatMetric(metrics.sermonsPublished)}
           icon={Mic2}
-          trend={{ value: 2, label: "from last month", isPositive: true }}
         />
         <AdminStatCard
           title="Upcoming Events"
-          value="8"
+          value={formatMetric(metrics.eventsUpcoming)}
           icon={CalendarDays}
         />
         <AdminStatCard
           title="Active Ministries"
-          value="12"
+          value={formatMetric(metrics.ministriesActive)}
           icon={Users}
         />
         <AdminStatCard
           title="Pending Forms"
-          value="5"
+          value={formatMetric(metrics.formSubmissionsPending)}
           icon={ClipboardList}
-          trend={{ value: 14, label: "increase", isPositive: false }}
         />
         <AdminStatCard
           title="Active Announcements"
-          value="3"
+          value={formatMetric(metrics.announcementsActive)}
           icon={Megaphone}
         />
         <AdminStatCard
           title="Media Assets"
-          value="481"
+          value={formatMetric(metrics.mediaAssetsTotal)}
           icon={FolderOpen}
         />
       </div>
@@ -76,12 +81,12 @@ export default function AdminDashboardPage() {
               <a
                 key={action.label}
                 href={action.href}
-                className="group flex items-center justify-between rounded-lg border border-stonehill-line p-4 hover:border-stonehill-evergreen hover:bg-stonehill-cream/50 transition-all"
+                className="group flex items-center justify-between rounded-lg border border-stonehill-line p-4 hover:border-stonehill-gold/50 hover:bg-stonehill-cream/50 motion-safe:transition-all"
               >
                 <span className="font-medium text-stonehill-ink group-hover:text-stonehill-evergreen">
                   {action.label}
                 </span>
-                <ArrowRight className="h-4 w-4 text-stonehill-ink/40 group-hover:text-stonehill-evergreen" />
+                <ArrowRight className="h-4 w-4 text-stonehill-ink/40 group-hover:text-stonehill-gold motion-safe:transition-colors" />
               </a>
             ))}
           </div>

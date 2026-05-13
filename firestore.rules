@@ -88,10 +88,19 @@ service cloud.firestore {
 
     function validMediaAssetWrite() {
       return request.resource.data.contentType == "image/webp" &&
+        request.resource.data.mimeType == "image/webp" &&
         request.resource.data.size <= 5 * 1024 * 1024 &&
         request.resource.data.storagePath.matches("^media/.*\\.webp$") &&
+        request.resource.data.fileName is string &&
+        request.resource.data.fileName.matches(".*\\.webp$") &&
+        request.resource.data.originalFileName is string &&
+        request.resource.data.url is string &&
         request.resource.data.altText is string &&
-        request.resource.data.altText.size() > 0 &&
+        request.resource.data.altText.size() >= 8 &&
+        request.resource.data.width is number &&
+        request.resource.data.height is number &&
+        request.resource.data.public is bool &&
+        request.resource.data.status in ["approved", "pending", "archived"] &&
         (!request.resource.data.public ||
           (adminOrHigher() &&
             request.resource.data.status == "approved" &&
@@ -133,9 +142,17 @@ service cloud.firestore {
     }
 
     match /formSubmissions/{submissionId} {
-      allow create: if true;
+      // Public submissions are accepted through /api/forms so validation,
+      // rate limiting, and spam checks cannot be bypassed with the client SDK.
+      allow create: if false;
       allow read, update: if adminOrHigher();
       allow delete: if superAdmin();
+    }
+
+    // Invite tokens are validated only through trusted server routes. Even
+    // approved admins should not read token hashes directly from client SDKs.
+    match /userInvites/{inviteId} {
+      allow read, write: if false;
     }
 
     match /media/{mediaId} {

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getAdminSessionForRequest } from "@/lib/api/adminSession";
+import {
+  requireAdminSessionForRequest,
+  type AdminRequestAuthResult,
+} from "@/lib/api/adminSession";
 import {
   createFormSubmission,
   listFormSubmissions,
@@ -19,6 +22,11 @@ import type {
 import type { FormSubmissionStatus } from "@/types/shared";
 
 type PublicFormSubmission = z.infer<typeof publicFormSubmissionSchema>;
+
+const HONEYPOT_FIELDS = ["website", "company", "url", "homepage", "honeypot", "_gotcha"] as const;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_POSTS = 5;
+const submissionAttempts = new Map<string, { count: number; resetAt: number }>();
 
 function jsonSuccess<T>(data: T, status = 200): NextResponse<FormApiResponse<T>> {
   return NextResponse.json({ ok: true, data }, { status });
@@ -40,6 +48,51 @@ function jsonError(
       },
     },
     { status },
+  );
+}
+
+function jsonAuthError(authResult: Extract<AdminRequestAuthResult, { ok: false }>) {
+  return jsonError(authResult.reason, authResult.message, authResult.status);
+}
+
+function requestIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return forwardedFor || request.headers.get("x-real-ip") || "unknown";
+}
+
+function isRateLimited(request: NextRequest): boolean {
+  const key = requestIp(request);
+  const now = Date.now();
+  const current = submissionAttempts.get(key);
+
+  if (!current || current.resetAt <= now) {
+    submissionAttempts.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  current.count += 1;
+  submissionAttempts.set(key, current);
+  return current.count > RATE_LIMIT_MAX_POSTS;
+}
+
+function hasHoneypotValue(body: unknown): boolean {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return false;
+  }
+
+  const record = body as Record<string, unknown>;
+  const candidates = [
+    record,
+    record.data && typeof record.data === "object" && !Array.isArray(record.data)
+      ? (record.data as Record<string, unknown>)
+      : null,
+  ].filter((value): value is Record<string, unknown> => value !== null);
+
+  return candidates.some((candidate) =>
+    HONEYPOT_FIELDS.some((field) => {
+      const value = candidate[field];
+      return typeof value === "string" ? value.trim().length > 0 : Boolean(value);
+    }),
   );
 }
 
@@ -120,6 +173,18 @@ export async function POST(request: NextRequest) {
     return jsonError("INVALID_JSON", "Request body must be valid JSON.");
   }
 
+  if (hasHoneypotValue(body)) {
+    return jsonSuccess({ submission: null, accepted: true }, 202);
+  }
+
+  if (isRateLimited(request)) {
+    return jsonError(
+      "RATE_LIMITED",
+      "Too many form submissions were received. Please wait a few minutes and try again.",
+      429,
+    );
+  }
+
   const parsed = publicFormSubmissionSchema.safeParse(normalizeRequestPayload(body));
 
   if (!parsed.success) {
@@ -134,16 +199,17 @@ export async function POST(request: NextRequest) {
   try {
     const submission = await createFormSubmission(toFormSubmissionInput(parsed.data));
     return jsonSuccess({ submission }, 201);
-  } catch {
+  } catch (error) {
+    console.error("[forms] Failed to save form submission.", error);
     return jsonError("SUBMISSION_FAILED", "Could not save the form submission.", 500);
   }
 }
 
 export async function GET(request: NextRequest) {
-  const session = await getAdminSessionForRequest(request, "forms:manage");
+  const authResult = await requireAdminSessionForRequest(request, "forms:manage");
 
-  if (!session) {
-    return jsonError("FORBIDDEN", "You are not authorized to review form submissions.", 403);
+  if (!authResult.ok) {
+    return jsonAuthError(authResult);
   }
 
   const searchParams = request.nextUrl.searchParams;
@@ -169,7 +235,8 @@ export async function GET(request: NextRequest) {
     });
 
     return jsonSuccess({ submissions });
-  } catch {
+  } catch (error) {
+    console.error("[forms] Failed to list form submissions.", error);
     return jsonError("LIST_FAILED", "Could not load form submissions.", 500);
   }
 }

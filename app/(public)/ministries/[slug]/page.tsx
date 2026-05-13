@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getMinistryBySlug } from "@/lib/data/ministries";
@@ -12,7 +13,7 @@ import {
   createMinistryMetadata,
   siteSettingsToSeoSettings,
 } from "@/lib/seo";
-import { Clock, User, Mail, Users } from "lucide-react";
+import { Clock, User, Mail, Users, ArrowLeft } from "lucide-react";
 
 interface MinistryPageProps {
   params: Promise<{ slug: string }>;
@@ -53,7 +54,7 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
-    <main className="flex min-h-screen flex-col bg-stone-50 pb-24">
+    <main className="flex min-h-screen flex-col bg-stonehill-cream">
       <JsonLd
         data={breadcrumbJsonLd(
           [
@@ -69,96 +70,110 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
         subtitle={ministry.shortDescription}
       />
 
-      <div className="container mx-auto px-4 -mt-12 relative z-20">
-        <div className="bg-white rounded-3xl shadow-lg overflow-hidden max-w-4xl mx-auto flex flex-col md:flex-row">
+      <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           
-          {/* Main Content */}
-          <div className="p-8 md:p-10 flex-grow">
-            {ministry.imageUrl && (
-              <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-8">
-                <Image
-                  src={ministry.imageUrl}
-                  alt={ministry.imageAlt || ministry.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            )}
-            
-            <h2 className="text-2xl font-bold font-serif mb-6 text-stone-900 border-b border-stone-100 pb-4">About this Ministry</h2>
-            <div className="prose prose-stone max-w-none prose-lg">
-              <div className="whitespace-pre-wrap text-stone-700 leading-relaxed">
-                {ministry.longDescription}
-              </div>
-            </div>
+          {/* Back Link */}
+          <div className="mb-6">
+            <Link 
+              href="/ministries" 
+              className="inline-flex items-center gap-2 text-stonehill-ink/60 hover:text-stonehill-gold font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Ministries
+            </Link>
           </div>
 
-          {/* Sidebar */}
-          <div className="bg-stone-50 p-8 md:p-10 md:w-1/3 border-t md:border-t-0 md:border-l border-stone-100 flex flex-col gap-6">
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-stonehill-line flex flex-col md:flex-row">
             
-            {ministry.meetingTime && (
-              <div className="flex items-start gap-4">
-                <div className="bg-white p-3 rounded-full shadow-sm text-primary">
-                  <Clock className="w-6 h-6" />
+            {/* Main Content */}
+            <div className="p-8 md:p-10 flex-grow">
+              {ministry.imageUrl && (
+                <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-8 ring-1 ring-stonehill-line bg-stonehill-cream">
+                  <Image
+                    src={ministry.imageUrl}
+                    alt={ministry.imageAlt || ministry.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Meeting Time</p>
-                  <p className="text-stone-900 font-medium">{ministry.meetingTime}</p>
-                </div>
-              </div>
-            )}
-
-            {ministry.leaderName && (
-              <div className="flex items-start gap-4">
-                <div className="bg-white p-3 rounded-full shadow-sm text-primary">
-                  <User className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Ministry Leader</p>
-                  <p className="text-stone-900 font-medium">{ministry.leaderName}</p>
+              )}
+              
+              <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-evergreen border-b border-stonehill-line pb-4">About this Ministry</h2>
+              <div className="prose prose-lg max-w-none prose-headings:text-stonehill-evergreen prose-p:text-stonehill-ink/80 prose-a:text-stonehill-gold hover:prose-a:text-stonehill-gold/80 leading-relaxed">
+                <div className="whitespace-pre-wrap">
+                  {ministry.longDescription}
                 </div>
               </div>
-            )}
-
-            {ministry.leaderEmail && (
-              <div className="flex items-start gap-4">
-                <div className="bg-white p-3 rounded-full shadow-sm text-primary">
-                  <Mail className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Contact Email</p>
-                  <a href={`mailto:${ministry.leaderEmail}`} className="text-primary hover:underline font-medium break-all">
-                    {ministry.leaderEmail}
-                  </a>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-start gap-4">
-               <div className="bg-white p-3 rounded-full shadow-sm text-primary">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Category</p>
-                  <p className="text-stone-900 font-medium capitalize">{ministry.category}</p>
-                </div>
             </div>
 
-            {ministry.ctaHref && (
-              <div className="mt-4 pt-6 border-t border-stone-200">
-                <a
-                  href={ministry.ctaHref}
-                  className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-xl transition-all font-medium shadow-md hover:shadow-lg text-center"
-                >
-                  {ministry.ctaLabel || "Get Involved"}
-                </a>
+            {/* Sidebar */}
+            <div className="bg-stonehill-cream p-8 md:p-10 md:w-1/3 border-t md:border-t-0 md:border-l border-stonehill-line flex flex-col gap-8">
+              
+              {ministry.meetingTime && (
+                <div className="flex items-start gap-4">
+                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Meeting Time</p>
+                    <p className="text-stonehill-ink font-medium leading-tight mt-1">{ministry.meetingTime}</p>
+                  </div>
+                </div>
+              )}
+
+              {ministry.leaderName && (
+                <div className="flex items-start gap-4">
+                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                    <User className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Ministry Leader</p>
+                    <p className="text-stonehill-ink font-medium leading-tight mt-1">{ministry.leaderName}</p>
+                  </div>
+                </div>
+              )}
+
+              {ministry.leaderEmail && (
+                <div className="flex items-start gap-4">
+                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Contact Email</p>
+                    <a href={`mailto:${ministry.leaderEmail}`} className="text-stonehill-evergreen hover:text-stonehill-forest hover:underline font-medium break-all mt-1 block">
+                      {ministry.leaderEmail}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-start gap-4">
+                 <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                    <Users className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Category</p>
+                    <p className="text-stonehill-ink font-medium capitalize mt-1">{ministry.category}</p>
+                  </div>
               </div>
-            )}
+
+              {ministry.ctaHref && (
+                <div className="mt-4 pt-6 border-t border-stonehill-line">
+                  <Link
+                    href={ministry.ctaHref}
+                    className="w-full flex items-center justify-center gap-2 bg-stonehill-gold hover:bg-stonehill-gold/90 text-stonehill-ink py-3.5 px-6 rounded-xl transition-all font-semibold shadow-sm hover:-translate-y-0.5 text-center"
+                  >
+                    {ministry.ctaLabel || "Get Involved"}
+                  </Link>
+                </div>
+              )}
+
+            </div>
 
           </div>
-
         </div>
-      </div>
+      </section>
     </main>
   );
 }
