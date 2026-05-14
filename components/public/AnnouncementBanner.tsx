@@ -27,9 +27,9 @@ export function AnnouncementBanner({
   if (!isVisible) return null;
 
   const bgColors = {
-    low: "bg-stonehill-cream text-stonehill-ink",
-    normal: "bg-stonehill-leaf text-stonehill-ink",
-    high: "bg-stonehill-gold text-stonehill-ink",
+    low: "bg-slate-50 text-slate-900",
+    normal: "bg-stonehill-secondary text-slate-900",
+    high: "bg-stonehill-accent text-slate-900",
     urgent: "bg-red-700 text-white",
   };
 

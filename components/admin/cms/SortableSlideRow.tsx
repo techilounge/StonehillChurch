@@ -36,8 +36,8 @@ export function SortableSlideRow({ id, children, disabled }: SortableSlideRowPro
       className={`
         transition-colors
         ${isDragging
-          ? "bg-stonehill-cream shadow-lg shadow-stonehill-evergreen/10 ring-2 ring-stonehill-gold/40 rounded-lg opacity-95"
-          : "hover:bg-stonehill-cream/10"
+          ? "bg-slate-50 shadow-lg shadow-stonehill-primary/10 ring-2 ring-stonehill-accent/40 rounded-lg opacity-95"
+          : "hover:bg-slate-50/10"
         }
         ${isSorting && !isDragging ? "transition-transform duration-200" : ""}
       `}
@@ -48,9 +48,9 @@ export function SortableSlideRow({ id, children, disabled }: SortableSlideRowPro
           type="button"
           className={`
             flex items-center justify-center w-8 h-8 rounded
-            text-stonehill-ink/30 hover:text-stonehill-ink/70
-            hover:bg-stonehill-cream/60
-            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold
+            text-slate-900/30 hover:text-slate-900/70
+            hover:bg-slate-50/60
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent
             transition-colors
             ${disabled ? "opacity-30 cursor-not-allowed" : "cursor-grab active:cursor-grabbing"}
           `}

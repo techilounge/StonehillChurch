@@ -10,8 +10,8 @@ interface LoadingStateProps {
 
 export function LoadingState({ text = "Loading...", className, fullHeight = false }: LoadingStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center p-8 text-stonehill-muted", fullHeight && "min-h-[400px]", className)}>
-      <Loader2 className="h-8 w-8 animate-spin mb-4 text-stonehill-gold" />
+    <div className={cn("flex flex-col items-center justify-center p-8 text-slate-500", fullHeight && "min-h-[400px]", className)}>
+      <Loader2 className="h-8 w-8 animate-spin mb-4 text-stonehill-accent" />
       <p className="text-sm font-medium animate-pulse">{text}</p>
     </div>
   );

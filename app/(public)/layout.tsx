@@ -16,7 +16,7 @@ export default async function PublicLayout({
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
-    <div className="min-h-screen bg-stonehill-cream text-stonehill-ink">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <JsonLd data={[organizationJsonLd(seoSettings), placeJsonLd(seoSettings)]} />
       <TopAnnouncementBar />
       <PublicHeader />

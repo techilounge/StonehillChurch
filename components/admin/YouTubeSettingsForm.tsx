@@ -132,7 +132,7 @@ export function YouTubeSettingsForm({
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
-      <section className="rounded-2xl border border-stonehill-line bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="grid gap-5">
           <FormField
             id="channelId"
@@ -203,7 +203,7 @@ export function YouTubeSettingsForm({
             </FormField>
           </div>
 
-          <div className="grid gap-4 rounded-xl border border-stonehill-line bg-stonehill-cream p-4">
+          <div className="grid gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
             <CheckboxField
               id="showLiveBanner"
               checked={form.showLiveBanner}
@@ -231,8 +231,8 @@ export function YouTubeSettingsForm({
             </div>
           )}
 
-          <div className="flex flex-col gap-3 border-t border-stonehill-line pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-stonehill-ink/65">
+          <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-900/65">
               {authReady && !user
                 ? "Your secure admin session cookie will be used to save changes."
                 : "Changes are stored in youtubeSettings/default."}
@@ -246,21 +246,21 @@ export function YouTubeSettingsForm({
       </section>
 
       <aside className="space-y-5">
-        <section className="rounded-2xl border border-stonehill-line bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-3 text-stonehill-evergreen">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3 text-stonehill-primary">
             <Youtube className="h-5 w-5" aria-hidden="true" />
             <h2 className="text-lg font-semibold">Connection</h2>
           </div>
           <dl className="mt-5 space-y-4 text-sm">
             <div>
-              <dt className="font-medium text-stonehill-ink">YouTube API key</dt>
-              <dd className={apiConfigured ? "text-green-700" : "text-stonehill-ink/65"}>
+              <dt className="font-medium text-slate-900">YouTube API key</dt>
+              <dd className={apiConfigured ? "text-green-700" : "text-slate-900/65"}>
                 {apiConfigured ? "Configured in environment" : "Not configured"}
               </dd>
             </div>
             <div>
-              <dt className="font-medium text-stonehill-ink">Latest videos</dt>
-              <dd className="text-stonehill-ink/65">
+              <dt className="font-medium text-slate-900">Latest videos</dt>
+              <dd className="text-slate-900/65">
                 {form.autoFetchLatestSermons
                   ? "Enabled when API key and uploads playlist are present"
                   : "Manual sermon records will be used as fallback"}
@@ -269,14 +269,14 @@ export function YouTubeSettingsForm({
           </dl>
         </section>
 
-        <section className="rounded-2xl border border-stonehill-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-stonehill-evergreen">Public Links</h2>
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-stonehill-primary">Public Links</h2>
           <div className="mt-5 grid gap-3">
             <a
               href={liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-between rounded-md border border-stonehill-line px-4 py-3 text-sm font-medium text-stonehill-ink hover:border-stonehill-evergreen hover:text-stonehill-evergreen"
+              className="inline-flex items-center justify-between rounded-md border border-slate-200 px-4 py-3 text-sm font-medium text-slate-900 hover:border-stonehill-primary hover:text-stonehill-primary"
             >
               Livestream fallback
               <ExternalLink className="h-4 w-4" aria-hidden="true" />
@@ -285,7 +285,7 @@ export function YouTubeSettingsForm({
               href={channelUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-between rounded-md border border-stonehill-line px-4 py-3 text-sm font-medium text-stonehill-ink hover:border-stonehill-evergreen hover:text-stonehill-evergreen"
+              className="inline-flex items-center justify-between rounded-md border border-slate-200 px-4 py-3 text-sm font-medium text-slate-900 hover:border-stonehill-primary hover:text-stonehill-primary"
             >
               Channel fallback
               <ExternalLink className="h-4 w-4" aria-hidden="true" />

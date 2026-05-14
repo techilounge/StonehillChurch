@@ -15,10 +15,10 @@ export function AdminHeader({ onMenuClick }: { onMenuClick: () => void }) {
   const formattedPage = currentPage.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-stonehill-line bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-slate-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       <button
         type="button"
-        className="-m-2.5 p-2.5 text-stonehill-ink/70 hover:text-stonehill-evergreen md:hidden"
+        className="-m-2.5 p-2.5 text-slate-900/70 hover:text-stonehill-primary md:hidden"
         onClick={onMenuClick}
       >
         <span className="sr-only">Open sidebar</span>
@@ -26,28 +26,28 @@ export function AdminHeader({ onMenuClick }: { onMenuClick: () => void }) {
       </button>
 
       {/* Separator */}
-      <div className="h-6 w-px bg-stonehill-line md:hidden" aria-hidden="true" />
+      <div className="h-6 w-px bg-slate-200 md:hidden" aria-hidden="true" />
 
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <div className="flex flex-1 items-center font-medium text-stonehill-ink">
+        <div className="flex flex-1 items-center font-medium text-slate-900">
           {formattedPage}
         </div>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
           {/* Separator */}
-          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-stonehill-line" aria-hidden="true" />
+          <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-slate-200" aria-hidden="true" />
 
           {/* Profile dropdown / Profile placeholder */}
           <div className="flex items-center gap-x-4">
-            <span className="hidden text-sm font-medium leading-6 text-stonehill-ink/80 lg:block">
+            <span className="hidden text-sm font-medium leading-6 text-slate-900/80 lg:block">
               {session.email ?? session.role}
             </span>
-            <div className="h-8 w-8 rounded-full bg-stonehill-evergreen/10 flex items-center justify-center text-stonehill-evergreen">
+            <div className="h-8 w-8 rounded-full bg-stonehill-primary/10 flex items-center justify-center text-stonehill-primary">
               <User className="h-5 w-5" />
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="text-stonehill-ink/70 hover:text-red-600"
+              className="text-slate-900/70 hover:text-red-600"
               title="Sign out"
               onClick={signOutAdmin}
               disabled={signingOut}

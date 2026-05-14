@@ -25,15 +25,15 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div className={cn("overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg", className)}>
-      <table className="min-w-full divide-y divide-stonehill-line">
-        <thead className="bg-stonehill-cream">
+      <table className="min-w-full divide-y divide-slate-200">
+        <thead className="bg-slate-50">
           <tr>
             {columns.map((col, i) => (
               <th
                 key={i}
                 scope="col"
                 className={cn(
-                  "py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-stonehill-evergreen sm:pl-6",
+                  "py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-stonehill-primary sm:pl-6",
                   col.className
                 )}
               >
@@ -42,21 +42,21 @@ export function DataTable<T>({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-stonehill-line bg-white">
+        <tbody className="divide-y divide-slate-200 bg-white">
           {data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-6 py-12 text-center text-sm text-stonehill-ink/60">
+              <td colSpan={columns.length} className="px-6 py-12 text-center text-sm text-slate-900/60">
                 {emptyMessage}
               </td>
             </tr>
           ) : (
             data.map((item) => (
-              <tr key={keyExtractor(item)} className="hover:bg-stonehill-cream/30 transition-colors">
+              <tr key={keyExtractor(item)} className="hover:bg-slate-50/30 transition-colors">
                 {columns.map((col, i) => (
                   <td
                     key={i}
                     className={cn(
-                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm text-stonehill-ink sm:pl-6",
+                      "whitespace-nowrap py-4 pl-4 pr-3 text-sm text-slate-900 sm:pl-6",
                       col.className
                     )}
                   >

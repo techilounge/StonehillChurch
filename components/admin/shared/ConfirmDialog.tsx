@@ -38,7 +38,7 @@ export function ConfirmDialog({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-stonehill-ink/80 transition-opacity" />
+          <div className="fixed inset-0 bg-slate-900/80 transition-opacity" />
         </Transition.Child>
 
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -54,15 +54,15 @@ export function ConfirmDialog({
             >
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div className="sm:flex sm:items-start">
-                  <div className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 ${destructive ? 'bg-red-100' : 'bg-stonehill-cream'}`}>
-                    <AlertTriangle className={`h-6 w-6 ${destructive ? 'text-red-600' : 'text-stonehill-gold'}`} aria-hidden="true" />
+                  <div className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 ${destructive ? 'bg-red-100' : 'bg-slate-50'}`}>
+                    <AlertTriangle className={`h-6 w-6 ${destructive ? 'text-red-600' : 'text-stonehill-accent'}`} aria-hidden="true" />
                   </div>
                   <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                    <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-stonehill-ink">
+                    <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-slate-900">
                       {title}
                     </Dialog.Title>
                     <div className="mt-2">
-                      <p className="text-sm text-stonehill-ink/70">
+                      <p className="text-sm text-slate-900/70">
                         {description}
                       </p>
                     </div>

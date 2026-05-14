@@ -104,20 +104,20 @@ export function InviteUserDialog({ open, onClose, onCreated }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-stonehill-ink/50 px-4 py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 py-8"
       role="dialog"
       aria-modal="true"
       aria-labelledby="invite-dialog-title"
     >
-      <div className="w-full max-w-md rounded-xl border border-stonehill-line bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b border-stonehill-line px-6 py-4">
-          <h2 id="invite-dialog-title" className="text-lg font-semibold text-stonehill-ink">
+      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 id="invite-dialog-title" className="text-lg font-semibold text-slate-900">
             Invite a new user
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-stonehill-ink/60 hover:text-stonehill-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold"
+            className="rounded-md p-1 text-slate-900/60 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -135,12 +135,12 @@ export function InviteUserDialog({ open, onClose, onCreated }: Props) {
             </div>
 
             {result.data.delivery.method === "email" ? (
-              <p className="text-sm text-stonehill-ink/80">
+              <p className="text-sm text-slate-900/80">
                 An invite email has been sent. The link expires in 7 days.
               </p>
             ) : (
               <div className="space-y-3">
-                <p className="text-sm text-stonehill-ink/80">
+                <p className="text-sm text-slate-900/80">
                   {result.data.delivery.reason === "resend_not_configured"
                     ? "Email sending is not configured. Copy this invite link and send it to the user yourself — this is the only time it will be shown."
                     : "The invite email could not be sent. Copy this link and share it directly — this is the only time it will be shown."}
@@ -156,7 +156,7 @@ export function InviteUserDialog({ open, onClose, onCreated }: Props) {
                     readOnly
                     value={result.data.delivery.inviteLink}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="flex-1 rounded-md border border-stonehill-line bg-stonehill-cream/40 px-3 py-2 text-xs text-stonehill-ink"
+                    className="flex-1 rounded-md border border-slate-200 bg-slate-50/40 px-3 py-2 text-xs text-slate-900"
                     aria-label="Invite link"
                   />
                   <Button

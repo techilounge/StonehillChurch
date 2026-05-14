@@ -39,24 +39,24 @@ export default async function AcceptInvitePage({ searchParams }: InvitePageProps
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stonehill-cream px-4 py-12 sm:px-6 lg:px-8">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-[460px]">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-stonehill-forest/10 ring-8 ring-stonehill-forest/5">
-            <ShieldCheck className="h-8 w-8 text-stonehill-forest" aria-hidden="true" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-stonehill-dark/10 ring-8 ring-stonehill-dark/5">
+            <ShieldCheck className="h-8 w-8 text-stonehill-dark" aria-hidden="true" />
           </div>
-          <p className="mb-1 text-sm font-bold uppercase tracking-widest text-stonehill-forest">
+          <p className="mb-1 text-sm font-bold uppercase tracking-widest text-stonehill-dark">
             Stonehill SDA Church
           </p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-stonehill-ink">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             Accept Invitation
           </h1>
-          <p className="mt-2 text-sm leading-6 text-stonehill-ink/70">
+          <p className="mt-2 text-sm leading-6 text-slate-900/70">
             Set up your admin account to finish onboarding.
           </p>
         </div>
 
-        <div className="rounded-xl border border-stone-200/60 bg-white px-6 py-10 shadow-xl shadow-stone-200/40 sm:px-10">
+        <div className="rounded-xl border border-slate-200/60 bg-white px-6 py-10 shadow-xl shadow-stone-200/40 sm:px-10">
           {errorMessage ? (
             <div className="space-y-4 text-center">
               <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -64,7 +64,7 @@ export default async function AcceptInvitePage({ searchParams }: InvitePageProps
               </p>
               <a
                 href="/admin/login"
-                className="inline-block text-sm font-medium text-stonehill-forest hover:underline"
+                className="inline-block text-sm font-medium text-stonehill-dark hover:underline"
               >
                 Go to sign in
               </a>
@@ -80,7 +80,7 @@ export default async function AcceptInvitePage({ searchParams }: InvitePageProps
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-xs text-stonehill-ink/50">
+          <p className="text-xs text-slate-900/50">
             &copy; {new Date().getFullYear()} Stonehill Seventh-day Adventist Church. All rights reserved.
           </p>
         </div>

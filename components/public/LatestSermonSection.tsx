@@ -14,12 +14,12 @@ interface LatestSermonSectionProps {
 export function LatestSermonSection({ sermon }: LatestSermonSectionProps) {
   if (!sermon) {
     return (
-      <section className="py-16 bg-stonehill-cream sm:py-24 overflow-hidden">
+      <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl">
             Latest Sermon
           </h2>
-          <p className="mt-6 text-lg text-stonehill-ink/80">
+          <p className="mt-6 text-lg text-slate-900/80">
             Sermons coming soon.
           </p>
         </div>
@@ -28,14 +28,14 @@ export function LatestSermonSection({ sermon }: LatestSermonSectionProps) {
   }
 
   return (
-    <section className="py-16 bg-stonehill-cream sm:py-24 overflow-hidden">
+    <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
+            <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl mb-4">
               Watch Our Latest Sermon
             </h2>
-            <p className="text-lg text-stonehill-ink/80 mb-8">
+            <p className="text-lg text-slate-900/80 mb-8">
               Can&apos;t make it in person? You can still be part of our worship experience. 
               Watch our latest message or join us live every Sabbath morning.
             </p>

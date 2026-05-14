@@ -19,7 +19,7 @@ export default async function ChurchCalendarPage() {
   const events = await getUpcomingEvents();
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream pb-24">
+    <main className="flex min-h-screen flex-col bg-slate-50 pb-24">
       <PageHero
         title="Church Calendar"
         subtitle="Stay up to date with everything happening at Stonehill SDA Church."
@@ -34,13 +34,13 @@ export default async function ChurchCalendarPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-3xl shadow-sm border border-stonehill-line max-w-4xl mx-auto overflow-hidden">
-              <div className="aspect-[4/3] md:aspect-[21/9] w-full bg-stonehill-cream flex flex-col items-center justify-center p-8 text-center border-b border-stonehill-line">
-                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-stonehill-line">
-                  <Calendar className="w-10 h-10 text-stonehill-evergreen" />
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 max-w-4xl mx-auto overflow-hidden">
+              <div className="aspect-[4/3] md:aspect-[21/9] w-full bg-slate-50 flex flex-col items-center justify-center p-8 text-center border-b border-slate-200">
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-slate-200">
+                  <Calendar className="w-10 h-10 text-stonehill-primary" />
                 </div>
-                <h2 className="text-2xl font-bold tracking-tight text-stonehill-ink mb-3">No Upcoming Events Listed</h2>
-                <p className="text-stonehill-ink/80 text-lg max-w-lg mx-auto">
+                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mb-3">No Upcoming Events Listed</h2>
+                <p className="text-slate-900/80 text-lg max-w-lg mx-auto">
                   Published church events will appear here as they are added to the calendar.
                 </p>
               </div>

@@ -182,7 +182,7 @@ export function CmsModuleList({
 
     return (
       <>
-        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-stonehill-ink">
+        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900">
           {primaryValue}
         </td>
         <td className="whitespace-nowrap px-6 py-4 text-sm">
@@ -195,7 +195,7 @@ export function CmsModuleList({
             {status}
           </span>
         </td>
-        <td className="whitespace-nowrap px-6 py-4 text-sm text-stonehill-ink/70">
+        <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-900/70">
           {dateStr}
         </td>
         <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -212,7 +212,7 @@ export function CmsModuleList({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="h-8 px-2 text-stonehill-evergreen hover:text-stonehill-evergreen hover:border-stonehill-evergreen"
+                className="h-8 px-2 text-stonehill-primary hover:text-stonehill-primary hover:border-stonehill-primary"
                 disabled={isMutating}
                 onClick={() => handleAction("publish", doc.id)}
                 title="Publish"
@@ -256,7 +256,7 @@ export function CmsModuleList({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-stonehill-ink">{config.title}</h1>
+        <h1 className="text-2xl font-bold text-slate-900">{config.title}</h1>
         {canCreate && (
           <Link href={`/admin/${routePath}/new`}>
             <Button>
@@ -269,7 +269,7 @@ export function CmsModuleList({
 
       <div className="flex flex-col gap-4">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stonehill-ink/50" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900/50" />
           <TextInput
             placeholder={`Search ${config.title.toLowerCase()}...`}
             value={searchQuery}
@@ -280,11 +280,11 @@ export function CmsModuleList({
 
         {/* Reorder hint */}
         {isSortable && !isSearching && (
-          <div className="flex items-center gap-2 text-xs text-stonehill-ink/50">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-stonehill-gold" />
+          <div className="flex items-center gap-2 text-xs text-slate-900/50">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-stonehill-accent" />
             Drag the handle to reorder slides. Changes save automatically.
             {isSaving && (
-              <span className="ml-2 inline-flex items-center gap-1 text-stonehill-gold animate-pulse">
+              <span className="ml-2 inline-flex items-center gap-1 text-stonehill-accent animate-pulse">
                 <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -308,20 +308,20 @@ export function CmsModuleList({
             onDragEnd={handleDragEnd}
             modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           >
-            <div className="overflow-x-auto rounded-lg border border-stonehill-line bg-white shadow-sm">
-              <table className="min-w-full divide-y divide-stonehill-line">
-                <thead className="bg-stonehill-cream/40">
+            <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50/40">
                   <tr>
                     <th scope="col" className="w-10 pl-3 pr-0 py-3">
                       <span className="sr-only">Reorder</span>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stonehill-ink/70">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                       {primaryField.label}
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stonehill-ink/70">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                       Status
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stonehill-ink/70">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                       Last Updated
                     </th>
                     <th scope="col" className="relative px-6 py-3">
@@ -329,10 +329,10 @@ export function CmsModuleList({
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stonehill-line bg-white">
+                <tbody className="divide-y divide-slate-200 bg-white">
                   {filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-stonehill-muted">
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
                         No {config.title.toLowerCase()} found.
                       </td>
                     </tr>
@@ -357,17 +357,17 @@ export function CmsModuleList({
             </div>
           </DndContext>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-stonehill-line bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-stonehill-line">
-              <thead className="bg-stonehill-cream/40">
+          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead className="bg-slate-50/40">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stonehill-ink/70">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                     {primaryField.label}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stonehill-ink/70">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stonehill-ink/70">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                     Last Updated
                   </th>
                   <th scope="col" className="relative px-6 py-3">
@@ -375,16 +375,16 @@ export function CmsModuleList({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stonehill-line bg-white">
+              <tbody className="divide-y divide-slate-200 bg-white">
                 {filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-stonehill-muted">
+                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
                       No {config.title.toLowerCase()} found.
                     </td>
                   </tr>
                 ) : (
                   filteredData.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-stonehill-cream/10 transition-colors">
+                    <tr key={doc.id} className="hover:bg-slate-50/10 transition-colors">
                       {renderRowCells(doc)}
                     </tr>
                   ))

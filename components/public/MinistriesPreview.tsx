@@ -15,10 +15,10 @@ export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
     return (
       <section className="py-16 bg-white sm:py-24 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
+          <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl mb-4">
             Find Your Place
           </h2>
-          <p className="text-lg text-stonehill-ink/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-900/80 mb-8 max-w-2xl mx-auto">
             We have ministries for every age and stage of life. Discover how you can get involved, 
             grow in your faith, and serve others.
           </p>
@@ -35,10 +35,10 @@ export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
+            <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl mb-4">
               Find Your Place
             </h2>
-            <p className="text-lg text-stonehill-ink/80">
+            <p className="text-lg text-slate-900/80">
               There&apos;s a place for everyone at Stonehill. Browse our featured ministries below or 
               explore all the ways you can get connected.
             </p>

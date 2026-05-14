@@ -27,9 +27,9 @@ export function MediaGrid({ assets, onSelectAsset }: MediaGridProps) {
 
   if (assets.length === 0) {
     return (
-      <div className="rounded-xl border border-stonehill-line bg-white p-12 text-center shadow-sm">
-        <h3 className="text-lg font-medium text-stonehill-ink mb-2">No media found</h3>
-        <p className="text-stonehill-ink/60">Upload some images to see them here.</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+        <h3 className="text-lg font-medium text-slate-900 mb-2">No media found</h3>
+        <p className="text-slate-900/60">Upload some images to see them here.</p>
       </div>
     );
   }
@@ -37,8 +37,8 @@ export function MediaGrid({ assets, onSelectAsset }: MediaGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {assets.map((asset) => (
-        <div key={asset.id} className="group flex flex-col overflow-hidden rounded-xl border border-stonehill-line bg-white shadow-sm hover:shadow-md hover:border-stonehill-gold/30 motion-safe:transition-all">
-          <div className="relative aspect-video bg-stonehill-cream/30 overflow-hidden">
+        <div key={asset.id} className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-stonehill-accent/30 motion-safe:transition-all">
+          <div className="relative aspect-video bg-slate-50/30 overflow-hidden">
             <Image
               src={asset.url}
               alt={asset.altText}
@@ -46,7 +46,7 @@ export function MediaGrid({ assets, onSelectAsset }: MediaGridProps) {
               className="object-cover"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 bg-stonehill-ink/60 opacity-0 group-hover:opacity-100 motion-safe:transition-opacity flex items-center justify-center gap-3">
+            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 motion-safe:transition-opacity flex items-center justify-center gap-3">
               {onSelectAsset ? (
                 <Button 
                   variant="primary" 
@@ -61,7 +61,7 @@ export function MediaGrid({ assets, onSelectAsset }: MediaGridProps) {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="bg-white/90 border-transparent hover:bg-white text-stonehill-ink"
+                    className="bg-white/90 border-transparent hover:bg-white text-slate-900"
                     onClick={() => handleCopyUrl(asset.id, asset.url)}
                   >
                     {copiedId === asset.id ? (
@@ -75,7 +75,7 @@ export function MediaGrid({ assets, onSelectAsset }: MediaGridProps) {
                     href={asset.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="p-2 bg-white/90 rounded-md hover:bg-white text-stonehill-ink transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold"
+                    className="p-2 bg-white/90 rounded-md hover:bg-white text-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent"
                     aria-label="Open in new tab"
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -86,14 +86,14 @@ export function MediaGrid({ assets, onSelectAsset }: MediaGridProps) {
           </div>
           
           <div className="p-4 flex flex-col flex-1">
-            <h4 className="text-sm font-medium text-stonehill-ink truncate mb-1" title={asset.originalFileName}>
+            <h4 className="text-sm font-medium text-slate-900 truncate mb-1" title={asset.originalFileName}>
               {asset.originalFileName}
             </h4>
             <div className="flex items-center justify-between mt-auto pt-2">
-              <span className="text-xs text-stonehill-ink/60">
+              <span className="text-xs text-slate-900/60">
                 {(asset.size / 1024).toFixed(1)} KB
               </span>
-              <span className="text-xs text-stonehill-ink/60 bg-stonehill-cream px-2 py-0.5 rounded-full uppercase font-medium">
+              <span className="text-xs text-slate-900/60 bg-slate-50 px-2 py-0.5 rounded-full uppercase font-medium">
                 {asset.contentType.replace('image/', '')}
               </span>
             </div>

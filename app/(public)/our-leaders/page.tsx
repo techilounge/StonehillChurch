@@ -22,7 +22,7 @@ export default async function OurLeadersPage() {
   const leaders = await getLeaders();
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream">
+    <main className="flex min-h-screen flex-col bg-slate-50">
       <PageHero
         title="Our Leaders"
         subtitle="Meet the pastoral team and staff serving Stonehill SDA Church."
@@ -37,12 +37,12 @@ export default async function OurLeadersPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-stonehill-cream rounded-3xl p-12 text-center border border-stonehill-line shadow-sm max-w-3xl mx-auto">
-              <div className="w-16 h-16 bg-stonehill-evergreen/10 text-stonehill-evergreen rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="bg-slate-50 rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-3xl mx-auto">
+              <div className="w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-bold tracking-tight mb-4 text-stonehill-ink">Our Team</h2>
-              <p className="text-lg text-stonehill-ink/80 leading-relaxed mb-8">
+              <h2 className="text-2xl font-bold tracking-tight mb-4 text-slate-900">Our Team</h2>
+              <p className="text-lg text-slate-900/80 leading-relaxed mb-8">
                 Our leadership team information is currently being updated. Please check back later to learn more about the dedicated individuals who serve our church community.
               </p>
               <Link href="/contact" className={cn(buttonVariants({ variant: "outline" }))}>
@@ -54,9 +54,9 @@ export default async function OurLeadersPage() {
       </section>
 
       {/* CTAs */}
-      <section className="py-16 bg-stonehill-cream overflow-hidden">
+      <section className="py-16 bg-slate-50 overflow-hidden">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2 className="text-3xl font-bold tracking-tight text-stonehill-ink">Get Involved</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Get Involved</h2>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
               href="/ministries"

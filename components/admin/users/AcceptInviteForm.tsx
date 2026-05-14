@@ -75,14 +75,14 @@ export function AcceptInviteForm({ token, email, role, expiresAt }: AcceptInvite
           <CheckCircle2 className="h-7 w-7 text-green-700" aria-hidden="true" />
         </div>
         <div>
-          <p className="text-lg font-semibold text-stonehill-ink">Account created</p>
-          <p className="mt-1 text-sm text-stonehill-ink/70">
+          <p className="text-lg font-semibold text-slate-900">Account created</p>
+          <p className="mt-1 text-sm text-slate-900/70">
             Sign in with your email and the password you just set.
           </p>
         </div>
         <Link
           href="/admin/login"
-          className="inline-flex items-center justify-center rounded-md bg-stonehill-evergreen px-4 py-2 text-sm font-medium text-white hover:bg-stonehill-forest"
+          className="inline-flex items-center justify-center rounded-md bg-stonehill-primary px-4 py-2 text-sm font-medium text-white hover:bg-stonehill-dark"
         >
           Go to sign in
         </Link>
@@ -94,15 +94,15 @@ export function AcceptInviteForm({ token, email, role, expiresAt }: AcceptInvite
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="rounded-md border border-stonehill-line bg-stonehill-cream/50 px-4 py-3 text-sm">
-        <p className="text-stonehill-ink">
+      <div className="rounded-md border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm">
+        <p className="text-slate-900">
           <span className="font-semibold">{email}</span>
         </p>
-        <p className="mt-1 text-xs uppercase tracking-wider text-stonehill-forest">
+        <p className="mt-1 text-xs uppercase tracking-wider text-stonehill-dark">
           Role: {role}
         </p>
         {expiry && (
-          <p className="mt-1 text-xs text-stonehill-ink/60">Invite expires {expiry}</p>
+          <p className="mt-1 text-xs text-slate-900/60">Invite expires {expiry}</p>
         )}
       </div>
 

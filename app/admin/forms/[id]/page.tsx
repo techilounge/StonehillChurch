@@ -66,7 +66,7 @@ export default async function AdminFormDetailPage({ params }: RouteParams) {
       <div className="mb-6">
         <Link 
           href="/admin/forms" 
-          className="inline-flex items-center text-sm font-medium text-stone-500 hover:text-stone-900 transition-colors"
+          className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
         >
           <ChevronLeft className="w-4 h-4 mr-1" />
           Back to all submissions

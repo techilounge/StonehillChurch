@@ -44,13 +44,13 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
 
   if (!slides || slides.length === 0) {
     return (
-      <div className="relative w-full h-[60vh] min-h-[500px] bg-stonehill-evergreen flex items-center justify-center text-center px-4">
-        <div className="absolute inset-0 bg-stonehill-ink/40 z-10" />
+      <div className="relative w-full h-[60vh] min-h-[500px] bg-stonehill-primary flex items-center justify-center text-center px-4">
+        <div className="absolute inset-0 bg-slate-900/40 z-10" />
         <div className="relative z-20 max-w-4xl mx-auto space-y-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white">
-            Welcome to Stonehill
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+            Welcome to Stonehill SDA Church
           </h1>
-          <p className="text-xl text-stonehill-cream/90 max-w-2xl mx-auto">
+          <p className="font-handwritten text-3xl md:text-4xl text-stonehill-accent max-w-2xl mx-auto">
             A place to belong, grow, and serve.
           </p>
         </div>
@@ -63,7 +63,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y">
           {slides.map((slide, index) => (
-            <div key={slide.id} className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px] bg-stonehill-evergreen">
+            <div key={slide.id} className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px] bg-stonehill-primary">
               {slide.imageUrl ? (
                 <Image
                   src={slide.imageUrl}
@@ -74,7 +74,7 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                   sizes="100vw"
                 />
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-stonehill-evergreen via-stonehill-evergreen to-stonehill-ink" />
+                <div className="absolute inset-0 bg-gradient-to-br from-stonehill-primary via-stonehill-primary to-slate-900" />
               )}
               <div 
                 className="absolute inset-0 z-10" 
@@ -82,17 +82,17 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
               />
               <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4">
                 <div className="max-w-4xl mx-auto space-y-6">
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white drop-shadow-lg">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
                     {slide.title}
                   </h1>
-                  <p className="text-xl text-stonehill-cream/90 max-w-2xl mx-auto drop-shadow-lg">
+                  <p className="font-handwritten text-3xl md:text-4xl text-stonehill-accent max-w-2xl mx-auto drop-shadow-lg">
                     {slide.subtitle}
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                     {slide.primaryCtaLabel && slide.primaryCtaHref && (
                       <Link
                         href={slide.primaryCtaHref}
-                        className={cn(buttonVariants({ variant: "default", size: "lg" }), "bg-stonehill-gold text-stonehill-ink hover:bg-stonehill-gold/90 border-none")}
+                        className={cn(buttonVariants({ variant: "default", size: "lg" }), "bg-[#FFBD11] text-white hover:bg-[#FFBD11]/90 border-none")}
                       >
                         {slide.primaryCtaLabel}
                       </Link>

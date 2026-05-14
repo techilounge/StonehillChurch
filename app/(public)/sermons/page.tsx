@@ -28,7 +28,7 @@ export default async function SermonsIndexPage() {
   const channelUrl = getYouTubeChannelUrl(youtubeSettings);
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream">
+    <main className="flex min-h-screen flex-col bg-slate-50">
       <PageHero
         title="Sermons"
         subtitle="Watch or listen to recent teachings."
@@ -43,12 +43,12 @@ export default async function SermonsIndexPage() {
               ))}
             </div>
           ) : (
-             <div className="bg-white rounded-3xl p-12 text-center border border-stonehill-line shadow-sm max-w-3xl mx-auto">
-               <div className="w-16 h-16 bg-stonehill-evergreen/10 text-stonehill-evergreen rounded-full flex items-center justify-center mx-auto mb-6">
+             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-3xl mx-auto">
+               <div className="w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary rounded-full flex items-center justify-center mx-auto mb-6">
                  <PlayCircle className="w-8 h-8" />
                </div>
-               <h2 className="text-2xl font-bold tracking-tight mb-4 text-stonehill-ink">No Sermons Available</h2>
-               <p className="text-lg text-stonehill-ink/80 leading-relaxed mb-8">
+               <h2 className="text-2xl font-bold tracking-tight mb-4 text-slate-900">No Sermons Available</h2>
+               <p className="text-lg text-slate-900/80 leading-relaxed mb-8">
                  Sermons are currently being updated. Please check back later or visit our YouTube channel for live streams.
                </p>
                <a
@@ -64,16 +64,16 @@ export default async function SermonsIndexPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-white border-t border-stonehill-line overflow-hidden">
+      <section className="py-16 bg-white border-t border-slate-200 overflow-hidden">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen">Want to listen live?</h2>
-          <p className="text-stonehill-ink/80 text-lg max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary">Want to listen live?</h2>
+          <p className="text-slate-900/80 text-lg max-w-2xl mx-auto">
             Join us every Sabbath morning for uplifting worship and biblical teaching. We stream our Divine Worship service online and welcome you to attend in person.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/live"
-              className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto bg-stonehill-gold text-stonehill-ink hover:bg-stonehill-gold/90")}
+              className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto bg-stonehill-accent text-slate-900 hover:bg-stonehill-accent/90")}
             >
               Watch Live
             </Link>

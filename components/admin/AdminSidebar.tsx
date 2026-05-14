@@ -62,8 +62,8 @@ export function AdminSidebar({ session }: { session: PermissionSubject }) {
   const visibleNavigation = filterAdminNavigation(session);
 
   return (
-    <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-72 md:flex-col md:border-r md:border-stonehill-line md:bg-white md:shadow-sm">
-      <div className="flex h-16 shrink-0 items-center px-6 border-b border-stonehill-line bg-stonehill-evergreen text-white">
+    <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-72 md:flex-col md:border-r md:border-slate-200 md:bg-white md:shadow-sm">
+      <div className="flex h-16 shrink-0 items-center px-6 border-b border-slate-200 bg-stonehill-primary text-white">
         <Link href="/admin/dashboard" className="text-xl font-bold tracking-tight">
           Stonehill CMS
         </Link>
@@ -79,14 +79,14 @@ export function AdminSidebar({ session }: { session: PermissionSubject }) {
                 className={cn(
                   "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-stonehill-evergreen/10 text-stonehill-evergreen"
-                    : "text-stonehill-ink/70 hover:bg-stonehill-cream hover:text-stonehill-evergreen"
+                    ? "bg-stonehill-primary/10 text-stonehill-primary"
+                    : "text-slate-900/70 hover:bg-slate-50 hover:text-stonehill-primary"
                 )}
               >
                 <item.icon
                   className={cn(
                     "mr-3 h-5 w-5 shrink-0 transition-colors",
-                    isActive ? "text-stonehill-evergreen" : "text-stonehill-ink/50 group-hover:text-stonehill-evergreen"
+                    isActive ? "text-stonehill-primary" : "text-slate-900/50 group-hover:text-stonehill-primary"
                   )}
                   aria-hidden="true"
                 />

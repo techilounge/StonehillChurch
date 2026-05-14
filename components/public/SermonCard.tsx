@@ -22,10 +22,10 @@ export function SermonCard({ sermon }: SermonCardProps) {
   return (
     <Link
       href={`/sermons/${sermon.slug}`}
-      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
+      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
     >
       <Card className="h-full flex flex-col hover:shadow-md transition-shadow duration-300">
-        <div className="relative aspect-video w-full bg-stonehill-cream overflow-hidden">
+        <div className="relative aspect-video w-full bg-slate-50 overflow-hidden">
           {sermon.thumbnailUrl ? (
             <Image
               src={sermon.thumbnailUrl}
@@ -34,7 +34,7 @@ export function SermonCard({ sermon }: SermonCardProps) {
               className="object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-stonehill-muted/50">
+            <div className="absolute inset-0 flex items-center justify-center text-slate-500/50">
               <PlayCircle className="w-16 h-16" />
             </div>
           )}
@@ -46,15 +46,15 @@ export function SermonCard({ sermon }: SermonCardProps) {
 
         <CardContent className="p-5 flex flex-col flex-grow">
           {sermon.series && (
-            <span className="text-xs font-semibold text-stonehill-evergreen uppercase tracking-wider mb-2">
+            <span className="text-xs font-semibold text-stonehill-primary uppercase tracking-wider mb-2">
               {sermon.series}
             </span>
           )}
-          <h3 className="text-xl font-bold tracking-tight text-stonehill-ink mb-3 line-clamp-2 group-hover:text-stonehill-evergreen transition-colors">
+          <h3 className="text-xl font-bold tracking-tight text-slate-900 mb-3 line-clamp-2 group-hover:text-stonehill-primary transition-colors">
             {sermon.title}
           </h3>
           
-          <div className="mt-auto space-y-2 text-sm text-stonehill-muted">
+          <div className="mt-auto space-y-2 text-sm text-slate-500">
             {sermon.speaker && (
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />

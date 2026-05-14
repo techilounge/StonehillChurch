@@ -62,10 +62,10 @@ export default async function AdminFormsPage() {
       title="Form Submissions"
       description="Review and manage submissions from public forms."
     >
-      <div className="bg-white rounded-2xl shadow-sm border border-stonehill-line overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-stonehill-cream border-b border-stonehill-line text-stonehill-ink/80">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-900/80">
               <tr>
                 <th className="px-6 py-4 font-semibold">Date</th>
                 <th className="px-6 py-4 font-semibold">Type</th>
@@ -75,29 +75,29 @@ export default async function AdminFormsPage() {
                 <th className="px-6 py-4 text-right font-semibold">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stonehill-line/50">
+            <tbody className="divide-y divide-slate-200/50">
               {submissions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-stonehill-ink/65">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-900/65">
                     No form submissions found.
                   </td>
                 </tr>
               ) : (
                 submissions.map((submission) => (
-                  <tr key={submission.id} className="hover:bg-stonehill-cream transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-stonehill-ink/80">
+                  <tr key={submission.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-slate-900/80">
                       {formatSubmissionDate(submission.createdAt)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-stonehill-ink">
+                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
                       {formatFormType(submission.formType)}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-stonehill-ink">{submission.name}</div>
+                      <div className="font-medium text-slate-900">{submission.name}</div>
                       {submission.email && (
-                        <div className="text-stonehill-ink/65 text-xs mt-0.5">{submission.email}</div>
+                        <div className="text-slate-900/65 text-xs mt-0.5">{submission.email}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-stonehill-ink/80 max-w-[200px] truncate">
+                    <td className="px-6 py-4 text-slate-900/80 max-w-[200px] truncate">
                       {submission.subject || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -108,7 +108,7 @@ export default async function AdminFormsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <Link
                         href={`/admin/forms/${submission.id}`}
-                        className="text-stonehill-forest hover:text-stonehill-forest/80 font-medium transition-colors"
+                        className="text-stonehill-dark hover:text-stonehill-dark/80 font-medium transition-colors"
                       >
                         Review
                       </Link>

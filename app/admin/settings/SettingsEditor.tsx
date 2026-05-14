@@ -117,14 +117,14 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
       )}
 
       {/* Contact Info Group */}
-      <section className="bg-white border border-stonehill-line shadow-sm rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stonehill-line bg-stonehill-cream/30">
-          <h3 className="text-lg font-semibold text-stonehill-ink">Contact Information</h3>
-          <p className="text-sm text-stonehill-muted">Public contact details displayed in the footer and contact page.</p>
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Contact Information</h3>
+          <p className="text-sm text-slate-500">Public contact details displayed in the footer and contact page.</p>
         </div>
         <div className="p-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Email Address</label>
+            <label className="text-sm font-semibold text-slate-900">Email Address</label>
             <TextInput
               type="email"
               value={settings["contact"]?.email || ""}
@@ -132,7 +132,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Phone Number</label>
+            <label className="text-sm font-semibold text-slate-900">Phone Number</label>
             <TextInput
               type="tel"
               value={settings["contact"]?.phone || ""}
@@ -140,7 +140,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Physical Address</label>
+            <label className="text-sm font-semibold text-slate-900">Physical Address</label>
             <TextInput
               value={settings["contact"]?.address || ""}
               onChange={(e) => handleChange("contact", "address", e.target.value)}
@@ -148,7 +148,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           </div>
         </div>
         {canEdit && (
-          <div className="px-6 py-4 bg-stonehill-cream/30 border-t border-stonehill-line flex justify-end">
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
             <Button disabled={isSubmitting} onClick={() => handleSave("contact", "contact", settings["contact"] || {})}>
               <Save className="h-4 w-4 mr-2" /> Save Contact Info
             </Button>
@@ -157,14 +157,14 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
       </section>
 
       {/* Service Times Group */}
-      <section className="bg-white border border-stonehill-line shadow-sm rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stonehill-line bg-stonehill-cream/30">
-          <h3 className="text-lg font-semibold text-stonehill-ink">Service Times</h3>
-          <p className="text-sm text-stonehill-muted">Weekly worship and prayer schedule displayed on public pages.</p>
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Service Times</h3>
+          <p className="text-sm text-slate-500">Weekly worship and prayer schedule displayed on public pages.</p>
         </div>
         <div className="p-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Breakfast Service</label>
+            <label className="text-sm font-semibold text-slate-900">Breakfast Service</label>
             <TextInput
               value={settings["service_times"]?.breakfast_service || SERVICE_TIME_DEFAULTS.breakfast_service}
               placeholder={SERVICE_TIME_DEFAULTS.breakfast_service}
@@ -172,7 +172,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Sabbath School</label>
+            <label className="text-sm font-semibold text-slate-900">Sabbath School</label>
             <TextInput
               value={settings["service_times"]?.sabbath_school || SERVICE_TIME_DEFAULTS.sabbath_school}
               placeholder={SERVICE_TIME_DEFAULTS.sabbath_school}
@@ -180,7 +180,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Divine Worship</label>
+            <label className="text-sm font-semibold text-slate-900">Divine Worship</label>
             <TextInput
               value={settings["service_times"]?.divine_worship || SERVICE_TIME_DEFAULTS.divine_worship}
               placeholder={SERVICE_TIME_DEFAULTS.divine_worship}
@@ -188,7 +188,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Prayer Meeting</label>
+            <label className="text-sm font-semibold text-slate-900">Prayer Meeting</label>
             <TextInput
               value={settings["service_times"]?.prayer_meeting || SERVICE_TIME_DEFAULTS.prayer_meeting}
               placeholder={SERVICE_TIME_DEFAULTS.prayer_meeting}
@@ -197,7 +197,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           </div>
         </div>
         {canEdit && (
-          <div className="px-6 py-4 bg-stonehill-cream/30 border-t border-stonehill-line flex justify-end">
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
             <Button
               disabled={isSubmitting}
               onClick={() =>
@@ -214,14 +214,14 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
       </section>
 
       {/* Social Links Group */}
-      <section className="bg-white border border-stonehill-line shadow-sm rounded-xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-stonehill-line bg-stonehill-cream/30">
-          <h3 className="text-lg font-semibold text-stonehill-ink">Social Media Links</h3>
-          <p className="text-sm text-stonehill-muted">URLs for church social media profiles.</p>
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Social Media Links</h3>
+          <p className="text-sm text-slate-500">URLs for church social media profiles.</p>
         </div>
         <div className="p-6 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Facebook URL</label>
+            <label className="text-sm font-semibold text-slate-900">Facebook URL</label>
             <TextInput
               type="url"
               value={settings["social"]?.facebook || ""}
@@ -229,7 +229,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">Instagram URL</label>
+            <label className="text-sm font-semibold text-slate-900">Instagram URL</label>
             <TextInput
               type="url"
               value={settings["social"]?.instagram || ""}
@@ -237,7 +237,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stonehill-ink">YouTube Channel URL</label>
+            <label className="text-sm font-semibold text-slate-900">YouTube Channel URL</label>
             <TextInput
               type="url"
               value={settings["social"]?.youtube || ""}
@@ -246,7 +246,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           </div>
         </div>
         {canEdit && (
-          <div className="px-6 py-4 bg-stonehill-cream/30 border-t border-stonehill-line flex justify-end">
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
             <Button disabled={isSubmitting} onClick={() => handleSave("social", "social", settings["social"] || {})}>
               <Save className="h-4 w-4 mr-2" /> Save Social Links
             </Button>
@@ -254,7 +254,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
         )}
       </section>
 
-      <div className="text-sm text-stonehill-muted p-4 border border-dashed border-stonehill-line rounded-lg text-center">
+      <div className="text-sm text-slate-500 p-4 border border-dashed border-slate-200 rounded-lg text-center">
         Note: More settings groups (SEO, Giving) can be added here following the same pattern.
       </div>
     </div>

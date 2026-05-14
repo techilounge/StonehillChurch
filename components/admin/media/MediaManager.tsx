@@ -52,8 +52,8 @@ export function MediaManager({ onSelectAsset }: MediaManagerProps) {
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-stonehill-ink">Media Library</h2>
-          {loading && <span className="text-sm text-stonehill-muted">Refreshing...</span>}
+          <h2 className="text-xl font-semibold text-slate-900">Media Library</h2>
+          {loading && <span className="text-sm text-slate-500">Refreshing...</span>}
         </div>
 
         {error && (
@@ -66,11 +66,11 @@ export function MediaManager({ onSelectAsset }: MediaManagerProps) {
         {loading && assets.length === 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="flex flex-col overflow-hidden rounded-xl border border-stonehill-line bg-white shadow-sm">
-                <div className="aspect-video bg-stonehill-line" />
+              <div key={i} className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="aspect-video bg-slate-200" />
                 <div className="p-4 flex flex-col gap-2">
-                  <div className="h-4 w-3/4 bg-stonehill-line rounded" />
-                  <div className="h-3 w-1/4 bg-stonehill-line rounded mt-2" />
+                  <div className="h-4 w-3/4 bg-slate-200 rounded" />
+                  <div className="h-3 w-1/4 bg-slate-200 rounded mt-2" />
                 </div>
               </div>
             ))}

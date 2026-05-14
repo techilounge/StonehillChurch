@@ -18,12 +18,12 @@ export function AdminEmptyState({
   onAction,
 }: AdminEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-stonehill-line bg-white px-6 py-16 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-stonehill-cream">
-        <Icon className="h-8 w-8 text-stonehill-gold" aria-hidden="true" />
+    <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-white px-6 py-16 text-center">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-50">
+        <Icon className="h-8 w-8 text-stonehill-accent" aria-hidden="true" />
       </div>
-      <h3 className="mt-4 text-sm font-semibold text-stonehill-ink">{title}</h3>
-      <p className="mt-1 text-sm text-stonehill-ink/60">{description}</p>
+      <h3 className="mt-4 text-sm font-semibold text-slate-900">{title}</h3>
+      <p className="mt-1 text-sm text-slate-900/60">{description}</p>
       {actionLabel && onAction && (
         <div className="mt-6">
           <Button onClick={onAction}>

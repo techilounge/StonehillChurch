@@ -18,7 +18,7 @@ export function DesktopNav({ items, className }: DesktopNavProps) {
         <Link 
           key={item.href} 
           href={item.href} 
-          className="rounded-sm px-1 text-stonehill-ink transition-colors hover:text-stonehill-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
+          className="rounded-sm px-1 text-slate-900 transition-colors hover:text-stonehill-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
         >
           {item.label}
         </Link>

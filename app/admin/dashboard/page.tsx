@@ -67,8 +67,8 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Quick Actions */}
-        <section className="rounded-lg border border-stonehill-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-stonehill-ink">Quick Actions</h2>
+        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">Quick Actions</h2>
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {[
               { label: "Upload Sermon", href: "/admin/sermons/new" },
@@ -81,23 +81,23 @@ export default async function AdminDashboardPage() {
               <a
                 key={action.label}
                 href={action.href}
-                className="group flex items-center justify-between rounded-lg border border-stonehill-line p-4 hover:border-stonehill-gold/50 hover:bg-stonehill-cream/50 motion-safe:transition-all"
+                className="group flex items-center justify-between rounded-lg border border-slate-200 p-4 hover:border-stonehill-accent/50 hover:bg-slate-50/50 motion-safe:transition-all"
               >
-                <span className="font-medium text-stonehill-ink group-hover:text-stonehill-evergreen">
+                <span className="font-medium text-slate-900 group-hover:text-stonehill-primary">
                   {action.label}
                 </span>
-                <ArrowRight className="h-4 w-4 text-stonehill-ink/40 group-hover:text-stonehill-gold motion-safe:transition-colors" />
+                <ArrowRight className="h-4 w-4 text-slate-900/40 group-hover:text-stonehill-accent motion-safe:transition-colors" />
               </a>
             ))}
           </div>
         </section>
 
         {/* Recent Activity Placeholder */}
-        <section className="rounded-lg border border-stonehill-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-stonehill-ink">Recent Activity</h2>
+        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
           <div className="mt-6 space-y-6">
             <div className="flex justify-center py-8">
-              <p className="text-sm text-stonehill-ink/60">Activity feed will be connected to Firestore audit logs.</p>
+              <p className="text-sm text-slate-900/60">Activity feed will be connected to Firestore audit logs.</p>
             </div>
           </div>
         </section>

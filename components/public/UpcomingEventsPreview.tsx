@@ -13,12 +13,12 @@ interface UpcomingEventsPreviewProps {
 export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
   if (!events || events.length === 0) {
     return (
-      <section className="py-16 bg-stonehill-cream sm:py-24 overflow-hidden">
+      <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
+          <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl mb-4">
             Upcoming Events
           </h2>
-          <p className="text-lg text-stonehill-ink/80 mb-8">
+          <p className="text-lg text-slate-900/80 mb-8">
             No upcoming events listed at this time. Please check back later or view our full calendar.
           </p>
           <Link href="/events" className={cn(buttonVariants({ variant: "outline" }))}>
@@ -30,14 +30,14 @@ export function UpcomingEventsPreview({ events }: UpcomingEventsPreviewProps) {
   }
 
   return (
-    <section className="py-16 bg-stonehill-cream sm:py-24 overflow-hidden">
+    <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl mb-4">
+            <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl mb-4">
               Upcoming Events
             </h2>
-            <p className="text-lg text-stonehill-ink/80">
+            <p className="text-lg text-slate-900/80">
               Stay connected with our church family. Check out what&apos;s happening this month 
               and RSVP to let us know you&apos;re coming.
             </p>

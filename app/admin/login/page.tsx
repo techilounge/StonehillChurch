@@ -40,26 +40,26 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
   const message = reasonMessage(params.reason);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-stonehill-cream px-4 py-12 sm:px-6 lg:px-8">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-[420px]">
         {/* Header / Logo section */}
         <div className="mb-8 text-center sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-stonehill-forest/10 mb-4 ring-8 ring-stonehill-forest/5">
-            <ShieldCheck className="h-8 w-8 text-stonehill-forest" aria-hidden="true" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-stonehill-dark/10 mb-4 ring-8 ring-stonehill-dark/5">
+            <ShieldCheck className="h-8 w-8 text-stonehill-dark" aria-hidden="true" />
           </div>
-          <p className="text-sm font-bold uppercase tracking-widest text-stonehill-forest mb-1">
+          <p className="text-sm font-bold uppercase tracking-widest text-stonehill-dark mb-1">
             Stonehill SDA Church
           </p>
-          <h1 className="text-3xl font-extrabold tracking-tight text-stonehill-ink">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             Admin Console
           </h1>
-          <p className="mt-2 text-sm leading-6 text-stonehill-ink/70">
+          <p className="mt-2 text-sm leading-6 text-slate-900/70">
             Sign in with an approved staff account to continue.
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="rounded-xl border border-stone-200/60 bg-white px-6 py-10 shadow-xl shadow-stone-200/40 sm:px-10">
+        <div className="rounded-xl border border-slate-200/60 bg-white px-6 py-10 shadow-xl shadow-stone-200/40 sm:px-10">
           {message && (
             <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
               {message}
@@ -71,7 +71,7 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-stonehill-ink/50">
+          <p className="text-xs text-slate-900/50">
             &copy; {new Date().getFullYear()} Stonehill Seventh-day Adventist Church. All rights reserved.
           </p>
         </div>

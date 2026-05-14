@@ -103,13 +103,13 @@ export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
   };
 
   return (
-    <Card className="border-stonehill-line shadow-sm overflow-hidden bg-white">
+    <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
       <CardContent className="p-6">
-        <h2 className="text-lg font-semibold text-stonehill-ink mb-4">Upload New Media</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Upload New Media</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div 
             className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
-              file ? "border-stonehill-evergreen bg-stonehill-cream/30" : "border-stonehill-line hover:border-stonehill-gold hover:bg-stonehill-cream/10"
+              file ? "border-stonehill-primary bg-slate-50/30" : "border-slate-200 hover:border-stonehill-accent hover:bg-slate-50/10"
             }`}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}
@@ -126,20 +126,20 @@ export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
             <div className="flex flex-col items-center justify-center space-y-3">
               {file ? (
                 <>
-                  <CheckCircle className="h-10 w-10 text-stonehill-evergreen" />
-                  <div className="text-stonehill-ink">
-                    <span className="font-medium text-stonehill-evergreen">{file.name}</span>
-                    <span className="text-stonehill-ink/60 text-sm block mt-1">
+                  <CheckCircle className="h-10 w-10 text-stonehill-primary" />
+                  <div className="text-slate-900">
+                    <span className="font-medium text-stonehill-primary">{file.name}</span>
+                    <span className="text-slate-900/60 text-sm block mt-1">
                       {(file.size / (1024 * 1024)).toFixed(2)} MB
                     </span>
                   </div>
                 </>
               ) : (
                 <>
-                  <UploadCloud className="h-10 w-10 text-stonehill-ink/40" />
-                  <div className="text-stonehill-ink">
+                  <UploadCloud className="h-10 w-10 text-slate-900/40" />
+                  <div className="text-slate-900">
                     <span className="font-medium">Click to browse</span> or drag and drop
-                    <span className="text-stonehill-ink/60 text-sm block mt-1">
+                    <span className="text-slate-900/60 text-sm block mt-1">
                       JPG, PNG, or WEBP (max 12MB)
                     </span>
                   </div>
@@ -149,10 +149,10 @@ export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="altText" className="block text-sm font-medium text-stonehill-ink">
+            <label htmlFor="altText" className="block text-sm font-medium text-slate-900">
               Alt Text (Required)
             </label>
-            <p className="text-xs text-stonehill-ink/60">
+            <p className="text-xs text-slate-900/60">
               Good alt text is concise and describes what the image shows. Required for accessibility.
             </p>
             <TextInput

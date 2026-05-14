@@ -60,48 +60,48 @@ export function AdminFormDetail({ submission }: { submission: AdminFormSubmissio
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-stonehill-line p-6 md:p-8">
-          <h2 className="text-xl font-bold tracking-tight text-stonehill-ink mb-6 border-b border-stonehill-line/50 pb-2">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-6 border-b border-slate-200/50 pb-2">
             Submission Details
           </h2>
           
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
             <div>
-              <dt className="text-sm font-medium text-stonehill-ink/65">Name</dt>
-              <dd className="mt-1 text-stonehill-ink font-medium">{submission.name}</dd>
+              <dt className="text-sm font-medium text-slate-900/65">Name</dt>
+              <dd className="mt-1 text-slate-900 font-medium">{submission.name}</dd>
             </div>
             
             <div>
-              <dt className="text-sm font-medium text-stonehill-ink/65">Email</dt>
-              <dd className="mt-1 text-stonehill-ink">{submission.email || "-"}</dd>
+              <dt className="text-sm font-medium text-slate-900/65">Email</dt>
+              <dd className="mt-1 text-slate-900">{submission.email || "-"}</dd>
             </div>
             
             <div>
-              <dt className="text-sm font-medium text-stonehill-ink/65">Phone</dt>
-              <dd className="mt-1 text-stonehill-ink">{submission.phone || "-"}</dd>
+              <dt className="text-sm font-medium text-slate-900/65">Phone</dt>
+              <dd className="mt-1 text-slate-900">{submission.phone || "-"}</dd>
             </div>
 
             <div>
-              <dt className="text-sm font-medium text-stonehill-ink/65">Subject</dt>
-              <dd className="mt-1 text-stonehill-ink">{submission.subject || "-"}</dd>
+              <dt className="text-sm font-medium text-slate-900/65">Subject</dt>
+              <dd className="mt-1 text-slate-900">{submission.subject || "-"}</dd>
             </div>
           </dl>
 
-          <div className="mt-6 border-t border-stonehill-line/50 pt-6">
-            <h3 className="text-sm font-medium text-stonehill-ink/65 mb-2">Message</h3>
-            <div className="bg-stonehill-cream p-4 rounded-lg whitespace-pre-wrap text-stonehill-ink/90 text-sm">
+          <div className="mt-6 border-t border-slate-200/50 pt-6">
+            <h3 className="text-sm font-medium text-slate-900/65 mb-2">Message</h3>
+            <div className="bg-slate-50 p-4 rounded-lg whitespace-pre-wrap text-slate-900/90 text-sm">
               {submission.message}
             </div>
           </div>
 
           {payloadEntries.length > 0 && (
-            <div className="mt-6 border-t border-stonehill-line/50 pt-6">
-              <h3 className="text-sm font-medium text-stonehill-ink/65 mb-4">Additional Data</h3>
+            <div className="mt-6 border-t border-slate-200/50 pt-6">
+              <h3 className="text-sm font-medium text-slate-900/65 mb-4">Additional Data</h3>
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
                 {payloadEntries.map(([key, value]) => (
                   <div key={key}>
-                    <dt className="text-sm font-medium text-stonehill-ink/65 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</dt>
-                    <dd className="mt-1 text-stonehill-ink">
+                    <dt className="text-sm font-medium text-slate-900/65 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</dt>
+                    <dd className="mt-1 text-slate-900">
                       {Array.isArray(value) ? value.join(", ") : String(value)}
                     </dd>
                   </div>
@@ -113,8 +113,8 @@ export function AdminFormDetail({ submission }: { submission: AdminFormSubmissio
       </div>
 
       <div className="space-y-6">
-        <form action={updateStatus} className="bg-white rounded-2xl shadow-sm border border-stonehill-line p-6">
-          <h2 className="text-lg font-bold tracking-tight text-stonehill-ink mb-4 border-b border-stonehill-line/50 pb-2">
+        <form action={updateStatus} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <h2 className="text-lg font-bold tracking-tight text-slate-900 mb-4 border-b border-slate-200/50 pb-2">
             Admin Actions
           </h2>
           

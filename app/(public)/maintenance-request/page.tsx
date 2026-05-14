@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function MaintenanceRequestPage() {
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream">
+    <main className="flex min-h-screen flex-col bg-slate-50">
       <PageHero
         title="Maintenance Request"
         subtitle="Help us keep our church home safe, clean, and functioning."
@@ -25,13 +25,13 @@ export default function MaintenanceRequestPage() {
       <section className="py-16 md:py-24 overflow-hidden">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 text-center">
-            <h2 className="text-3xl font-bold tracking-tight mb-4 text-stonehill-evergreen">Report an Issue</h2>
-            <p className="text-lg text-stonehill-ink/80 leading-relaxed max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tight mb-4 text-stonehill-primary">Report an Issue</h2>
+            <p className="text-lg text-slate-900/80 leading-relaxed max-w-2xl mx-auto">
               Notice something broken, leaking, or needing attention? Please submit a request to our facilities team so we can address it promptly.
             </p>
           </div>
           
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-stonehill-line">
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
             <MaintenanceRequestForm />
           </div>
         </div>

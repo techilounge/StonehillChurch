@@ -17,12 +17,12 @@ interface AdminStatCardProps {
 
 export function AdminStatCard({ title, value, icon: Icon, trend, className }: AdminStatCardProps) {
   return (
-    <Card className={cn("overflow-hidden border-stonehill-line shadow-sm hover:shadow-md hover:border-stonehill-gold/30 motion-safe:transition-all", className)}>
+    <Card className={cn("overflow-hidden border-slate-200 shadow-sm hover:shadow-md hover:border-stonehill-accent/30 motion-safe:transition-all", className)}>
       <CardContent className="p-6">
         <div className="flex items-center">
           <div className="flex-1">
-            <p className="text-sm font-medium text-stonehill-ink/60 truncate">{title}</p>
-            <p className="mt-1 text-3xl font-semibold text-stonehill-evergreen">{value}</p>
+            <p className="text-sm font-medium text-slate-900/60 truncate">{title}</p>
+            <p className="mt-1 text-3xl font-semibold text-stonehill-primary">{value}</p>
             {trend && (
               <p className="mt-1 flex items-center text-sm">
                 <span
@@ -34,11 +34,11 @@ export function AdminStatCard({ title, value, icon: Icon, trend, className }: Ad
                   {trend.isPositive ? "+" : ""}
                   {trend.value}%
                 </span>
-                <span className="ml-2 text-stonehill-ink/50">{trend.label}</span>
+                <span className="ml-2 text-slate-900/50">{trend.label}</span>
               </p>
             )}
           </div>
-          <div className="ml-4 p-3 bg-stonehill-cream rounded-xl text-stonehill-gold">
+          <div className="ml-4 p-3 bg-slate-50 rounded-xl text-stonehill-accent">
             <Icon className="h-6 w-6" aria-hidden="true" />
           </div>
         </div>

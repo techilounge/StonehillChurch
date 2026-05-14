@@ -33,76 +33,76 @@ export default async function ContactPage() {
   const serviceTimes = `Breakfast Service: ${breakfastServiceTime}\nSabbath School: ${sabbathSchoolTime}\n\nDivine Worship: ${worshipServiceTime}\nPrayer Meeting: ${prayerMeetingTime}`;
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream">
+    <main className="flex min-h-screen flex-col bg-slate-50">
       <PageHero
         title="Contact Us"
         subtitle="We'd love to hear from you. Get in touch with our team."
       />
 
-      <section className="py-16 md:py-24 overflow-hidden border-b border-stonehill-line">
+      <section className="py-16 md:py-24 overflow-hidden border-b border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
             
             {/* Contact Information */}
             <div>
-              <h2 className="text-3xl font-bold tracking-tight mb-8 text-stonehill-evergreen">Get in Touch</h2>
-              <p className="text-lg text-stonehill-ink/80 mb-10 leading-relaxed max-w-lg">
+              <h2 className="text-3xl font-bold tracking-tight mb-8 text-stonehill-primary">Get in Touch</h2>
+              <p className="text-lg text-slate-900/80 mb-10 leading-relaxed max-w-lg">
                 Whether you have a question about our ministries, need prayer, or just want to say hello, we are here for you.
               </p>
 
               <div className="space-y-8">
                 <div className="flex items-start gap-5">
-                  <div className="bg-stonehill-evergreen/10 p-4 rounded-full text-stonehill-evergreen shrink-0 ring-1 ring-stonehill-line">
+                  <div className="bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary shrink-0 ring-1 ring-slate-200">
                     <MapPin className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold tracking-tight text-stonehill-ink mb-1">Visit Us</h3>
-                    <p className="text-stonehill-ink/80 whitespace-pre-wrap">{address}</p>
+                    <h3 className="text-lg font-bold tracking-tight text-slate-900 mb-1">Visit Us</h3>
+                    <p className="text-slate-900/80 whitespace-pre-wrap">{address}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-5">
-                  <div className="bg-stonehill-evergreen/10 p-4 rounded-full text-stonehill-evergreen shrink-0 ring-1 ring-stonehill-line">
+                  <div className="bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary shrink-0 ring-1 ring-slate-200">
                     <Phone className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold tracking-tight text-stonehill-ink mb-1">Call Us</h3>
-                    <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="text-stonehill-ink/80 hover:text-stonehill-evergreen hover:underline transition-colors block mt-1">
+                    <h3 className="text-lg font-bold tracking-tight text-slate-900 mb-1">Call Us</h3>
+                    <a href={`tel:${phone.replace(/[^0-9+]/g, '')}`} className="text-slate-900/80 hover:text-stonehill-primary hover:underline transition-colors block mt-1">
                       {phone}
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-5">
-                  <div className="bg-stonehill-evergreen/10 p-4 rounded-full text-stonehill-evergreen shrink-0 ring-1 ring-stonehill-line">
+                  <div className="bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary shrink-0 ring-1 ring-slate-200">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold tracking-tight text-stonehill-ink mb-1">Email Us</h3>
-                    <a href={`mailto:${email}`} className="text-stonehill-ink/80 hover:text-stonehill-evergreen hover:underline transition-colors block mt-1">
+                    <h3 className="text-lg font-bold tracking-tight text-slate-900 mb-1">Email Us</h3>
+                    <a href={`mailto:${email}`} className="text-slate-900/80 hover:text-stonehill-primary hover:underline transition-colors block mt-1">
                       {email}
                     </a>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-5">
-                  <div className="bg-stonehill-evergreen/10 p-4 rounded-full text-stonehill-evergreen shrink-0 ring-1 ring-stonehill-line">
+                  <div className="bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary shrink-0 ring-1 ring-slate-200">
                     <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold tracking-tight text-stonehill-ink mb-1">Service Times</h3>
-                    <p className="text-stonehill-ink/80 whitespace-pre-wrap leading-relaxed mt-1">{serviceTimes}</p>
+                    <h3 className="text-lg font-bold tracking-tight text-slate-900 mb-1">Service Times</h3>
+                    <p className="text-slate-900/80 whitespace-pre-wrap leading-relaxed mt-1">{serviceTimes}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-stonehill-line mt-10">
-                <h3 className="text-xl font-bold tracking-tight text-stonehill-evergreen mb-4">Member Resources</h3>
+              <div className="pt-8 border-t border-slate-200 mt-10">
+                <h3 className="text-xl font-bold tracking-tight text-stonehill-primary mb-4">Member Resources</h3>
                 <div className="flex flex-col gap-3">
-                  <Link href="/maintenance-request" className="text-stonehill-ink hover:text-stonehill-evergreen font-medium transition-colors">
+                  <Link href="/maintenance-request" className="text-slate-900 hover:text-stonehill-primary font-medium transition-colors">
                     Submit a Maintenance Request &rarr;
                   </Link>
-                  <Link href="/membership-transfer" className="text-stonehill-ink hover:text-stonehill-evergreen font-medium transition-colors">
+                  <Link href="/membership-transfer" className="text-slate-900 hover:text-stonehill-primary font-medium transition-colors">
                     Transfer Your Membership &rarr;
                   </Link>
                 </div>
@@ -110,8 +110,8 @@ export default async function ContactPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-stonehill-line">
-              <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-evergreen border-b border-stonehill-line pb-4">Send a Message</h2>
+            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+              <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-primary border-b border-slate-200 pb-4">Send a Message</h2>
               <div className="mt-6">
                 <ContactForm />
               </div>

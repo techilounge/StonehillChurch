@@ -99,7 +99,7 @@ export default async function LiveStreamPage() {
   const times = serviceTimes(siteSettings);
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream pb-20">
+    <main className="flex min-h-screen flex-col bg-slate-50 pb-20">
       <PageHero
         title="Watch Live"
         subtitle="Join worship online, then stay connected with recent messages."
@@ -107,21 +107,21 @@ export default async function LiveStreamPage() {
 
       <section className="py-12 sm:py-16 lg:py-20">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:px-8">
-          <div className="overflow-hidden rounded-3xl border border-stonehill-line bg-white shadow-soft">
-            <div className="border-b border-stonehill-line px-5 py-4 sm:px-6">
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
+            <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
               <div className="flex flex-wrap items-center gap-3">
                 <span
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em]",
                     youtubeSettings.showLiveBanner
                       ? "bg-red-100 text-red-700"
-                      : "bg-stonehill-cream text-stonehill-forest",
+                      : "bg-slate-50 text-stonehill-dark",
                   )}
                 >
                   <Radio className="h-3.5 w-3.5" aria-hidden="true" />
                   {youtubeSettings.showLiveBanner ? "Live Stream" : "Online Worship"}
                 </span>
-                <h2 className="text-xl font-semibold text-stonehill-evergreen">
+                <h2 className="text-xl font-semibold text-stonehill-primary">
                   Stonehill SDA Church Worship
                 </h2>
               </div>
@@ -137,12 +137,12 @@ export default async function LiveStreamPage() {
                   buttonLabel={`Play ${liveVideoTitle}`}
                 />
               ) : (
-                <div className="flex aspect-video flex-col items-center justify-center rounded-2xl border border-dashed border-stonehill-line bg-stonehill-cream px-6 text-center">
-                  <Youtube className="h-14 w-14 text-stonehill-forest/50" aria-hidden="true" />
-                  <h2 className="mt-5 text-2xl font-semibold text-stonehill-evergreen">
+                <div className="flex aspect-video flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+                  <Youtube className="h-14 w-14 text-stonehill-dark/50" aria-hidden="true" />
+                  <h2 className="mt-5 text-2xl font-semibold text-stonehill-primary">
                     Livestream Opens on YouTube
                   </h2>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-stonehill-ink/75">
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-slate-900/75">
                     When a specific live video is configured, it will play here. You can always
                     continue to the church channel for live and recent services.
                   </p>
@@ -181,23 +181,23 @@ export default async function LiveStreamPage() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-stonehill-line bg-white p-6 md:p-8 shadow-sm">
-            <div className="flex items-center gap-3 text-stonehill-evergreen">
+          <aside className="rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="flex items-center gap-3 text-stonehill-primary">
               <CalendarDays className="h-5 w-5" aria-hidden="true" />
               <h2 className="text-lg font-semibold">Service Times</h2>
             </div>
             <div className="mt-5 space-y-4">
               {times.map((item) => (
-                <div key={item.label} className="rounded-md bg-stonehill-cream p-4">
-                  <p className="font-medium text-stonehill-ink">{item.label}</p>
-                  <p className="mt-1 flex items-center gap-2 text-sm text-stonehill-ink/75">
-                    <Clock className="h-4 w-4 text-stonehill-gold" aria-hidden="true" />
+                <div key={item.label} className="rounded-md bg-slate-50 p-4">
+                  <p className="font-medium text-slate-900">{item.label}</p>
+                  <p className="mt-1 flex items-center gap-2 text-sm text-slate-900/75">
+                    <Clock className="h-4 w-4 text-stonehill-accent" aria-hidden="true" />
                     {String(item.time)}
                   </p>
                 </div>
               ))}
             </div>
-            <p className="mt-5 text-sm leading-6 text-stonehill-ink/70">
+            <p className="mt-5 text-sm leading-6 text-slate-900/70">
               The livestream is available for worship services when the church is broadcasting.
               Past messages remain available through the sermon library and YouTube channel.
             </p>
@@ -205,14 +205,14 @@ export default async function LiveStreamPage() {
         </div>
       </section>
 
-      <section className="border-t border-stonehill-line bg-white py-14 sm:py-16">
+      <section className="border-t border-slate-200 bg-white py-14 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-stonehill-forest">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-stonehill-dark">
                 Recent Messages
               </p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-stonehill-evergreen">
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-stonehill-primary">
                 Latest Videos and Sermons
               </h2>
             </div>
@@ -229,7 +229,7 @@ export default async function LiveStreamPage() {
                 return (
                   <article
                     key={video.id}
-                    className="overflow-hidden rounded-2xl border border-stonehill-line bg-stonehill-cream shadow-sm hover:shadow-md transition-shadow"
+                    className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <YouTubeLiteEmbed
                       videoId={video.id}
@@ -239,18 +239,18 @@ export default async function LiveStreamPage() {
                     />
                     <div className="p-5">
                       {date && (
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stonehill-forest">
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-stonehill-dark">
                           {date}
                         </p>
                       )}
-                      <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-stonehill-ink">
+                      <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-slate-900">
                         {video.title}
                       </h3>
                       <a
                         href={video.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-4 inline-flex items-center text-sm font-semibold text-stonehill-evergreen hover:text-stonehill-forest"
+                        className="mt-4 inline-flex items-center text-sm font-semibold text-stonehill-primary hover:text-stonehill-dark"
                       >
                         Open on YouTube
                         <ExternalLink className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
@@ -267,7 +267,7 @@ export default async function LiveStreamPage() {
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl border border-dashed border-stonehill-line bg-stonehill-cream p-12 text-center text-stonehill-ink/70">
+            <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center text-slate-900/70">
               Recent sermons will appear here once they are published.
             </div>
           )}

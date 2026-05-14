@@ -2,31 +2,20 @@
 
 All notable changes to the Stonehill Church website will be documented in this file.
 
-## [0.2.0] - 2026-05-13
+## [0.3.0] - 2026-05-14
 
 ### Added
-- **Phase 10: Homepage UI Polish**
-  - Modernized Hero section with glassmorphism and smooth transitions.
-  - Improved QuickActions and Ministries preview for better engagement.
-  - Refined layout and typography across the landing page.
-- **Phase 11: Public Core Pages UI Completion**
-  - Polished `/im-new`, `/plan-your-visit`, and `/about` pages.
-  - Updated `/our-beliefs` and `/our-leaders` with premium cards and layouts.
-  - Ensured consistent branding and responsive design across all visitor-facing routes.
-- **Phase 12: YouTube & Live Experience**
-  - Integrated YouTube Live API support with fallback channel CTAs.
-  - Created a premium `/live` page with dynamic service time context.
-  - Added `/admin/youtube` console for managing livestream settings and channel metadata.
-- **Phase 13: Public Forms & Admin Management**
-  - Completed all six public forms: Prayer Request, Contact, Volunteer, Announcement, Membership Transfer, and Maintenance.
-  - Implemented `/admin/forms` dashboard for reviewing and managing submissions.
-  - Added internal notes, status badges, and staff assignment features to form submissions.
+- **Phase 15R-B: Global Design System Migration**
+  - Migrated entire site to the new Stonehill brand palette: Blue (#1E3F66), Teal (#1C6B8D), and Yellow (#E7AB10).
+  - Swapped legacy `stonehill-*` tokens (evergreen, gold, forest, etc.) with new brand tokens across 90+ components.
+  - Implemented automated migration of neutral colors from warm stone tones to cool slate tones for better contrast with the new blue theme.
+  - Applied Yeseva One (`font-display`) globally to all headings (h1-h6) with 0.02em letter spacing.
+  - Integrated Reenie Beanie (`font-handwritten`) and brand yellow accent to all hero subtitles and section callouts.
 
 ### Fixed
-- Resolved React hydration mismatch warnings across public routes.
-- Fixed `FormField` prop propagation issues on intrinsic DOM elements.
-- Improved mobile responsiveness for complex tables and grid layouts.
+- Fixed Next.js hydration mismatch error caused by browser extensions (ColorZilla) by adding `suppressHydrationWarning` to root layout elements.
+- Cleaned up legacy typography overrides (`tracking-tight`) that were conflicting with the new display font spacing.
 
 ### Notes
-- All UI components now strictly follow the `stonehill-` brand variables (Evergreen, Gold, Ink, Cream).
-- Backend contracts and Firestore schemas remain stable and compatible with previous versions.
+- All legacy design tokens have been removed from `tailwind.config.ts` and `app/globals.css`.
+- The site now strictly follows the 2026 Stonehill Church Brand Guide.

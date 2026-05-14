@@ -6,14 +6,14 @@ import { cn } from "@/lib/utils";
 
 export function WelcomeSection() {
   return (
-    <section className="overflow-hidden bg-stonehill-cream py-16 sm:py-24">
+    <section className="overflow-hidden bg-slate-50 py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-y-12 lg:grid-cols-2 lg:gap-x-16 lg:items-center">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary sm:text-4xl">
               Welcome to Stonehill SDA Church
             </h2>
-            <p className="mt-4 text-lg leading-8 text-stonehill-ink/80">
+            <p className="mt-4 text-lg leading-8 text-slate-900/80">
               We are a Seventh-day Adventist community dedicated to sharing the love of Jesus. 
               Whether you are looking for a church home, seeking answers, or simply want to 
               visit, you are welcome here.

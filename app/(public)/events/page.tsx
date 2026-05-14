@@ -22,7 +22,7 @@ export default async function EventsIndexPage() {
   const events = await getUpcomingEvents();
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream">
+    <main className="flex min-h-screen flex-col bg-slate-50">
       <PageHero
         title="Upcoming Events"
         subtitle="Connect, grow, and serve with our church family."
@@ -37,12 +37,12 @@ export default async function EventsIndexPage() {
               ))}
             </div>
           ) : (
-             <div className="bg-white rounded-3xl p-12 text-center border border-stonehill-line shadow-sm max-w-3xl mx-auto">
-               <div className="w-16 h-16 bg-stonehill-evergreen/10 text-stonehill-evergreen rounded-full flex items-center justify-center mx-auto mb-6">
+             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-3xl mx-auto">
+               <div className="w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary rounded-full flex items-center justify-center mx-auto mb-6">
                  <CalendarDays className="w-8 h-8" />
                </div>
-               <h2 className="text-2xl font-bold tracking-tight mb-4 text-stonehill-ink">No Upcoming Events</h2>
-               <p className="text-lg text-stonehill-ink/80 leading-relaxed mb-8">
+               <h2 className="text-2xl font-bold tracking-tight mb-4 text-slate-900">No Upcoming Events</h2>
+               <p className="text-lg text-slate-900/80 leading-relaxed mb-8">
                  We don't have any upcoming events scheduled at the moment. Please check back later or view our church calendar for recurring services.
                </p>
                <Link 
@@ -56,10 +56,10 @@ export default async function EventsIndexPage() {
         </div>
       </section>
 
-      <section className="py-16 bg-white border-t border-stonehill-line overflow-hidden">
+      <section className="py-16 bg-white border-t border-slate-200 overflow-hidden">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-8">
-          <h2 className="text-3xl font-bold tracking-tight text-stonehill-evergreen">Want to stay updated?</h2>
-          <p className="text-stonehill-ink/80 text-lg max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold tracking-tight text-stonehill-primary">Want to stay updated?</h2>
+          <p className="text-slate-900/80 text-lg max-w-2xl mx-auto">
             Get the latest updates on upcoming events and church announcements by reading our weekly bulletin or following our social media channels.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

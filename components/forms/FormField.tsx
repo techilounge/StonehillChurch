@@ -62,7 +62,7 @@ export function FormField({
   return (
     <div className={cn("grid gap-2", className)} {...props}>
       {label && (
-        <label htmlFor={fieldId} className="text-sm font-medium text-stonehill-ink">
+        <label htmlFor={fieldId} className="text-sm font-medium text-slate-900">
           {label}
           {shouldShowRequiredMarker && (
             <span className="ml-1 text-red-700" aria-hidden="true">
@@ -73,7 +73,7 @@ export function FormField({
       )}
       {field}
       {description && (
-        <p className="text-sm text-stonehill-ink/70" id={descriptionId}>
+        <p className="text-sm text-slate-900/70" id={descriptionId}>
           {description}
         </p>
       )}

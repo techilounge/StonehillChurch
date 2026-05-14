@@ -22,7 +22,7 @@ const CheckboxField = React.forwardRef<HTMLInputElement, CheckboxFieldProps>(
           id={fieldId}
           ref={ref}
           className={cn(
-            "mt-0.5 h-4 w-4 shrink-0 rounded-sm border border-stonehill-line accent-stonehill-forest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 motion-safe:transition-colors",
+            "mt-0.5 h-4 w-4 shrink-0 rounded-sm border border-slate-200 accent-stonehill-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 motion-safe:transition-colors",
             hasError && "border-red-600 focus-visible:ring-red-600",
             className
           )}
@@ -33,7 +33,7 @@ const CheckboxField = React.forwardRef<HTMLInputElement, CheckboxFieldProps>(
         <div className="grid gap-1.5 leading-none">
           <label
             htmlFor={fieldId}
-            className="text-sm font-medium leading-none text-stonehill-ink peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            className="text-sm font-medium leading-none text-slate-900 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             {label}
             {props.required && (
@@ -43,7 +43,7 @@ const CheckboxField = React.forwardRef<HTMLInputElement, CheckboxFieldProps>(
             )}
           </label>
           {description && (
-            <p className="text-sm text-stonehill-ink/70" id={descriptionId}>{description}</p>
+            <p className="text-sm text-slate-900/70" id={descriptionId}>{description}</p>
           )}
         </div>
       </div>

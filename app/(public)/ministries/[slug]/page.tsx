@@ -54,7 +54,7 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
-    <main className="flex min-h-screen flex-col bg-stonehill-cream">
+    <main className="flex min-h-screen flex-col bg-slate-50">
       <JsonLd
         data={breadcrumbJsonLd(
           [
@@ -77,19 +77,19 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
           <div className="mb-6">
             <Link 
               href="/ministries" 
-              className="inline-flex items-center gap-2 text-stonehill-ink/60 hover:text-stonehill-gold font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-slate-900/60 hover:text-stonehill-accent font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Ministries
             </Link>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-stonehill-line flex flex-col md:flex-row">
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-200 flex flex-col md:flex-row">
             
             {/* Main Content */}
             <div className="p-8 md:p-10 flex-grow">
               {ministry.imageUrl && (
-                <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-8 ring-1 ring-stonehill-line bg-stonehill-cream">
+                <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-8 ring-1 ring-slate-200 bg-slate-50">
                   <Image
                     src={ministry.imageUrl}
                     alt={ministry.imageAlt || ministry.name}
@@ -99,8 +99,8 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
                 </div>
               )}
               
-              <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-evergreen border-b border-stonehill-line pb-4">About this Ministry</h2>
-              <div className="prose prose-lg max-w-none prose-headings:text-stonehill-evergreen prose-p:text-stonehill-ink/80 prose-a:text-stonehill-gold hover:prose-a:text-stonehill-gold/80 leading-relaxed">
+              <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-primary border-b border-slate-200 pb-4">About this Ministry</h2>
+              <div className="prose prose-lg max-w-none prose-headings:text-stonehill-primary prose-p:text-slate-900/80 prose-a:text-stonehill-accent hover:prose-a:text-stonehill-accent/80 leading-relaxed">
                 <div className="whitespace-pre-wrap">
                   {ministry.longDescription}
                 </div>
@@ -108,40 +108,40 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
             </div>
 
             {/* Sidebar */}
-            <div className="bg-stonehill-cream p-8 md:p-10 md:w-1/3 border-t md:border-t-0 md:border-l border-stonehill-line flex flex-col gap-8">
+            <div className="bg-slate-50 p-8 md:p-10 md:w-1/3 border-t md:border-t-0 md:border-l border-slate-200 flex flex-col gap-8">
               
               {ministry.meetingTime && (
                 <div className="flex items-start gap-4">
-                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-primary ring-1 ring-slate-200">
                     <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Meeting Time</p>
-                    <p className="text-stonehill-ink font-medium leading-tight mt-1">{ministry.meetingTime}</p>
+                    <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Meeting Time</p>
+                    <p className="text-slate-900 font-medium leading-tight mt-1">{ministry.meetingTime}</p>
                   </div>
                 </div>
               )}
 
               {ministry.leaderName && (
                 <div className="flex items-start gap-4">
-                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-primary ring-1 ring-slate-200">
                     <User className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Ministry Leader</p>
-                    <p className="text-stonehill-ink font-medium leading-tight mt-1">{ministry.leaderName}</p>
+                    <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Ministry Leader</p>
+                    <p className="text-slate-900 font-medium leading-tight mt-1">{ministry.leaderName}</p>
                   </div>
                 </div>
               )}
 
               {ministry.leaderEmail && (
                 <div className="flex items-start gap-4">
-                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                  <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-primary ring-1 ring-slate-200">
                     <Mail className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Contact Email</p>
-                    <a href={`mailto:${ministry.leaderEmail}`} className="text-stonehill-evergreen hover:text-stonehill-forest hover:underline font-medium break-all mt-1 block">
+                    <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Contact Email</p>
+                    <a href={`mailto:${ministry.leaderEmail}`} className="text-stonehill-primary hover:text-stonehill-dark hover:underline font-medium break-all mt-1 block">
                       {ministry.leaderEmail}
                     </a>
                   </div>
@@ -149,20 +149,20 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
               )}
 
               <div className="flex items-start gap-4">
-                 <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-evergreen ring-1 ring-stonehill-line">
+                 <div className="bg-white p-3 rounded-full shadow-sm text-stonehill-primary ring-1 ring-slate-200">
                     <Users className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-stonehill-muted uppercase tracking-wide">Category</p>
-                    <p className="text-stonehill-ink font-medium capitalize mt-1">{ministry.category}</p>
+                    <p className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Category</p>
+                    <p className="text-slate-900 font-medium capitalize mt-1">{ministry.category}</p>
                   </div>
               </div>
 
               {ministry.ctaHref && (
-                <div className="mt-4 pt-6 border-t border-stonehill-line">
+                <div className="mt-4 pt-6 border-t border-slate-200">
                   <Link
                     href={ministry.ctaHref}
-                    className="w-full flex items-center justify-center gap-2 bg-stonehill-gold hover:bg-stonehill-gold/90 text-stonehill-ink py-3.5 px-6 rounded-xl transition-all font-semibold shadow-sm hover:-translate-y-0.5 text-center"
+                    className="w-full flex items-center justify-center gap-2 bg-stonehill-accent hover:bg-stonehill-accent/90 text-slate-900 py-3.5 px-6 rounded-xl transition-all font-semibold shadow-sm hover:-translate-y-0.5 text-center"
                   >
                     {ministry.ctaLabel || "Get Involved"}
                   </Link>

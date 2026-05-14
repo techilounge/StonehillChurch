@@ -23,8 +23,8 @@ export function ErrorState({
       <div className="rounded-full bg-red-100 p-3 mb-4">
         <AlertCircle className="h-8 w-8 text-red-600" />
       </div>
-      <h3 className="text-lg font-semibold text-stonehill-ink mb-2">{title}</h3>
-      <p className="text-stonehill-muted max-w-md mb-6">{message}</p>
+      <h3 className="text-lg font-semibold text-slate-900 mb-2">{title}</h3>
+      <p className="text-slate-500 max-w-md mb-6">{message}</p>
       {onRetry && (
         <Button variant="outline" onClick={onRetry}>
           Try again

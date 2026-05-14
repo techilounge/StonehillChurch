@@ -86,7 +86,7 @@ export function VolunteerForm() {
       />
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+        <h3 className="text-xl font-bold tracking-tight text-slate-900 border-b border-slate-200 pb-2">
           Personal Information
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -126,7 +126,7 @@ export function VolunteerForm() {
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+        <h3 className="text-xl font-bold tracking-tight text-slate-900 border-b border-slate-200 pb-2">
           Service Areas
         </h3>
         <FormField
@@ -149,7 +149,7 @@ export function VolunteerForm() {
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-xl font-bold tracking-tight text-stonehill-ink border-b border-stonehill-line pb-2">
+        <h3 className="text-xl font-bold tracking-tight text-slate-900 border-b border-slate-200 pb-2">
           Details
         </h3>
         <FormField

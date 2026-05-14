@@ -27,7 +27,7 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
     `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   
   return (
-    <section className="py-16 bg-stonehill-evergreen text-white sm:py-24 overflow-hidden">
+    <section className="py-16 bg-stonehill-primary text-white sm:py-24 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           
@@ -43,7 +43,7 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
 
             <div className="space-y-6 bg-white/10 p-6 rounded-2xl backdrop-blur-sm border border-white/20">
               <div className="flex items-start">
-                <MapPin className="w-6 h-6 mr-4 text-stonehill-gold flex-shrink-0 mt-1" />
+                <MapPin className="w-6 h-6 mr-4 text-stonehill-accent flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-lg">Address</h3>
                   <p className="text-white/80 mt-1">{address}</p>
@@ -51,7 +51,7 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
               </div>
 
               <div className="flex items-start">
-                <Clock className="w-6 h-6 mr-4 text-stonehill-gold flex-shrink-0 mt-1" />
+                <Clock className="w-6 h-6 mr-4 text-stonehill-accent flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-bold text-lg">Service Times</h3>
                   <div className="text-white/80 mt-1 space-y-1">
@@ -65,12 +65,12 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
               </div>
 
               <div className="flex items-center">
-                <Phone className="w-6 h-6 mr-4 text-stonehill-gold flex-shrink-0" />
+                <Phone className="w-6 h-6 mr-4 text-stonehill-accent flex-shrink-0" />
                 <p className="text-white/80">{phone}</p>
               </div>
 
               <div className="flex items-center">
-                <Mail className="w-6 h-6 mr-4 text-stonehill-gold flex-shrink-0" />
+                <Mail className="w-6 h-6 mr-4 text-stonehill-accent flex-shrink-0" />
                 <a href={`mailto:${email}`} className="text-white/80 hover:text-white hover:underline transition-all">
                   {email}
                 </a>
@@ -82,7 +82,7 @@ export function LocationMapSection({ settings = {} }: LocationMapSectionProps) {
                 href={mapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={cn(buttonVariants({ size: "lg" }), "bg-stonehill-gold text-stonehill-ink hover:bg-stonehill-gold/90 border-none")}
+                className={cn(buttonVariants({ size: "lg" }), "bg-stonehill-accent text-slate-900 hover:bg-stonehill-accent/90 border-none")}
               >
                 Get Directions
                 <ExternalLink className="w-4 h-4 ml-2" />

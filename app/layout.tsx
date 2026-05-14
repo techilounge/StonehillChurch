@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Yeseva_One, Reenie_Beanie, Roboto } from "next/font/google";
 import {
   DEFAULT_SITE_DESCRIPTION,
   DEFAULT_SITE_NAME,
@@ -6,6 +7,27 @@ import {
   normalizeSiteUrl,
 } from "@/lib/seo";
 import "./globals.css";
+
+const roboto = Roboto({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
+
+const yesevaOne = Yeseva_One({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
+});
+
+const reenieBeanie = Reenie_Beanie({
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-handwritten",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -32,7 +54,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#163b33",
+  themeColor: "#1e3f66",
 };
 
 export default function RootLayout({
@@ -41,8 +63,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${roboto.variable} ${yesevaOne.variable} ${reenieBeanie.variable}`}
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

@@ -24,10 +24,10 @@ export function CTASection({
   className
 }: CTASectionProps) {
   return (
-    <section className={cn("bg-stonehill-evergreen text-white py-20", className)}>
+    <section className={cn("bg-stonehill-primary text-white py-20", className)}>
       <Container className="text-center">
         <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">{title}</h2>
-        {subtitle && <p className="text-stonehill-leaf text-lg md:text-xl max-w-2xl mx-auto mb-8">{subtitle}</p>}
+        {subtitle && <p className="text-stonehill-secondary text-lg md:text-xl max-w-2xl mx-auto mb-8">{subtitle}</p>}
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button asChild size="lg" variant="primary">

@@ -16,7 +16,7 @@ import { HeroCarousel } from "@/components/public/HeroCarousel";
 
 export default function DesignShowcase() {
   return (
-    <div className="min-h-screen bg-stonehill-cream/20">
+    <div className="min-h-screen bg-slate-50/20">
       <AnnouncementBanner
         title="Welcome to the Design System Showcase!"
         message="Core components and states for Stonehill."
@@ -28,10 +28,10 @@ export default function DesignShowcase() {
         <div>
           <SectionHeader title="Typography & Colors" subtitle="Core brand tokens" />
           <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="h-24 rounded-lg bg-stonehill-evergreen flex items-end p-4 text-white font-bold">Evergreen</div>
-            <div className="h-24 rounded-lg bg-stonehill-forest flex items-end p-4 text-white font-bold">Forest</div>
-            <div className="h-24 rounded-lg bg-stonehill-gold flex items-end p-4 text-stonehill-ink font-bold">Gold</div>
-            <div className="h-24 rounded-lg bg-stonehill-cream flex items-end p-4 text-stonehill-ink font-bold border border-stonehill-line">Cream</div>
+            <div className="h-24 rounded-lg bg-stonehill-primary flex items-end p-4 text-white font-bold">Evergreen</div>
+            <div className="h-24 rounded-lg bg-stonehill-dark flex items-end p-4 text-white font-bold">Forest</div>
+            <div className="h-24 rounded-lg bg-stonehill-accent flex items-end p-4 text-slate-900 font-bold">Gold</div>
+            <div className="h-24 rounded-lg bg-slate-50 flex items-end p-4 text-slate-900 font-bold border border-slate-200">Cream</div>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export default function DesignShowcase() {
         <div>
           <SectionHeader title="Heroes" subtitle="Page and Carousel Heroes" />
           <div className="mt-8 space-y-8">
-            <div className="rounded-2xl overflow-hidden border border-stonehill-line shadow-sm">
+            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
               <PageHero 
                 title="Page Hero Example" 
                 subtitle="With guaranteed text contrast overlay"
@@ -104,7 +104,7 @@ export default function DesignShowcase() {
                 imageAlt="Sample background"
               />
             </div>
-            <div className="rounded-2xl overflow-hidden border border-stonehill-line shadow-sm">
+            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
               <HeroCarousel 
                 slides={[
                   {
@@ -177,7 +177,7 @@ export default function DesignShowcase() {
 
         <div>
           <SectionHeader title="States" />
-          <div className="mt-8 p-12 bg-white rounded-lg border border-stonehill-line relative h-48">
+          <div className="mt-8 p-12 bg-white rounded-lg border border-slate-200 relative h-48">
             <LoadingState text="Loading content..." />
           </div>
         </div>

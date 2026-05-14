@@ -103,14 +103,14 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
-            className="w-full transition-colors focus:ring-2 focus:ring-stonehill-forest/20"
+            className="w-full transition-colors focus:ring-2 focus:ring-stonehill-dark/20"
             placeholder="admin@stonehillsda.org"
           />
         </FormField>
 
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <label htmlFor="admin-password" className="text-sm font-medium text-stonehill-ink">
+            <label htmlFor="admin-password" className="text-sm font-medium text-slate-900">
               Password
             </label>
             <Link 
@@ -119,7 +119,7 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
                 e.preventDefault();
                 alert("Password reset functionality will be implemented in a future phase.");
               }}
-              className="text-sm font-medium text-stonehill-forest hover:text-stonehill-forest/80 hover:underline transition-colors"
+              className="text-sm font-medium text-stonehill-dark hover:text-stonehill-dark/80 hover:underline transition-colors"
             >
               Forgot password?
             </Link>
@@ -131,7 +131,7 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
-            className="w-full transition-colors focus:ring-2 focus:ring-stonehill-forest/20"
+            className="w-full transition-colors focus:ring-2 focus:ring-stonehill-dark/20"
           />
         </div>
       </div>

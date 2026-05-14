@@ -7,7 +7,7 @@ type PublicFooterProps = {
 };
 
 const footerLinkClassName =
-  "rounded-sm transition-colors hover:text-stonehill-evergreen focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2";
+  "rounded-sm transition-colors hover:text-stonehill-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2";
 
 function settingString(settings: Record<string, unknown> | undefined, key: string): string {
   const value = settings?.[key];
@@ -36,12 +36,12 @@ export function PublicFooter({ settings }: PublicFooterProps) {
   ].filter((item) => item.href);
 
   return (
-    <footer className="border-t border-stonehill-line bg-white py-16">
+    <footer className="border-t border-slate-200 bg-white py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-8">
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-stonehill-evergreen">{churchName}</span>
-            <p className="mt-4 text-sm text-stonehill-muted max-w-xs">
+            <span className="text-xl font-bold text-stonehill-primary">{churchName}</span>
+            <p className="mt-4 text-sm text-slate-500 max-w-xs">
               {tagline}
             </p>
             {socialLinks.length > 0 && (
@@ -51,7 +51,7 @@ export function PublicFooter({ settings }: PublicFooterProps) {
                     key={item.label}
                     href={item.href}
                     aria-label={item.label}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-stonehill-cream text-stonehill-ink transition-colors hover:bg-stonehill-gold hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-900 transition-colors hover:bg-stonehill-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
                     {...externalLinkProps(item.href)}
                   >
                     <item.icon className="h-5 w-5" aria-hidden="true" />
@@ -62,8 +62,8 @@ export function PublicFooter({ settings }: PublicFooterProps) {
           </div>
           <div className="grid grid-cols-2 gap-8 lg:col-span-2">
             <div>
-              <h3 className="text-sm font-semibold text-stonehill-ink uppercase tracking-wider">Navigation</h3>
-              <ul className="mt-6 space-y-4 text-sm text-stonehill-muted">
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Navigation</h3>
+              <ul className="mt-6 space-y-4 text-sm text-slate-500">
                 <li><Link href="/im-new" className={footerLinkClassName}>I&apos;m New</Link></li>
                 <li><Link href="/plan-your-visit" className={footerLinkClassName}>Plan Your Visit</Link></li>
                 <li><Link href="/sermons" className={footerLinkClassName}>Sermons</Link></li>
@@ -71,8 +71,8 @@ export function PublicFooter({ settings }: PublicFooterProps) {
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-stonehill-ink uppercase tracking-wider">Contact</h3>
-              <ul className="mt-6 space-y-4 text-sm text-stonehill-muted">
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Contact</h3>
+              <ul className="mt-6 space-y-4 text-sm text-slate-500">
                 {address && <li className="max-w-xs">{address}</li>}
                 {email && (
                   <li>
@@ -88,11 +88,11 @@ export function PublicFooter({ settings }: PublicFooterProps) {
             </div>
           </div>
         </div>
-        <div className="mt-16 flex flex-col items-center justify-between border-t border-stonehill-line pt-8 sm:flex-row">
-          <p className="text-xs leading-5 text-stonehill-muted">
+        <div className="mt-16 flex flex-col items-center justify-between border-t border-slate-200 pt-8 sm:flex-row">
+          <p className="text-xs leading-5 text-slate-500">
             &copy; {new Date().getFullYear()} Stonehill Seventh-day Adventist Church. All rights reserved.
           </p>
-          <div className="mt-4 flex space-x-6 sm:mt-0 text-xs text-stonehill-muted">
+          <div className="mt-4 flex space-x-6 sm:mt-0 text-xs text-slate-500">
             <Link href="/privacy" className={cn(footerLinkClassName, "px-1")}>Privacy Policy</Link>
             <Link href="/terms" className={cn(footerLinkClassName, "px-1")}>Terms of Service</Link>
             <Link href="/admin/dashboard" className={cn(footerLinkClassName, "px-1")}>Admin Login</Link>

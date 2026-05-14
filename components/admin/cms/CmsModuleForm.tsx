@@ -96,10 +96,10 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
           Back
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-stonehill-ink">
+          <h1 className="text-2xl font-bold text-slate-900">
             {isNew ? `New ${config.singular}` : `Edit ${config.singular}`}
           </h1>
-          <p className="text-sm text-stonehill-muted">
+          <p className="text-sm text-slate-500">
             {config.description}
           </p>
         </div>
@@ -112,7 +112,7 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
         </div>
       )}
 
-      <form className="bg-white border border-stonehill-line shadow-sm rounded-xl overflow-hidden" onSubmit={(e) => handleSubmit(e)}>
+      <form className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden" onSubmit={(e) => handleSubmit(e)}>
         <div className="p-6 sm:p-8 flex flex-col gap-6">
           {config.fields.map((field) => {
             const errorMessages = fieldErrors[field.name];
@@ -121,12 +121,12 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
 
             return (
               <div key={field.name} className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-stonehill-ink flex items-center gap-1">
+                <label className="text-sm font-semibold text-slate-900 flex items-center gap-1">
                   {field.label}
                   {field.required && <span className="text-red-500">*</span>}
                 </label>
                 {field.description && (
-                  <p className="text-xs text-stonehill-ink/60 mb-1">{field.description}</p>
+                  <p className="text-xs text-slate-900/60 mb-1">{field.description}</p>
                 )}
 
                 {field.type === "text" || field.type === "slug" || field.type === "url" || field.type === "email" ? (
@@ -184,11 +184,11 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
                 ) : field.type === "media" ? (
                   <div className="flex flex-col gap-3">
                     {value ? (
-                      <div className="relative w-full max-w-sm aspect-video rounded-lg overflow-hidden border border-stonehill-line bg-stonehill-cream flex flex-col">
+                      <div className="relative w-full max-w-sm aspect-video rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex flex-col">
                         {isImageUrl(value) ? (
                           <Image src={value} alt="Selected media" fill className="object-cover" />
                         ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center p-4 bg-stonehill-cream/50 text-center break-all text-xs font-medium text-stonehill-ink">
+                          <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-50/50 text-center break-all text-xs font-medium text-slate-900">
                             <span className="mb-2 p-2 bg-white rounded-full shadow-sm">
                               📄 Document
                             </span>
@@ -208,11 +208,11 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
                       </div>
                     ) : (
                       <div 
-                        className={`flex flex-col items-center justify-center w-full max-w-sm aspect-video rounded-lg border-2 border-dashed ${hasError ? "border-red-400 bg-red-50" : "border-stonehill-line bg-stonehill-cream/30 hover:bg-stonehill-cream/50 cursor-pointer transition-colors"}`}
+                        className={`flex flex-col items-center justify-center w-full max-w-sm aspect-video rounded-lg border-2 border-dashed ${hasError ? "border-red-400 bg-red-50" : "border-slate-200 bg-slate-50/30 hover:bg-slate-50/50 cursor-pointer transition-colors"}`}
                         onClick={() => openMediaSelector(field.name)}
                       >
-                        <ImageIcon className={`h-8 w-8 mb-2 ${hasError ? "text-red-400" : "text-stonehill-ink/40"}`} />
-                        <span className={`text-sm font-medium ${hasError ? "text-red-600" : "text-stonehill-ink/60"}`}>
+                        <ImageIcon className={`h-8 w-8 mb-2 ${hasError ? "text-red-400" : "text-slate-900/40"}`} />
+                        <span className={`text-sm font-medium ${hasError ? "text-red-600" : "text-slate-900/60"}`}>
                           Click to select media
                         </span>
                       </div>
@@ -225,7 +225,7 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
           })}
         </div>
 
-        <div className="p-6 sm:p-8 border-t border-stonehill-line bg-stonehill-cream/30 flex items-center justify-end gap-3 shrink-0">
+        <div className="p-6 sm:p-8 border-t border-slate-200 bg-slate-50/30 flex items-center justify-end gap-3 shrink-0">
           {/* If the schema requires a status, we assume we can Save Draft or Publish. Otherwise just Save. */}
           {formData.status !== undefined || isNew ? (
             <>

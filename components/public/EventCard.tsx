@@ -49,10 +49,10 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Link
       href={`/events/${event.slug}`}
-      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold focus-visible:ring-offset-2"
+      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
     >
       <Card className="h-full flex flex-col hover:shadow-md transition-shadow duration-300">
-        <div className="relative h-48 w-full bg-stonehill-cream overflow-hidden">
+        <div className="relative h-48 w-full bg-slate-50 overflow-hidden">
           {imageUrl ? (
             <Image
               src={imageUrl}
@@ -61,25 +61,25 @@ export function EventCard({ event }: EventCardProps) {
               className="object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-stonehill-muted/50">
+            <div className="absolute inset-0 flex items-center justify-center text-slate-500/50">
               <Calendar className="w-12 h-12" />
             </div>
           )}
           {/* Date Badge */}
           {startDate && (
-            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur rounded-xl shadow-sm flex flex-col items-center justify-center w-14 h-16 text-center border border-stonehill-line/50">
-              <span className="text-xs font-bold text-stonehill-evergreen leading-none uppercase">{formattedMonth}</span>
-              <span className="text-xl font-bold text-stonehill-ink leading-none mt-1">{formattedDay}</span>
+            <div className="absolute top-4 left-4 bg-white/95 backdrop-blur rounded-xl shadow-sm flex flex-col items-center justify-center w-14 h-16 text-center border border-slate-200/50">
+              <span className="text-xs font-bold text-stonehill-primary leading-none uppercase">{formattedMonth}</span>
+              <span className="text-xl font-bold text-slate-900 leading-none mt-1">{formattedDay}</span>
             </div>
           )}
         </div>
 
         <CardContent className="p-5 flex flex-col flex-grow">
-          <h3 className="text-xl font-bold font-serif text-stonehill-ink mb-3 line-clamp-2 group-hover:text-stonehill-evergreen transition-colors">
+          <h3 className="text-xl font-bold font-display text-slate-900 mb-3 line-clamp-2 group-hover:text-stonehill-primary transition-colors">
             {event.title}
           </h3>
           
-          <div className="mt-auto space-y-2 text-sm text-stonehill-muted">
+          <div className="mt-auto space-y-2 text-sm text-slate-500">
             {formattedTime && (
               <div className="flex items-start gap-2">
                 <Clock className="w-4 h-4 mt-0.5 shrink-0" />

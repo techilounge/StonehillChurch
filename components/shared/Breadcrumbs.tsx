@@ -15,10 +15,10 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className={cn("flex items-center text-sm text-stonehill-muted", className)}>
+    <nav aria-label="Breadcrumb" className={cn("flex items-center text-sm text-slate-500", className)}>
       <ol className="flex items-center space-x-2">
         <li>
-          <Link href="/" className="hover:text-stonehill-evergreen transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold rounded-sm">
+          <Link href="/" className="hover:text-stonehill-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent rounded-sm">
             <span className="sr-only">Home</span>
             <Home className="h-4 w-4" />
           </Link>
@@ -29,11 +29,11 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
             <li key={item.label} className="flex items-center space-x-2">
               <ChevronRight className="h-4 w-4 flex-shrink-0" />
               {isLast || !item.href ? (
-                <span className="font-medium text-stonehill-ink" aria-current="page">
+                <span className="font-medium text-slate-900" aria-current="page">
                   {item.label}
                 </span>
               ) : (
-                <Link href={item.href} className="hover:text-stonehill-evergreen transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-gold rounded-sm">
+                <Link href={item.href} className="hover:text-stonehill-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent rounded-sm">
                   {item.label}
                 </Link>
               )}
