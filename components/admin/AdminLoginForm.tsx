@@ -2,8 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { LogIn, Loader2, AlertCircle } from "lucide-react";
+import { signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { LogIn, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { FormField } from "@/components/forms/FormField";
 import { TextInput } from "@/components/forms/TextInput";
 import { Button } from "@/components/shared/Button";
@@ -46,11 +46,14 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setResetMessage(null);
     setLoading(true);
 
     const auth = getFirebaseAuth();
@@ -85,12 +88,43 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
     }
   }
 
+  async function handleForgotPassword(e: React.MouseEvent) {
+    e.preventDefault();
+    setError(null);
+    setResetMessage(null);
+
+    if (!email.trim()) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    setResetLoading(true);
+    const auth = getFirebaseAuth();
+
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setResetMessage("A password reset link has been sent to your email address.");
+    } catch (resetError) {
+      console.error("[auth] password reset failed", resetError);
+      setError("Could not send password reset email. Please verify your email address.");
+    } finally {
+      setResetLoading(false);
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
         <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" aria-hidden="true" />
           <p className="font-medium leading-relaxed">{error}</p>
+        </div>
+      )}
+
+      {resetMessage && (
+        <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-700 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" aria-hidden="true" />
+          <p className="font-medium leading-relaxed">{resetMessage}</p>
         </div>
       )}
 
@@ -113,16 +147,14 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
             <label htmlFor="admin-password" className="text-sm font-medium text-slate-900">
               Password
             </label>
-            <Link 
-              href="#" 
-              onClick={(e) => {
-                e.preventDefault();
-                alert("Password reset functionality will be implemented in a future phase.");
-              }}
-              className="text-sm font-medium text-stonehill-dark hover:text-stonehill-dark/80 hover:underline transition-colors"
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={resetLoading || loading}
+              className="text-sm font-medium text-stonehill-dark hover:text-stonehill-dark/80 hover:underline transition-colors disabled:opacity-50 disabled:hover:no-underline"
             >
-              Forgot password?
-            </Link>
+              {resetLoading ? "Sending..." : "Forgot password?"}
+            </button>
           </div>
           <TextInput
             id="admin-password"

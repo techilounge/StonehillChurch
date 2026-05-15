@@ -111,12 +111,20 @@ export default async function ImNewPage() {
               <p className="text-slate-900/80 mb-6">
                 Let us know you&apos;re coming so we can prepare to welcome you, answer any questions, and show you around.
               </p>
-              <Link 
-                href="/plan-your-visit"
-                className={cn(buttonVariants({ size: "lg" }))}
-              >
-                Plan Your Visit
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+                <Link 
+                  href="/plan-your-visit"
+                  className={cn(buttonVariants({ size: "lg" }))}
+                >
+                  Plan Your Visit
+                </Link>
+                <Link 
+                  href="/volunteer"
+                  className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+                >
+                  Want to get involved? Volunteer &rarr;
+                </Link>
+              </div>
             </div>
           </div>
         </div>

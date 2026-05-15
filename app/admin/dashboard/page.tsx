@@ -2,6 +2,8 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { AdminStatCard } from "@/components/admin/shared/AdminStatCard";
 import { Button } from "@/components/shared/Button";
 import { getDashboardMetrics } from "@/lib/data/dashboardMetrics";
+import { getRecentAuditEntries } from "@/lib/data/auditLogs";
+import Link from "next/link";
 import {
   Mic2,
   CalendarDays,
@@ -18,7 +20,10 @@ function formatMetric(value: number | null): string {
 }
 
 export default async function AdminDashboardPage() {
-  const metrics = await getDashboardMetrics();
+  const [metrics, recentActivity] = await Promise.all([
+    getDashboardMetrics(),
+    getRecentAuditEntries(10),
+  ]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -26,10 +31,14 @@ export default async function AdminDashboardPage() {
         title="Dashboard"
         description="Welcome back. Here is what's happening at Stonehill."
       >
-        <Button variant="outline">View Site</Button>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> New Announcement
-        </Button>
+        <Link href="/" target="_blank" rel="noopener noreferrer">
+          <Button variant="outline">View Site</Button>
+        </Link>
+        <Link href="/admin/announcements/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> New Announcement
+          </Button>
+        </Link>
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -92,13 +101,28 @@ export default async function AdminDashboardPage() {
           </div>
         </section>
 
-        {/* Recent Activity Placeholder */}
+        {/* Recent Activity */}
         <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">Recent Activity</h2>
           <div className="mt-6 space-y-6">
-            <div className="flex justify-center py-8">
-              <p className="text-sm text-slate-900/60">Activity feed will be connected to Firestore audit logs.</p>
-            </div>
+            {recentActivity.length === 0 ? (
+              <div className="flex justify-center py-8">
+                <p className="text-sm text-slate-900/60">No recent activity.</p>
+              </div>
+            ) : (
+              <ul className="space-y-4">
+                {recentActivity.map((entry) => (
+                  <li key={entry.id} className="flex flex-col gap-1 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                    <p className="text-sm text-slate-900 font-medium">
+                      {entry.actorEmail} <span className="font-normal text-slate-600">{entry.action}</span> {entry.targetName || entry.targetId}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {new Date(entry.createdAt as string).toLocaleString()} &middot; {entry.targetType}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       </div>

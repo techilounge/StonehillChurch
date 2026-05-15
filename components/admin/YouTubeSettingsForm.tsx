@@ -179,7 +179,7 @@ export function YouTubeSettingsForm({
             <FormField
               id="uploadsPlaylistId"
               label="Uploads Playlist ID"
-              description="Usually starts with UU."
+              description="Usually starts with UU. If your sermons are on a different channel, paste that channel's Uploads Playlist ID here."
             >
               <TextInput
                 id="uploadsPlaylistId"

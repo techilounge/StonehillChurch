@@ -50,7 +50,54 @@ export async function createFormSubmission(
   });
 
   const snapshot = await docRef.get();
-  return serializeSubmission(snapshot.id, snapshot.data() ?? {});
+  const serialized = serializeSubmission(snapshot.id, snapshot.data() ?? {});
+
+  // Best-effort admin notification email
+  try {
+    const { getCachedSiteSettings } = await import("./siteSettings");
+    const settings = await getCachedSiteSettings();
+    const adminEmails =
+      (settings["notifications.adminInbox"] as string)?.trim() ||
+      (settings["contact.email"] as string)?.trim();
+
+    if (adminEmails) {
+      const apiKey = process.env.RESEND_API_KEY?.trim();
+      const from =
+        process.env.RESEND_FROM_EMAIL?.trim() ||
+        process.env.RESEND_FROM?.trim() ||
+        "Stonehill SDA Church <onboarding@resend.dev>";
+
+      if (apiKey) {
+        const recipients = adminEmails.split(",").map((e) => e.trim()).filter(Boolean);
+        const subject = `[Stonehill SDA] New ${input.formType} submission`;
+        const text = [
+          `New ${input.formType} submission received.`,
+          `Name: ${input.name}`,
+          input.email ? `Email: ${input.email}` : "",
+          `Message: ${input.message.slice(0, 100)}...`,
+          `View details: ${process.env.NEXT_PUBLIC_SITE_URL || "https://stonehillsda.org"}/admin/forms/${snapshot.id}`,
+        ].filter(Boolean).join("\n");
+
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from,
+            to: recipients,
+            subject,
+            text,
+          }),
+        });
+      }
+    }
+  } catch (error) {
+    console.error("[formSubmissions] Failed to send admin notification email.", error);
+  }
+
+  return serialized;
 }
 
 export async function listFormSubmissions(

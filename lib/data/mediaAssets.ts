@@ -12,8 +12,11 @@ import { serializeData, type Serialized, withReadTimeout } from "./utils";
 
 const ACCEPTED_INPUT_TYPES = new Set(["image/webp", "image/jpeg", "image/png"]);
 const OUTPUT_CONTENT_TYPE = "image/webp";
-const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
-const MAX_OUTPUT_BYTES = 5 * 1024 * 1024;
+// Source files larger than 2 MB are rejected before compression. Most brand
+// photography lands well below this when exported at sensible quality, and a
+// tight cap keeps Storage costs and bandwidth predictable.
+const MAX_SOURCE_BYTES = 2 * 1024 * 1024;
+const MAX_OUTPUT_BYTES = 2 * 1024 * 1024;
 const MAX_DIMENSION = 2400;
 const WEBP_QUALITY = 82;
 const MAX_ALT_TEXT_LENGTH = 200;

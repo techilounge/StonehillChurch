@@ -60,14 +60,35 @@ export function PublicFooter({ settings }: PublicFooterProps) {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-8 lg:col-span-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:col-span-2">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Navigation</h3>
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Connect</h3>
               <ul className="mt-6 space-y-4 text-sm text-slate-500">
                 <li><Link href="/im-new" className={footerLinkClassName}>I&apos;m New</Link></li>
                 <li><Link href="/plan-your-visit" className={footerLinkClassName}>Plan Your Visit</Link></li>
+                <li><Link href="/contact" className={footerLinkClassName}>Contact</Link></li>
+                <li><Link href="/give" className={footerLinkClassName}>Give</Link></li>
+                <li><Link href="/volunteer" className={footerLinkClassName}>Volunteer</Link></li>
+                <li><Link href="/submit-announcement" className={footerLinkClassName}>Submit Announcement</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Discover</h3>
+              <ul className="mt-6 space-y-4 text-sm text-slate-500">
                 <li><Link href="/sermons" className={footerLinkClassName}>Sermons</Link></li>
                 <li><Link href="/events" className={footerLinkClassName}>Events</Link></li>
+                <li><Link href="/church-calendar" className={footerLinkClassName}>Calendar</Link></li>
+                <li><Link href="/ministries" className={footerLinkClassName}>Ministries</Link></li>
+                <li><Link href="/resources" className={footerLinkClassName}>Resources</Link></li>
+                <li><Link href="/live" className={footerLinkClassName}>Live Stream</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">About</h3>
+              <ul className="mt-6 space-y-4 text-sm text-slate-500">
+                <li><Link href="/about" className={footerLinkClassName}>About Us</Link></li>
+                <li><Link href="/our-beliefs" className={footerLinkClassName}>Our Beliefs</Link></li>
+                <li><Link href="/our-leaders" className={footerLinkClassName}>Our Leaders</Link></li>
               </ul>
             </div>
             <div>
@@ -93,8 +114,6 @@ export function PublicFooter({ settings }: PublicFooterProps) {
             &copy; {new Date().getFullYear()} Stonehill Seventh-day Adventist Church. All rights reserved.
           </p>
           <div className="mt-4 flex space-x-6 sm:mt-0 text-xs text-slate-500">
-            <Link href="/privacy" className={cn(footerLinkClassName, "px-1")}>Privacy Policy</Link>
-            <Link href="/terms" className={cn(footerLinkClassName, "px-1")}>Terms of Service</Link>
             <Link href="/admin/dashboard" className={cn(footerLinkClassName, "px-1")}>Admin Login</Link>
           </div>
         </div>

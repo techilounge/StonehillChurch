@@ -12,6 +12,24 @@ interface MediaUploadPanelProps {
 
 type UploadState = "idle" | "uploading" | "success" | "error";
 
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024;
+const MAX_FILE_SIZE_LABEL = "2 MB";
+
+function validateFile(file: File): { ok: true } | { ok: false; message: string } {
+  if (!ACCEPTED_TYPES.includes(file.type as (typeof ACCEPTED_TYPES)[number])) {
+    return { ok: false, message: "Only JPG, JPEG, PNG, and WEBP images are supported." };
+  }
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    const actual = (file.size / (1024 * 1024)).toFixed(2);
+    return {
+      ok: false,
+      message: `Image is ${actual} MB. Maximum allowed size is ${MAX_FILE_SIZE_LABEL}.`,
+    };
+  }
+  return { ok: true };
+}
+
 export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [altText, setAltText] = React.useState("");
@@ -20,11 +38,23 @@ export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const acceptFile = React.useCallback((next: File) => {
+    const validation = validateFile(next);
+    if (!validation.ok) {
+      setFile(null);
+      setStatus("error");
+      setErrorMessage(validation.message);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+    setFile(next);
+    setStatus("idle");
+    setErrorMessage(null);
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-      setStatus("idle");
-      setErrorMessage(null);
+      acceptFile(e.target.files[0]);
     }
   };
 
@@ -37,16 +67,7 @@ export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
     e.preventDefault();
     e.stopPropagation();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFile = e.dataTransfer.files[0];
-      const validTypes = ["image/jpeg", "image/png", "image/webp"];
-      if (validTypes.includes(droppedFile.type)) {
-        setFile(droppedFile);
-        setStatus("idle");
-        setErrorMessage(null);
-      } else {
-        setStatus("error");
-        setErrorMessage("Only JPG, PNG, and WEBP images are supported.");
-      }
+      acceptFile(e.dataTransfer.files[0]);
     }
   };
 

@@ -132,6 +132,8 @@ function defaultSubject(submission: PublicFormSubmission): string {
       return submission.subject ?? "Membership transfer";
     case "maintenance_request":
       return submission.location;
+    case "plan_your_visit":
+      return `Visit Plan: ${submission.visitDate}`;
   }
 }
 

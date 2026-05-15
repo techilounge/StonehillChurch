@@ -5,6 +5,7 @@ import { getSiteSettings } from "@/lib/data/siteSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Clock, MapPin } from "lucide-react";
 import { LocationMapSection } from "@/components/public/LocationMapSection";
+import { PlanYourVisitForm } from "@/components/forms/public/PlanYourVisitForm";
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPublicPageMetadata({
@@ -64,19 +65,13 @@ export default async function PlanYourVisitPage() {
               </div>
             </div>
 
-            {/* Let us know you're coming (Placeholder for Phase 13 Form) */}
-            <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 shadow-sm">
+            <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
               <h2 className="text-2xl font-bold tracking-tight mb-4 text-stonehill-primary">Let Us Know You&apos;re Coming!</h2>
               <p className="text-slate-900/80 mb-8">
-                Fill out the form below (coming soon) so we can prepare a welcome gift for you and make sure someone is ready to show you around.
+                Fill out the form below so we can prepare a welcome gift for you and make sure someone is ready to show you around.
               </p>
               
-              <div className="bg-white border-2 border-dashed border-slate-200 rounded-xl p-8 flex items-center justify-center text-center shadow-inner">
-                <p className="text-slate-500 font-medium italic">
-                  [ Plan Your Visit Form will be available in a future update ]<br/>
-                  In the meantime, just show up! We&apos;d love to have you.
-                </p>
-              </div>
+              <PlanYourVisitForm />
             </div>
 
           </div>

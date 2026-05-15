@@ -2,12 +2,14 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 
 export interface NavItem {
   href: string;
   label: string;
+  subItems?: NavItem[];
 }
 
 export interface MobileNavProps {
@@ -15,6 +17,7 @@ export interface MobileNavProps {
 }
 
 export function MobileNav({ items }: MobileNavProps) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
 
   // Prevent scrolling when menu is open
@@ -71,14 +74,31 @@ export function MobileNav({ items }: MobileNavProps) {
               <div className="-my-6 divide-y divide-slate-200">
                 <div className="space-y-2 py-6">
                   {items.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-slate-900 hover:bg-slate-50 hover:text-stonehill-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {item.label}
-                    </Link>
+                    <div key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={pathname === item.href ? "page" : undefined}
+                        className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-slate-900 hover:bg-slate-50 hover:text-stonehill-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                      {item.subItems && (
+                        <div className="ml-4 mt-1 border-l border-slate-200 pl-4 space-y-1">
+                          {item.subItems.map((subItem) => (
+                            <Link
+                              key={subItem.href}
+                              href={subItem.href}
+                              aria-current={pathname === subItem.href ? "page" : undefined}
+                              className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 text-slate-600 hover:bg-slate-50 hover:text-stonehill-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                              onClick={() => setIsOpen(false)}
+                            >
+                              {subItem.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

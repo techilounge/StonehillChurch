@@ -3,10 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { getPageBySlug } from "@/lib/data/pages";
+import { getSiteSettings } from "@/lib/data/siteSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
-import { BookOpen, Heart, Globe, Users } from "lucide-react";
+import { BookOpen, Heart, Globe, Users, ArrowLeft } from "lucide-react";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumbJsonLd, siteSettingsToSeoSettings } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPublicPageMetadata({
@@ -18,17 +21,41 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const pageContent = await getPageBySlug("about");
+  const [pageContent, siteSettings] = await Promise.all([
+    getPageBySlug("about"),
+    getSiteSettings()
+  ]);
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
+      <JsonLd
+        data={breadcrumbJsonLd(
+          [
+            { name: "Home", path: "/" },
+            { name: "About", path: "/about" },
+          ],
+          seoSettings.siteUrl,
+        )}
+      />
       <PageHero
         title={pageContent?.title || "About Stonehill SDA Church"}
         subtitle="A community built on faith, love, and service."
       />
 
-      <section className="py-16 md:py-24 bg-white overflow-hidden">
+      <section className="py-16 md:py-24 bg-white overflow-hidden -mt-16 md:-mt-24 relative z-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          
+          {/* Back Link */}
+          <div className="mb-6">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-slate-900/60 hover:text-stonehill-accent font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </Link>
+          </div>
           {pageContent ? (
             <div className="bg-white rounded-3xl shadow-sm p-8 md:p-12 border border-slate-200">
               <div 

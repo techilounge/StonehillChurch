@@ -29,6 +29,7 @@ export const formTypeSchema = z.enum([
   "announcement_request",
   "membership_transfer",
   "maintenance_request",
+  "plan_your_visit",
 ]);
 
 export const eventCategorySchema = z.enum([
@@ -208,6 +209,8 @@ export const announcementSchema = z
     priority: announcementPrioritySchema,
     ctaLabel: z.string().min(1).max(40).nullable(),
     ctaHref: z.string().min(1).max(300).nullable(),
+    imageUrl: urlSchema.nullable(),
+    imageAlt: z.string().min(2).max(200).nullable(),
     status: contentStatusSchema,
   })
   .refine(
@@ -352,6 +355,14 @@ export const maintenanceRequestFormSchema = basePublicFormSchema.extend({
   message: z.string().max(4000).default("Maintenance request submitted."),
 });
 
+export const planYourVisitFormSchema = basePublicFormSchema.extend({
+  formType: z.literal("plan_your_visit"),
+  visitDate: requiredFormText(2, 100),
+  numberOfAdults: z.number().int().min(1).max(100).default(1),
+  numberOfChildren: z.number().int().min(0).max(100).default(0),
+  message: z.string().max(4000).default(""),
+});
+
 export const publicFormSubmissionSchema = z.discriminatedUnion("formType", [
   contactFormSchema,
   prayerRequestFormSchema,
@@ -359,6 +370,7 @@ export const publicFormSubmissionSchema = z.discriminatedUnion("formType", [
   announcementRequestFormSchema,
   membershipTransferFormSchema,
   maintenanceRequestFormSchema,
+  planYourVisitFormSchema,
 ]);
 
 export const formSubmissionStatusUpdateSchema = z.object({

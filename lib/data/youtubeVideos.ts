@@ -100,7 +100,8 @@ export async function getLatestYoutubeUploads(
   let response: Response;
 
   try {
-    response = await fetch(url, { next: { revalidate: UPLOADS_CACHE_SECONDS } });
+    const headers = { Referer: process.env.NEXT_PUBLIC_SITE_URL || "https://stonehillchurch.org" };
+    response = await fetch(url, { headers, next: { revalidate: UPLOADS_CACHE_SECONDS } });
   } catch (error) {
     logDataFallback("getLatestYoutubeUploads", error);
     return [];
@@ -161,7 +162,8 @@ export async function getLiveYoutubeBroadcast(
   let response: Response;
 
   try {
-    response = await fetch(url, { next: { revalidate: LIVE_CACHE_SECONDS } });
+    const headers = { Referer: process.env.NEXT_PUBLIC_SITE_URL || "https://stonehillchurch.org" };
+    response = await fetch(url, { headers, next: { revalidate: LIVE_CACHE_SECONDS } });
   } catch (error) {
     logDataFallback("getLiveYoutubeBroadcast", error);
     return null;
@@ -190,5 +192,57 @@ export async function getLiveYoutubeBroadcast(
     publishedAt: liveItem?.snippet?.publishedAt ?? null,
     thumbnailUrl: bestThumbnail({ snippet: liveItem?.snippet }, videoId),
     url: getYouTubeWatchUrl(videoId),
+  };
+}
+
+export async function getYoutubeVideoById(videoId: string): Promise<YouTubeVideo | null> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+
+  if (!apiKey || !videoId) {
+    return null;
+  }
+
+  const url = new URL("https://www.googleapis.com/youtube/v3/videos");
+  url.searchParams.set("part", "snippet");
+  url.searchParams.set("id", videoId);
+  url.searchParams.set("key", apiKey);
+
+  let response: Response;
+
+  try {
+    const headers = { Referer: process.env.NEXT_PUBLIC_SITE_URL || "https://stonehillchurch.org" };
+    response = await fetch(url, { headers, next: { revalidate: UPLOADS_CACHE_SECONDS } });
+  } catch (error) {
+    logDataFallback("getYoutubeVideoById", error);
+    return null;
+  }
+
+  if (!response.ok) {
+    logDataFallback(
+      "getYoutubeVideoById",
+      new Error(`YouTube video API request failed with status ${response.status}.`),
+    );
+    return null;
+  }
+
+  const data = (await response.json()) as YouTubeSearchResponse;
+  const item = Array.isArray(data.items) ? data.items[0] : null;
+
+  if (!item || !item.id) {
+    return null;
+  }
+
+  // The videos endpoint returns the ID as a string, unlike the search endpoint which uses id.videoId
+  const actualId = typeof item.id === "string" ? item.id : item.id.videoId;
+  
+  if (!actualId) return null;
+
+  return {
+    id: actualId,
+    title: item.snippet?.title ?? "Stonehill video",
+    description: item.snippet?.description ?? "",
+    publishedAt: item.snippet?.publishedAt ?? null,
+    thumbnailUrl: bestThumbnail({ snippet: item.snippet }, actualId),
+    url: getYouTubeWatchUrl(actualId),
   };
 }

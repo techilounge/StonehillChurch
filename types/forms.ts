@@ -6,7 +6,8 @@ export type FormType =
   | "volunteer"
   | "announcement_request"
   | "membership_transfer"
-  | "maintenance_request";
+  | "maintenance_request"
+  | "plan_your_visit";
 
 export const FORM_TYPES = [
   "contact",
@@ -15,6 +16,7 @@ export const FORM_TYPES = [
   "announcement_request",
   "membership_transfer",
   "maintenance_request",
+  "plan_your_visit",
 ] as const satisfies readonly FormType[];
 
 export type FormSubmissionPayload = Record<

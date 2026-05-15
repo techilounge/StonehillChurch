@@ -23,6 +23,7 @@ import {
   Settings,
   UsersRound,
   Youtube,
+  FileText,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -41,6 +42,7 @@ export const adminNavigation: AdminNavItem[] = [
   { href: "/admin/leaders", label: "Leaders", icon: Contact },
   { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
   { href: "/admin/resources", label: "Resources", icon: BookOpen },
+  { href: "/admin/pages", label: "Pages", icon: FileText, requiredPermission: "settings:manage" },
   { href: "/admin/forms", label: "Forms", icon: ClipboardList, requiredPermission: "forms:manage" },
   { href: "/admin/media", label: "Media", icon: FolderOpen },
   { href: "/admin/youtube", label: "YouTube", icon: Youtube, requiredPermission: "youtube:manage" },

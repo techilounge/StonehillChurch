@@ -6,11 +6,21 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/im-new", label: "I'm New" },
-  { href: "/plan-your-visit", label: "Plan Your Visit" },
   { href: "/sermons", label: "Sermons" },
   { href: "/events", label: "Events" },
   { href: "/ministries", label: "Ministries" },
-  { href: "/about", label: "About" },
+  { href: "/resources", label: "Resources" },
+  { href: "/contact", label: "Contact" },
+  {
+    href: "/about",
+    label: "About",
+    // The "About" parent link itself goes to /about. Sub-items are only the
+    // pages that branch off About; we intentionally don't repeat /about here.
+    subItems: [
+      { href: "/our-beliefs", label: "Our Beliefs" },
+      { href: "/our-leaders", label: "Our Leaders" },
+    ],
+  },
 ];
 
 export function PublicHeader() {

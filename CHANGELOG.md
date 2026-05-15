@@ -2,7 +2,22 @@
 
 All notable changes to the Stonehill Church website will be documented in this file.
 
-## [0.3.0] - 2026-05-14
+
+## [0.4.0] - 2026-05-15
+
+### Added
+- **Automated YouTube Sermon Integration**
+  - Implemented dynamic sermon fetching from YouTube via Data API when enabled in settings.
+  - Added `getYoutubeVideoById` service to fetch individual video metadata on demand.
+  - Created a seamless adapter to map YouTube video payloads to the existing `Sermon` UI structure.
+  - Integrated "Auto-Fetch Latest Sermons" toggle into `getSermons`, `getLatestSermon`, and `getSermonBySlug`.
+
+### Fixed
+- Resolved YouTube API `403 Forbidden` errors by adding a persistent `Referer` header to all server-side fetch requests, bypassing Google Cloud API key restrictions.
+
+### Changed
+- Improved Admin UI for YouTube settings with clearer instructions for multi-channel configurations.
+
 
 ### Added
 - **Phase 15R-B: Global Design System Migration**

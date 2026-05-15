@@ -176,6 +176,8 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       ]},
       { name: "ctaLabel", label: "Action Label", type: "text", required: false, hiddenOnList: true },
       { name: "ctaHref", label: "Action URL", type: "url", required: false, hiddenOnList: true },
+      { name: "imageUrl", label: "Image", type: "media", required: false, hiddenOnList: true },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: false, hiddenOnList: true, description: "Describe the image for screen readers (required when an image is attached)." },
     ],
   },
   resources: {

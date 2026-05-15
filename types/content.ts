@@ -121,6 +121,8 @@ export type Announcement = {
   priority: AnnouncementPriority;
   ctaLabel: string | null;
   ctaHref: string | null;
+  imageUrl: string | null;
+  imageAlt: string | null;
   status: ContentStatus;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;

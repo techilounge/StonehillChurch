@@ -3,10 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { getResources } from "@/lib/data/resources";
+import { getSiteSettings } from "@/lib/data/siteSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
-import { FileText, Download, ExternalLink } from "lucide-react";
+import { FileText, Download, ExternalLink, ArrowLeft } from "lucide-react";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { breadcrumbJsonLd, siteSettingsToSeoSettings } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPublicPageMetadata({
@@ -18,7 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ResourcesPage() {
-  const resources = await getResources();
+  const [resources, siteSettings] = await Promise.all([
+    getResources(),
+    getSiteSettings()
+  ]);
+  const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   // Optionally group resources by category
   const groupedResources = resources.reduce((acc, resource) => {
@@ -32,13 +39,33 @@ export default async function ResourcesPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
+      <JsonLd
+        data={breadcrumbJsonLd(
+          [
+            { name: "Home", path: "/" },
+            { name: "Resources", path: "/resources" },
+          ],
+          seoSettings.siteUrl,
+        )}
+      />
       <PageHero
         title="Resources"
         subtitle="Documents, study guides, forms, and more."
       />
 
-      <section className="py-16 md:py-24 overflow-hidden">
+      <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          
+          {/* Back Link */}
+          <div className="mb-6">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-slate-900/60 hover:text-stonehill-accent font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </Link>
+          </div>
           {resources.length > 0 ? (
             <div className="space-y-16">
               {categories.map((category) => (

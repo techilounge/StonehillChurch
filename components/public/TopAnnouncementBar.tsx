@@ -1,4 +1,11 @@
-import { AnnouncementBanner } from "./AnnouncementBanner";
+import { AnnouncementBannerCarousel, type BannerItem } from "./AnnouncementBannerCarousel";
+
+const PRIORITY_ORDER: Record<"urgent" | "high" | "normal" | "low", number> = {
+  urgent: 4,
+  high: 3,
+  normal: 2,
+  low: 1,
+};
 
 export async function TopAnnouncementBar() {
   const [{ getActiveAnnouncements }, { getYoutubeSettings }] = await Promise.all([
@@ -10,41 +17,40 @@ export async function TopAnnouncementBar() {
     getYoutubeSettings(),
   ]);
 
+  const items: BannerItem[] = [];
+
+  // The YouTube live banner is sticky and always sits first when active.
   if (youtubeSettings.showLiveBanner) {
-    return (
-      <AnnouncementBanner
-        title="Live now"
-        message="Join the Stonehill worship service online."
-        priority="urgent"
-        ctaLabel="Watch live"
-        ctaHref="/live"
-        dismissible={false}
-      />
-    );
+    items.push({
+      id: "youtube-live",
+      title: "Live now",
+      message: "Join the Stonehill worship service online.",
+      priority: "urgent",
+      ctaLabel: "Watch live",
+      ctaHref: "/live",
+      dismissible: false,
+    });
   }
 
-  if (activeAnnouncements.length === 0) {
-    return null;
-  }
-
-  // Find the highest priority announcement
-  const priorityOrder = { urgent: 4, high: 3, normal: 2, low: 1 };
-  const sortedAnnouncements = activeAnnouncements.sort((a, b) => {
-    return (
-      priorityOrder[b.priority as keyof typeof priorityOrder] -
-      priorityOrder[a.priority as keyof typeof priorityOrder]
-    );
-  });
-
-  const topAnnouncement = sortedAnnouncements[0];
-
-  return (
-    <AnnouncementBanner
-      title={topAnnouncement.title}
-      message={topAnnouncement.body}
-      priority={topAnnouncement.priority}
-      ctaLabel={topAnnouncement.ctaLabel}
-      ctaHref={topAnnouncement.ctaHref}
-    />
+  const sortedAnnouncements = [...activeAnnouncements].sort(
+    (a, b) => PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority],
   );
+
+  for (const announcement of sortedAnnouncements) {
+    items.push({
+      id: announcement.id,
+      title: announcement.title,
+      message: announcement.body,
+      priority: announcement.priority,
+      ctaLabel: announcement.ctaLabel,
+      ctaHref: announcement.ctaHref,
+      imageUrl: announcement.imageUrl ?? null,
+      imageAlt: announcement.imageAlt ?? null,
+      dismissible: true,
+    });
+  }
+
+  if (items.length === 0) return null;
+
+  return <AnnouncementBannerCarousel items={items} />;
 }
