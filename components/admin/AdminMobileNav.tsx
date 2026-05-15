@@ -81,7 +81,7 @@ export function AdminMobileNav({
                                 href={item.href}
                                 onClick={() => setSidebarOpen(false)}
                                 className={cn(
-                                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                  "group flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2",
                                   isActive
                                     ? "bg-stonehill-primary/10 text-stonehill-primary"
                                     : "text-slate-900/70 hover:bg-slate-50 hover:text-stonehill-primary"

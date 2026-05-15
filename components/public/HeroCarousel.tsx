@@ -22,7 +22,18 @@ function normalizeOverlayOpacity(value: number | null | undefined) {
 }
 
 export function HeroCarousel({ slides }: HeroCarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mediaQuery.matches);
+    
+    const listener = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", listener);
+    return () => mediaQuery.removeEventListener("change", listener);
+  }, []);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: reducedMotion ? 0 : 25 });
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
@@ -34,6 +45,16 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
     setCanScrollPrev(emblaApi.canScrollPrev());
     setCanScrollNext(emblaApi.canScrollNext());
   }, [emblaApi]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      scrollPrev();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      scrollNext();
+    }
+  }, [scrollPrev, scrollNext]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -59,11 +80,24 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
   }
 
   return (
-    <div className="relative w-full group">
+    <div 
+      className="relative w-full group"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Featured slides"
+    >
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex touch-pan-y">
+        <div className="flex touch-pan-y" aria-live="polite" aria-atomic="true">
           {slides.map((slide, index) => (
-            <div key={slide.id} className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px] bg-stonehill-primary">
+            <div 
+              key={slide.id} 
+              className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px] bg-stonehill-primary"
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Slide ${index + 1} of ${slides.length}`}
+            >
               {slide.imageUrl ? (
                 <Image
                   src={slide.imageUrl}

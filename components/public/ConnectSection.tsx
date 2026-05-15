@@ -56,7 +56,7 @@ export function ConnectSection() {
             <Link 
               key={card.title}
               href={card.href}
-              className="group relative flex flex-col p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-stonehill-accent overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+              className="group relative flex flex-col p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 motion-safe:hover:-translate-y-1 hover:border-stonehill-accent overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
             >
               <div className={`inline-flex items-center justify-center p-3 rounded-xl mb-4 w-12 h-12 ${card.bgColor} ${card.color} motion-safe:transition-transform motion-safe:group-hover:scale-110`}>
                 <card.icon className="w-6 h-6" />

@@ -103,10 +103,14 @@ export function AdminLoginForm({ returnTo }: { returnTo: string }) {
 
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      setResetMessage("A password reset link has been sent to your email address.");
+      setResetMessage("If an account with that email exists, a password reset link has been sent.");
     } catch (resetError) {
-      console.error("[auth] password reset failed", resetError);
-      setError("Could not send password reset email. Please verify your email address.");
+      if ((resetError as { code?: string })?.code === "auth/user-not-found") {
+        setResetMessage("If an account with that email exists, a password reset link has been sent.");
+      } else {
+        console.error("[auth] password reset failed", resetError);
+        setError("Could not send password reset email. Please try again later.");
+      }
     } finally {
       setResetLoading(false);
     }

@@ -3,6 +3,23 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.2] - 2026-05-15
+
+### Added
+- **A11y & Motion Support**
+  - Implemented keyboard navigation (arrow keys) and full ARIA semantics for the Hero Carousel.
+  - Added OS-level `prefers-reduced-motion` support to the Hero Carousel and all interactive card hover animations.
+  - Integrated `focus-visible` high-contrast rings across the Admin Dashboard sidebar and mobile navigation.
+
+### Fixed
+- **Security Hardening**
+  - Closed an email enumeration vulnerability in the admin login by standardizing password reset success messages.
+  - Implemented a strict Content-Security-Policy (CSP) in `next.config.ts`, including whitelisting for YouTube, ReCAPTCHA, and Google Maps.
+- **UI/UX Polish**
+  - Resolved a redundant time display bug in `EventCard` where single-time events showed duplicate ranges.
+  - Fixed mobile layout wrapping in the global footer by optimizing the responsive grid for extra-small screens.
+  - Added a fallback `favicon.ico` to prevent browser 404s on metadata requests.
+
 ## [0.4.1] - 2026-05-15
 
 ### Added

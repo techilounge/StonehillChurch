@@ -58,7 +58,7 @@ export function WelcomeSection({ settings = {}, leaders = [] }: WelcomeSectionPr
               <div className="flex flex-wrap justify-center gap-10 md:gap-16 mb-10">
                 {topLeaders.map((leader) => (
                   <div key={leader.id} className="flex flex-col items-center text-center max-w-[200px]">
-                    <div className="group relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-stonehill-accent overflow-hidden mb-4 shadow-xl transition-all duration-500 ease-out hover:shadow-2xl hover:-translate-y-1.5">
+                    <div className="group relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-stonehill-accent overflow-hidden mb-4 shadow-xl transition-all duration-500 ease-out hover:shadow-2xl motion-safe:hover:-translate-y-1.5">
                       <Image
                         src={leader.photoUrl}
                         alt={leader.photoAlt || leader.name}

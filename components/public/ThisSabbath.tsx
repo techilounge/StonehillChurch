@@ -28,7 +28,7 @@ export function ThisSabbath({ settings = {} }: ThisSabbathProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Breakfast Service */}
-          <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 group">
+          <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all duration-500 ease-out motion-safe:hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 group">
             <div className="mb-4 bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary transition-transform duration-500 group-hover:scale-110">
               <Coffee className="w-8 h-8" />
             </div>
@@ -43,7 +43,7 @@ export function ThisSabbath({ settings = {} }: ThisSabbathProps) {
           </div>
 
           {/* Sabbath School */}
-          <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 group">
+          <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all duration-500 ease-out motion-safe:hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 group">
             <div className="mb-4 bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary transition-transform duration-500 group-hover:scale-110">
               <Users className="w-8 h-8" />
             </div>
@@ -58,7 +58,7 @@ export function ThisSabbath({ settings = {} }: ThisSabbathProps) {
           </div>
 
           {/* Divine Worship */}
-          <div className="flex flex-col items-center text-center p-6 bg-stonehill-primary text-white rounded-2xl shadow-md relative overflow-hidden transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-2xl group">
+          <div className="flex flex-col items-center text-center p-6 bg-stonehill-primary text-white rounded-2xl shadow-md relative overflow-hidden transition-all duration-500 ease-out motion-safe:hover:-translate-y-1.5 hover:shadow-2xl group">
             <div className="absolute top-0 right-0 p-4 opacity-10 transition-transform duration-700 ease-out group-hover:scale-110 group-hover:opacity-20">
               <MapPin className="w-24 h-24" />
             </div>
@@ -76,7 +76,7 @@ export function ThisSabbath({ settings = {} }: ThisSabbathProps) {
           </div>
 
           {/* Fellowship Meal */}
-          <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 group">
+          <div className="flex flex-col items-center text-center p-6 bg-slate-50 rounded-2xl border border-slate-200 transition-all duration-500 ease-out motion-safe:hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300 group">
             <div className="mb-4 bg-stonehill-primary/10 p-4 rounded-full text-stonehill-primary transition-transform duration-500 group-hover:scale-110">
               <Coffee className="w-8 h-8" />
             </div>

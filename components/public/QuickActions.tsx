@@ -62,7 +62,7 @@ export function QuickActions() {
             <Link
               key={action.title}
               href={action.href}
-              className="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-stonehill-accent hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+              className="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center shadow-sm transition-all duration-300 motion-safe:hover:-translate-y-1 hover:border-stonehill-accent hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
             >
               <div className="mb-4 rounded-full bg-stonehill-primary/10 p-3 text-stonehill-primary transition-colors group-hover:bg-stonehill-accent/20 group-hover:text-stonehill-accent">
                 <action.icon className="h-6 w-6" aria-hidden="true" />

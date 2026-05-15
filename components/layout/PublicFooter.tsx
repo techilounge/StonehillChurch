@@ -60,7 +60,7 @@ export function PublicFooter({ settings }: PublicFooterProps) {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 lg:col-span-2">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Connect</h3>
               <ul className="mt-6 space-y-4 text-sm text-slate-500">

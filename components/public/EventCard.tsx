@@ -41,9 +41,10 @@ export function EventCard({ event }: EventCardProps) {
     ? startDate.toLocaleDateString("en-US", { day: "2-digit" })
     : "";
     
+  const startTimeStr = startDate ? startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+  const endTimeStr = endDate ? endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
   const formattedTime = startDate
-    ? startDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) + 
-      (endDate ? ` - ${endDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : "")
+    ? (endTimeStr && startTimeStr !== endTimeStr ? `${startTimeStr} - ${endTimeStr}` : startTimeStr)
     : "";
 
   return (

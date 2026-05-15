@@ -66,7 +66,7 @@ export function AdminSidebar({ session }: { session: PermissionSubject }) {
   return (
     <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-50 md:flex md:w-72 md:flex-col md:border-r md:border-slate-200 md:bg-white md:shadow-sm">
       <div className="flex h-16 shrink-0 items-center px-6 border-b border-slate-200 bg-stonehill-primary text-white">
-        <Link href="/admin/dashboard" className="text-xl font-bold tracking-tight">
+        <Link href="/admin/dashboard" className="text-xl font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2 rounded-sm">
           Stonehill CMS
         </Link>
       </div>
@@ -79,7 +79,7 @@ export function AdminSidebar({ session }: { session: PermissionSubject }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                  "group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2",
                   isActive
                     ? "bg-stonehill-primary/10 text-stonehill-primary"
                     : "text-slate-900/70 hover:bg-slate-50 hover:text-stonehill-primary"
