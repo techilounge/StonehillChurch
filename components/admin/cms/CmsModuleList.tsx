@@ -211,7 +211,7 @@ export function CmsModuleList({
           <div className="flex items-center gap-2">
             {primaryValue}
             {hasFeaturedField && isFeatured && (
-              <Heart className="h-3 w-3 fill-stonehill-accent text-stonehill-accent" title="Featured" />
+              <Heart className="h-3 w-3 fill-stonehill-accent text-stonehill-accent" />
             )}
           </div>
         </td>
