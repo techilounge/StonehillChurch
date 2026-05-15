@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,17 +36,29 @@ export function PublicFooter({ settings }: PublicFooterProps) {
     { label: "YouTube", href: settingString(settings, "social.youtube"), icon: Youtube },
   ].filter((item) => item.href);
 
+  const logoUrl = settingString(settings, "general.logo_url");
+
   return (
     <footer className="border-t border-slate-200 bg-white py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-8">
           <div className="flex flex-col">
-            <span className="text-xl font-bold text-stonehill-primary">{churchName}</span>
-            <p className="mt-4 text-sm text-slate-500 max-w-xs">
+            <span className="text-xl font-bold text-stonehill-primary mb-4 block">{churchName}</span>
+            <p className="text-sm text-slate-500 max-w-xs mb-6">
               {tagline}
             </p>
+            {logoUrl && (
+              <div className="relative h-16 w-32 mb-6">
+                <Image
+                  src={logoUrl}
+                  alt={`${churchName} Logo`}
+                  fill
+                  className="object-contain object-left"
+                />
+              </div>
+            )}
             {socialLinks.length > 0 && (
-              <div className="mt-8 flex space-x-4">
+              <div className="flex space-x-4">
                 {socialLinks.map((item) => (
                   <a
                     key={item.label}

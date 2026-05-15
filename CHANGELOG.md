@@ -3,6 +3,22 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.3] - 2026-05-15
+
+### Added
+- **Branding & Media Management**
+  - Implemented a new "Branding & Media" section in the CMS for dynamic logo and favicon management.
+  - Created `ImageUploadField.tsx` for secure, server-optimized asset uploads (WebP conversion, size limits).
+  - Integrated dynamic Logo support across `PublicHeader`, `MobileNav`, and `PublicFooter`.
+  - Converted site metadata to dynamic `generateMetadata()` for CMS-controlled browser favicons.
+
+### Fixed
+- **Logo Integration & Layout Symmetry**
+  - Resolved a backend property access bug in the media upload pipeline that prevented URL retrieval.
+  - Fixed a configuration mismatch where flattened Firestore keys (e.g., `general.logo_url`) were being read incorrectly as nested objects.
+  - Optimized NavBar layout to prevent Church Name wrapping and ensured perfect horizontal symmetry between branding, menu items, and CTA buttons.
+  - Refined Footer architecture to follow a 4-row structure (Name, Tagline, Logo, Social Icons) for improved visual balance.
+
 ## [0.4.2] - 2026-05-15
 
 ### Added

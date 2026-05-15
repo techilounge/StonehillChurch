@@ -29,29 +29,40 @@ const reenieBeanie = Reenie_Beanie({
   variable: "--font-handwritten",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: DEFAULT_SITE_NAME,
-    template: "%s | Stonehill SDA Church",
-  },
-  description: DEFAULT_SITE_DESCRIPTION,
-  metadataBase: new URL(normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL)),
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: DEFAULT_SITE_NAME,
+export async function generateMetadata(): Promise<Metadata> {
+  const { getCachedSiteSettings } = await import("@/lib/data/siteSettings");
+  const siteSettings = await getCachedSiteSettings();
+  const faviconUrl = typeof siteSettings?.["general.favicon_url"] === "string" 
+    ? siteSettings["general.favicon_url"] 
+    : "/favicon.ico";
+
+  return {
+    title: {
+      default: DEFAULT_SITE_NAME,
+      template: "%s | Stonehill SDA Church",
+    },
     description: DEFAULT_SITE_DESCRIPTION,
-    url: "/",
-    siteName: DEFAULT_SITE_NAME,
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: DEFAULT_SITE_NAME,
-    description: DEFAULT_SITE_DESCRIPTION,
-  },
-};
+    metadataBase: new URL(normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL)),
+    alternates: {
+      canonical: "/",
+    },
+    icons: {
+      icon: faviconUrl,
+    },
+    openGraph: {
+      title: DEFAULT_SITE_NAME,
+      description: DEFAULT_SITE_DESCRIPTION,
+      url: "/",
+      siteName: DEFAULT_SITE_NAME,
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: DEFAULT_SITE_NAME,
+      description: DEFAULT_SITE_DESCRIPTION,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#1e3f66",

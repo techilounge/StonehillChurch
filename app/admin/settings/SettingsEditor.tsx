@@ -5,6 +5,7 @@ import { Save, AlertCircle } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
+import { ImageUploadField } from "@/components/admin/settings/ImageUploadField";
 import type { CmsDocument } from "@/lib/data/adminCms";
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/cms/actions";
 
@@ -123,6 +124,39 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <p>{message.text}</p>
         </div>
       )}
+
+      {/* Branding & Media Group */}
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Branding & Media</h3>
+          <p className="text-sm text-slate-500">Manage your site logo and favicon.</p>
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <ImageUploadField
+            label="Site Logo"
+            description="Displayed in the main navigation and footer."
+            value={settings["general"]?.logo_url || ""}
+            onChange={(url) => handleChange("general", "logo_url", url)}
+            disabled={!canEdit || isSubmitting}
+            defaultAltText="Site Logo"
+          />
+          <ImageUploadField
+            label="Site Favicon"
+            description="The small icon shown in the browser tab (ideally square)."
+            value={settings["general"]?.favicon_url || ""}
+            onChange={(url) => handleChange("general", "favicon_url", url)}
+            disabled={!canEdit || isSubmitting}
+            defaultAltText="Site Favicon"
+          />
+        </div>
+        {canEdit && (
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
+            <Button disabled={isSubmitting} onClick={() => handleSave("general", "general", settings["general"] || {})}>
+              <Save className="h-4 w-4 mr-2" /> Save Branding
+            </Button>
+          </div>
+        )}
+      </section>
 
       {/* Contact Info Group */}
       <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">

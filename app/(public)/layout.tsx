@@ -20,7 +20,7 @@ export default async function PublicLayout({
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <TopAnnouncementBar />
-      <PublicHeader />
+      <PublicHeader settings={siteSettings} />
       <main id="main-content" tabIndex={-1}>
         {children}
       </main>

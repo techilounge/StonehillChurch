@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/shared/Button";
@@ -14,9 +15,11 @@ export interface NavItem {
 
 export interface MobileNavProps {
   items: NavItem[];
+  churchName?: string;
+  logoUrl?: string | null;
 }
 
-export function MobileNav({ items }: MobileNavProps) {
+export function MobileNav({ items, churchName = "Stonehill SDA Church", logoUrl }: MobileNavProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -55,10 +58,24 @@ export function MobileNav({ items }: MobileNavProps) {
             <div className="flex items-center justify-between">
               <Link
                 href="/"
-                className="-m-1.5 rounded-sm p-1.5 text-lg font-bold text-stonehill-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                className="-m-1.5 rounded-sm p-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
                 onClick={() => setIsOpen(false)}
               >
-                Stonehill SDA Church
+                <div className="flex items-center gap-3">
+                  {logoUrl && (
+                    <div className="relative h-8 w-8">
+                      <Image
+                        src={logoUrl}
+                        alt={`${churchName} Logo`}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  )}
+                  <span className="text-lg font-bold text-stonehill-primary">
+                    {churchName}
+                  </span>
+                </div>
               </Link>
               <Button
                 variant="ghost"
