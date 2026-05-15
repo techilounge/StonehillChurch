@@ -24,7 +24,7 @@ if (process.env.SKIP_NEXT_DEV_CLEAN === "1") {
 // Best-effort sweep of leftover `.next-stale-*` directories from previous
 // runs. Locked folders are skipped silently so a stuck handle never blocks
 // dev or build. Whichever folders aren't locked anymore get reclaimed.
-function sweepStaleNextDirectories() {
+async function sweepStaleNextDirectories() {
   let entries;
   try {
     entries = fs.readdirSync(workspace, { withFileTypes: true });
@@ -55,12 +55,17 @@ function sweepStaleNextDirectories() {
     }
 
     try {
-      fs.rmSync(staleDir, {
-        recursive: true,
-        force: true,
-        maxRetries: 3,
-        retryDelay: 150,
-      });
+      // Use Promise.race to enforce a timeout of 1 second per stale dir
+      // This prevents the script from hanging indefinitely on Windows due to fs.rm bugs.
+      await Promise.race([
+        fs.promises.rm(staleDir, {
+          recursive: true,
+          force: true,
+          maxRetries: 2,
+          retryDelay: 100,
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1000))
+      ]);
       removed += 1;
     } catch {
       skipped += 1;
@@ -74,50 +79,61 @@ function sweepStaleNextDirectories() {
   }
 }
 
-sweepStaleNextDirectories();
+async function main() {
+  await sweepStaleNextDirectories();
 
-if (
-  shouldPrepareCache &&
-  process.env.CLEAN_NEXT_DEV_CACHE !== "1"
-) {
-  if (!fs.existsSync(nextDir)) {
-    process.stdout.write(`[${lifecycleEvent}] No .next cache to prepare.\n`);
+  if (
+    shouldPrepareCache &&
+    process.env.CLEAN_NEXT_DEV_CACHE !== "1"
+  ) {
+    if (!fs.existsSync(nextDir)) {
+      process.stdout.write(`[${lifecycleEvent}] No .next cache to prepare.\n`);
+      process.exit(0);
+    }
+
+    const staleDir = path.resolve(workspace, `.next-stale-${Date.now()}`);
+    const staleRelative = path.relative(workspace, staleDir);
+
+    if (
+      staleRelative.startsWith("..") ||
+      path.isAbsolute(staleRelative) ||
+      !path.basename(staleDir).startsWith(".next-stale-")
+    ) {
+      throw new Error(`Refusing to move .next to unexpected path: ${staleDir}`);
+    }
+
+    try {
+      fs.renameSync(nextDir, staleDir);
+      process.stdout.write(
+        `[${lifecycleEvent}] Moved .next to ${path.basename(staleDir)} before continuing.\n`,
+      );
+    } catch (error) {
+      process.stdout.write(
+        `[${lifecycleEvent}] Could not move .next (${error.code || error.message}). Continuing without cleanup.\n`,
+      );
+    }
+
     process.exit(0);
   }
 
-  const staleDir = path.resolve(workspace, `.next-stale-${Date.now()}`);
-  const staleRelative = path.relative(workspace, staleDir);
-
-  if (
-    staleRelative.startsWith("..") ||
-    path.isAbsolute(staleRelative) ||
-    !path.basename(staleDir).startsWith(".next-stale-")
-  ) {
-    throw new Error(`Refusing to move .next to unexpected path: ${staleDir}`);
-  }
-
-  try {
-    fs.renameSync(nextDir, staleDir);
-    process.stdout.write(
-      `[${lifecycleEvent}] Moved .next to ${path.basename(staleDir)} before continuing.\n`,
-    );
-  } catch (error) {
-    process.stdout.write(
-      `[${lifecycleEvent}] Could not move .next (${error.code || error.message}). Continuing without cleanup.\n`,
-    );
+  if (fs.existsSync(nextDir)) {
+    try {
+      await fs.promises.rm(nextDir, {
+        recursive: true,
+        force: true,
+        maxRetries: 3,
+        retryDelay: 200,
+      });
+      process.stdout.write(`[${lifecycleEvent}] Cleared .next before continuing.\n`);
+    } catch (e) {
+      process.stdout.write(`[${lifecycleEvent}] Warning: Failed to fully clear .next cache.\n`);
+    }
   }
 
   process.exit(0);
 }
 
-if (fs.existsSync(nextDir)) {
-  fs.rmSync(nextDir, {
-    recursive: true,
-    force: true,
-    maxRetries: 5,
-    retryDelay: 200,
-  });
-  process.stdout.write(`[${lifecycleEvent}] Cleared .next before continuing.\n`);
-}
-
-process.exit(0);
+main().catch((err) => {
+  console.error(`[${lifecycleEvent}] Fatal error during cache cleanup:`, err);
+  process.exit(0); // Exit successfully to not block build
+});

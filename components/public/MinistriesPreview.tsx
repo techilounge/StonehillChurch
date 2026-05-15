@@ -51,7 +51,10 @@ export function MinistriesPreview({ ministries }: MinistriesPreviewProps) {
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className={cn(
+          "grid grid-cols-1 md:grid-cols-2 gap-6",
+          ministries.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+        )}>
           {ministries.map((ministry) => (
             <MinistryCard key={ministry.id} ministry={ministry} />
           ))}

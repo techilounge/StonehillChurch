@@ -208,6 +208,16 @@ function parseDateValue(value: unknown, field: string): Date {
     return value;
   }
 
+  // Handle Firestore Timestamp objects gracefully
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as any).toDate === "function"
+  ) {
+    return (value as any).toDate();
+  }
+
   if (typeof value === "string") {
     const parsed = new Date(value);
 
@@ -253,7 +263,12 @@ function validateFullData(
   config: ModuleConfig,
   input: unknown,
 ): Record<string, unknown> {
-  const parsed = config.schema.safeParse(input);
+  const normalizedInput =
+    typeof input === "object" && input !== null
+      ? normalizeDateFields(input as Record<string, unknown>, config.dateFields)
+      : input;
+
+  const parsed = config.schema.safeParse(normalizedInput);
 
   if (!parsed.success) {
     throw new CmsAdminError(
@@ -264,7 +279,7 @@ function validateFullData(
     );
   }
 
-  return normalizeDateFields(parsed.data as Record<string, unknown>, config.dateFields);
+  return parsed.data as Record<string, unknown>;
 }
 
 function validatePartialData(
@@ -273,7 +288,13 @@ function validatePartialData(
 ): Record<string, unknown> {
   const partialSchema =
     config.schema instanceof z.ZodObject ? config.schema.partial() : z.object({}).passthrough();
-  const parsed = partialSchema.safeParse(input);
+  
+  const normalizedInput =
+    typeof input === "object" && input !== null
+      ? normalizeDateFields(input as Record<string, unknown>, config.dateFields)
+      : input;
+
+  const parsed = partialSchema.safeParse(normalizedInput);
 
   if (!parsed.success) {
     throw new CmsAdminError(
@@ -284,7 +305,7 @@ function validatePartialData(
     );
   }
 
-  return normalizeDateFields(parsed.data as Record<string, unknown>, config.dateFields);
+  return parsed.data as Record<string, unknown>;
 }
 
 function patchFromMergedData(

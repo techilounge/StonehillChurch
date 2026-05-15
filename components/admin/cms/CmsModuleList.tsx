@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useId } from "react";
 import Link from "next/link";
-import { Plus, Search, Pencil, Archive, Trash2, Globe } from "lucide-react";
+import { Plus, Search, Pencil, Archive, Trash2, Globe, Heart } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -35,6 +35,7 @@ import {
   deleteDocumentAction,
   publishDocumentAction,
   reorderDocumentsAction,
+  updateDocumentAction,
 } from "@/app/admin/cms/actions";
 import { PUBLISHED } from "@/types/shared";
 
@@ -58,6 +59,7 @@ export function CmsModuleList({
   const config = CMS_CONFIG[module];
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isMutating, setIsMutating] = React.useState(false);
+  const [confirmDialog, setConfirmDialog] = React.useState<{isOpen: boolean, id: string, name: string, isFeatured: boolean} | null>(null);
 
   /* ─── Sortable state ──────────────────────────────────────────── */
   const isSortable = module === "homepageSlides";
@@ -168,9 +170,31 @@ export function CmsModuleList({
     }
   };
 
+  const handleToggleFeatured = async (id: string, currentlyFeatured: boolean) => {
+    setIsMutating(true);
+    try {
+      const result = await updateDocumentAction(module, id, { featured: !currentlyFeatured });
+      if (!result.ok) {
+        let errorMessage = result.error.message;
+        if (result.error.fieldErrors) {
+          const missingFields = Object.keys(result.error.fieldErrors).join(", ");
+          errorMessage += ` Missing or invalid fields: ${missingFields}. Please edit the document to fix them.`;
+        }
+        toast.error(errorMessage, { duration: 6000 });
+      } else {
+        toast.success(`Successfully ${currentlyFeatured ? "removed from" : "added to"} featured items.`);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsMutating(false);
+      setConfirmDialog(null);
+    }
+  };
+
   // Determine primary display column
   const primaryField = config.fields.find((f) => f.name === "title" || f.name === "name") || config.fields[0];
-
+  const hasFeaturedField = config.fields.some((f) => f.name === "featured");
   const routePath = module.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 
   /* ─── Table row renderer ──────────────────────────────────────── */
@@ -179,11 +203,17 @@ export function CmsModuleList({
     const primaryValue = String(doc[primaryField.name] || "(Untitled)");
     const dateVal = doc.updatedAt || doc.createdAt;
     const dateStr = dateVal ? new Date(dateVal as string).toLocaleDateString() : "Unknown";
+    const isFeatured = !!doc.featured;
 
     return (
       <>
         <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900">
-          {primaryValue}
+          <div className="flex items-center gap-2">
+            {primaryValue}
+            {hasFeaturedField && isFeatured && (
+              <Heart className="h-3 w-3 fill-stonehill-accent text-stonehill-accent" title="Featured" />
+            )}
+          </div>
         </td>
         <td className="whitespace-nowrap px-6 py-4 text-sm">
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
@@ -200,6 +230,18 @@ export function CmsModuleList({
         </td>
         <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
           <div className="flex items-center justify-end gap-2">
+            {hasFeaturedField && canEdit && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className={`h-8 px-2 transition-colors ${isFeatured ? "text-stonehill-accent border-stonehill-accent bg-stonehill-accent/10" : "text-slate-400 hover:text-stonehill-accent"}`}
+                disabled={isMutating}
+                onClick={() => setConfirmDialog({ isOpen: true, id: doc.id, name: primaryValue, isFeatured })}
+                title={isFeatured ? "Remove from Featured" : "Mark as Featured"}
+              >
+                <Heart className={`h-4 w-4 ${isFeatured ? "fill-stonehill-accent" : ""}`} />
+              </Button>
+            )}
             {canEdit && (
               <Link href={`/admin/${routePath}/${doc.id}`}>
                 <Button variant="outline" size="sm" className="h-8 px-2" disabled={isMutating}>
@@ -254,67 +296,114 @@ export function CmsModuleList({
   const isSearching = !!searchQuery.trim();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-slate-900">{config.title}</h1>
-        {canCreate && (
-          <Link href={`/admin/${routePath}/new`}>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              New {config.singular}
-            </Button>
-          </Link>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900/50" />
-          <TextInput
-            placeholder={`Search ${config.title.toLowerCase()}...`}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+    <>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold text-slate-900">{config.title}</h1>
+          {canCreate && (
+            <Link href={`/admin/${routePath}/new`}>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                New {config.singular}
+              </Button>
+            </Link>
+          )}
         </div>
 
-        {/* Reorder hint */}
-        {isSortable && !isSearching && (
-          <div className="flex items-center gap-2 text-xs text-slate-900/50">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-stonehill-accent" />
-            Drag the handle to reorder slides. Changes save automatically.
-            {isSaving && (
-              <span className="ml-2 inline-flex items-center gap-1 text-stonehill-accent animate-pulse">
-                <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Saving…
-              </span>
-            )}
+        <div className="flex flex-col gap-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-900/50" />
+            <TextInput
+              placeholder={`Search ${config.title.toLowerCase()}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
           </div>
-        )}
 
-        {/* DndContext must be OUTSIDE the table to avoid its hidden
-           accessibility <div> being placed inside <tbody> (invalid HTML).
-           SortableContext is a pure context provider with no DOM output,
-           so it's safe inside <tbody>. */}
-        {isSortable && !isSearching ? (
-          <DndContext
-            id={dndContextId}
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-          >
+          {/* Reorder hint */}
+          {isSortable && !isSearching && (
+            <div className="flex items-center gap-2 text-xs text-slate-900/50">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-stonehill-accent" />
+              Drag the handle to reorder slides. Changes save automatically.
+              {isSaving && (
+                <span className="ml-2 inline-flex items-center gap-1 text-stonehill-accent animate-pulse">
+                  <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Saving…
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* DndContext must be OUTSIDE the table to avoid its hidden
+             accessibility <div> being placed inside <tbody> (invalid HTML).
+             SortableContext is a pure context provider with no DOM output,
+             so it's safe inside <tbody>. */}
+          {isSortable && !isSearching ? (
+            <DndContext
+              id={dndContextId}
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            >
+              <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead className="bg-slate-50/40">
+                    <tr>
+                      <th scope="col" className="w-10 pl-3 pr-0 py-3">
+                        <span className="sr-only">Reorder</span>
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
+                        {primaryField.label}
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
+                        Last Updated
+                      </th>
+                      <th scope="col" className="relative px-6 py-3">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white">
+                    {filteredData.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                          No {config.title.toLowerCase()} found.
+                        </td>
+                      </tr>
+                    ) : (
+                      <SortableContext
+                        items={filteredData.map((d) => d.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        {filteredData.map((doc) => (
+                          <SortableSlideRow
+                            key={doc.id}
+                            id={doc.id}
+                            disabled={isSaving || isMutating}
+                          >
+                            {renderRowCells(doc)}
+                          </SortableSlideRow>
+                        ))}
+                      </SortableContext>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </DndContext>
+          ) : (
             <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50/40">
                   <tr>
-                    <th scope="col" className="w-10 pl-3 pr-0 py-3">
-                      <span className="sr-only">Reorder</span>
-                    </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
                       {primaryField.label}
                     </th>
@@ -332,68 +421,69 @@ export function CmsModuleList({
                 <tbody className="divide-y divide-slate-200 bg-white">
                   {filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
                         No {config.title.toLowerCase()} found.
                       </td>
                     </tr>
                   ) : (
-                    <SortableContext
-                      items={filteredData.map((d) => d.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      {filteredData.map((doc) => (
-                        <SortableSlideRow
-                          key={doc.id}
-                          id={doc.id}
-                          disabled={isSaving || isMutating}
-                        >
-                          {renderRowCells(doc)}
-                        </SortableSlideRow>
-                      ))}
-                    </SortableContext>
+                    filteredData.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-slate-50/10 transition-colors">
+                        {renderRowCells(doc)}
+                      </tr>
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
-          </DndContext>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50/40">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
-                    {primaryField.label}
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-900/70">
-                    Last Updated
-                  </th>
-                  <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
-                {filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
-                      No {config.title.toLowerCase()} found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-50/10 transition-colors">
-                      {renderRowCells(doc)}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Premium Confirmation Dialog for Featuring Items */}
+      {confirmDialog && confirmDialog.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            onClick={() => !isMutating && setConfirmDialog(null)}
+          />
+          
+          {/* Dialog Modal */}
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full mb-6 mx-auto bg-stonehill-accent/10">
+              <Heart className={`h-6 w-6 ${confirmDialog.isFeatured ? "text-slate-400" : "text-stonehill-accent fill-stonehill-accent"}`} />
+            </div>
+            
+            <h3 className="text-2xl text-center font-display font-bold text-stonehill-dark mb-3">
+              {confirmDialog.isFeatured ? "Remove from Featured?" : "Add to Featured?"}
+            </h3>
+            
+            <p className="text-slate-600 text-center mb-8 leading-relaxed">
+              {confirmDialog.isFeatured
+                ? `Are you sure you want to remove "${confirmDialog.name}" from the featured list? It will no longer appear on the homepage.`
+                : `Are you sure you want to feature "${confirmDialog.name}"? It will be highlighted on the homepage.`}
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-3 w-full">
+              <Button 
+                variant="outline" 
+                onClick={() => setConfirmDialog(null)} 
+                disabled={isMutating}
+                className="w-full sm:w-1/2"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => handleToggleFeatured(confirmDialog.id, confirmDialog.isFeatured)} 
+                disabled={isMutating}
+                className={`w-full sm:w-1/2 ${confirmDialog.isFeatured ? "bg-red-600 hover:bg-red-700" : "bg-stonehill-primary hover:bg-stonehill-dark"}`}
+              >
+                {isMutating ? "Processing..." : confirmDialog.isFeatured ? "Remove" : "Feature"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

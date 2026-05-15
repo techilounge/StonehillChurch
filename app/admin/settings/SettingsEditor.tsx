@@ -4,6 +4,7 @@ import * as React from "react";
 import { Save, AlertCircle } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { TextInput } from "@/components/forms/TextInput";
+import { TextArea } from "@/components/forms/TextArea";
 import type { CmsDocument } from "@/lib/data/adminCms";
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/cms/actions";
 
@@ -17,6 +18,13 @@ const SERVICE_TIME_DEFAULTS = {
   sabbath_school: "Saturdays · 10:00am",
   divine_worship: "Saturdays · 11:00am",
   prayer_meeting: "Wednesdays · 7:00pm",
+} as const;
+
+const WELCOME_DEFAULTS = {
+  left_title: "Welcome to Stonehill Seventh-day Adventist Church",
+  left_paragraph: "We're a vibrant community of believers in Pflugerville, TX. We invite you to join us as we worship the Lord, nurture one another, and selflessly serve our neighbors. Our Saturday worship services provide an uplifting experience focused on biblical teaching, inspirational music, and heartfelt prayer. We offer a variety of ministries and spiritual growth opportunities for children, youth, adults, and seniors.",
+  right_paragraph_1: "Welcome Home to Stonehill. We are grateful you have taken a moment to visit us online. Whether you are a long-time member, a returning friend, or someone exploring faith for the first time, please know you are warmly welcomed here.",
+  right_paragraph_2: "One of our greatest blessings is the beautiful diversity of our church family. Our members represent more than 50 countries now living in the United States, united by one faith, one hope, and one Savior. At Stonehill, we celebrate our multicultural community as a reflection of God's kingdom and His love for all people."
 } as const;
 
 function isSettingGroup(value: unknown): value is Record<string, unknown> {
@@ -249,6 +257,66 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
             <Button disabled={isSubmitting} onClick={() => handleSave("social", "social", settings["social"] || {})}>
               <Save className="h-4 w-4 mr-2" /> Save Social Links
+            </Button>
+          </div>
+        )}
+      </section>
+
+      {/* Homepage Welcome Section Group */}
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Homepage Welcome Section</h3>
+          <p className="text-sm text-slate-500">Manage the welcome text displayed on the homepage alongside the pastoral headshots.</p>
+        </div>
+        <div className="p-6 flex flex-col gap-6">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-slate-900">Left Column: Title</label>
+            <TextInput
+              value={settings["welcome"]?.left_title || ""}
+              placeholder={WELCOME_DEFAULTS.left_title}
+              onChange={(e) => handleChange("welcome", "left_title", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-slate-900">Left Column: Paragraph</label>
+            <TextArea
+              className="min-h-[120px]"
+              value={settings["welcome"]?.left_paragraph || ""}
+              placeholder={WELCOME_DEFAULTS.left_paragraph}
+              onChange={(e) => handleChange("welcome", "left_paragraph", e.target.value)}
+            />
+          </div>
+          <div className="border-t border-slate-200 pt-6 flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-slate-900">Right Column: First Paragraph</label>
+            <TextArea
+              className="min-h-[100px]"
+              value={settings["welcome"]?.right_paragraph_1 || ""}
+              placeholder={WELCOME_DEFAULTS.right_paragraph_1}
+              onChange={(e) => handleChange("welcome", "right_paragraph_1", e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-slate-900">Right Column: Second Paragraph</label>
+            <TextArea
+              className="min-h-[100px]"
+              value={settings["welcome"]?.right_paragraph_2 || ""}
+              placeholder={WELCOME_DEFAULTS.right_paragraph_2}
+              onChange={(e) => handleChange("welcome", "right_paragraph_2", e.target.value)}
+            />
+          </div>
+        </div>
+        {canEdit && (
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
+            <Button
+              disabled={isSubmitting}
+              onClick={() =>
+                handleSave("welcome", "welcome", {
+                  ...WELCOME_DEFAULTS,
+                  ...(settings["welcome"] || {}),
+                })
+              }
+            >
+              <Save className="h-4 w-4 mr-2" /> Save Welcome Section
             </Button>
           </div>
         )}

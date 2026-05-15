@@ -3,6 +3,23 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.1] - 2026-05-15
+
+### Added
+- **Premium UI Animations**
+  - Implemented smooth, state-of-the-art hover effects for pastoral headshots (scale + translateY transitions).
+  - Added interactive lift and shadow animations to all cards in the "This Sabbath" section.
+  - Enhanced the "Divine Worship" card with subtle icon scaling on hover for a more premium feel.
+- **Enhanced Admin Feedback**
+  - Updated CMS update notifications to explicitly display which fields failed validation (e.g., missing legacy fields like `imageAlt`), allowing admins to quickly identify and fix data gaps.
+
+### Fixed
+- **CMS Validation & Legacy Support**
+  - Resolved "CMS document data is invalid" errors by making newer schema fields (SEO title/description, recurring rules) optional for updates to legacy documents.
+  - Fixed a critical backend bug where raw Firestore `Timestamp` objects were being rejected by Zod validators before they could be normalized to `Date` objects.
+- **Build System Stability**
+  - Fixed a persistent hang in `npm run build` on Windows by refactoring `cleanNextDevCache.cjs` to use asynchronous file operations with a 1-second timeout watchdog per directory, bypassing OS-level file lock deadlocks.
+
 ## [0.4.0] - 2026-05-15
 
 ### Added
