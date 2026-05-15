@@ -15,9 +15,9 @@ function youtubeVideoToSermon(video: YouTubeVideo): Serialized<Sermon> {
     id: video.id,
     title: video.title,
     slug: video.id, // We use the video ID as the slug
-    speaker: null,
+    speaker: "",
     sermonDate: dateStr,
-    scripture: null,
+    scripture: "",
     series: null,
     description: video.description,
     youtubeUrl: video.url,
