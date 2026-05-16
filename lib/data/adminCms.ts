@@ -17,6 +17,7 @@ import {
   leaderSchema,
   ministrySchema,
   pageSchema,
+  popupSchema,
   resourceSchema,
   sermonSchema,
   siteSettingSchema,
@@ -34,6 +35,7 @@ export const CMS_MODULES = [
   "announcements",
   "resources",
   "pages",
+  "popups",
   "siteSettings",
 ] as const;
 
@@ -117,6 +119,14 @@ const moduleConfigs = {
     schema: pageSchema,
     kind: "content",
     lifecycle: "status",
+    defaultOrderBy: [["updatedAt", "desc"]],
+  },
+  popups: {
+    collection: collections.popups,
+    schema: popupSchema,
+    kind: "content",
+    lifecycle: "status",
+    dateFields: ["startTime", "endTime"],
     defaultOrderBy: [["updatedAt", "desc"]],
   },
   siteSettings: {

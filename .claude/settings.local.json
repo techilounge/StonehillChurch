@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc *)",
-      "Bash(grep -E \"index\\\\.html|merge_src|move_files|git_status|firestore-debug|tsbuildinfo$\")"
+      "Bash(grep -E \"index\\\\.html|merge_src|move_files|git_status|firestore-debug|tsbuildinfo$\")",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(npm test *)",
+      "Bash(npm uninstall *)"
     ]
   }
 }

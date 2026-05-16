@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Globe, AlertCircle, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Globe, AlertCircle, Image as ImageIcon, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
@@ -26,7 +26,19 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
   const config = CMS_CONFIG[module];
   const isNew = !initialData;
 
-  const [formData, setFormData] = React.useState<Record<string, any>>(initialData || {});
+  const [formData, setFormData] = React.useState<Record<string, any>>(() => {
+    if (initialData) return initialData;
+    // Seed the new-doc form with the per-field defaults declared in
+    // CmsConfig. This is how a new popup lands pre-configured with sane
+    // animation/backdrop/size values that the user can still override.
+    const seeded: Record<string, any> = {};
+    for (const field of config.fields) {
+      if (field.defaultValue !== undefined) {
+        seeded[field.name] = field.defaultValue;
+      }
+    }
+    return seeded;
+  });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
@@ -34,6 +46,11 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
   // Media Selector State
   const [mediaSelectorOpen, setMediaSelectorOpen] = React.useState(false);
   const [activeMediaField, setActiveMediaField] = React.useState<string | null>(null);
+
+  // Per-field video upload state. Keyed by field name so multiple
+  // videoUpload fields on a form don't share a single spinner.
+  const [videoUploadingField, setVideoUploadingField] = React.useState<string | null>(null);
+  const [videoUploadError, setVideoUploadError] = React.useState<Record<string, string | null>>({});
 
   const routePath = module.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 
@@ -84,8 +101,52 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
     setMediaSelectorOpen(true);
   };
 
+  const handleVideoUpload = async (fieldName: string, file: File) => {
+    setVideoUploadingField(fieldName);
+    setVideoUploadError((prev) => ({ ...prev, [fieldName]: null }));
+
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/media/video", { method: "POST", body: fd });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        const message = json?.error?.message || "Video upload failed.";
+        setVideoUploadError((prev) => ({ ...prev, [fieldName]: message }));
+        return;
+      }
+      handleFieldChange(fieldName, json.data.url);
+    } catch (err) {
+      setVideoUploadError((prev) => ({
+        ...prev,
+        [fieldName]: err instanceof Error ? err.message : "Video upload failed.",
+      }));
+    } finally {
+      setVideoUploadingField(null);
+    }
+  };
+
   const isImageUrl = (url: string) => {
     return /\.(jpeg|jpg|gif|png|webp|avif|svg)(\?.*)?$/i.test(url);
+  };
+
+  // <input type="datetime-local"> takes "YYYY-MM-DDTHH:MM" in *local* time.
+  // The stored value is a UTC ISO string. Naively round-tripping through
+  // .toISOString().slice(0,16) keeps shifting the display by the user's TZ
+  // offset on every render (e.g. 14:30 EDT becomes 18:30 in the input), so
+  // we format component-wise from the local Date getters instead.
+  const isoToDatetimeLocal = (iso: string): string => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const isoToDateInput = (iso: string): string => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   };
 
   return (
@@ -115,6 +176,7 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
       <form className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden" onSubmit={(e) => handleSubmit(e)}>
         <div className="p-6 sm:p-8 flex flex-col gap-6">
           {config.fields.map((field) => {
+            if (field.showWhen && !field.showWhen(formData)) return null;
             const errorMessages = fieldErrors[field.name];
             const hasError = !!errorMessages && errorMessages.length > 0;
             const value = formData[field.name];
@@ -176,11 +238,72 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
                 ) : field.type === "date" || field.type === "datetime" ? (
                   <TextInput
                     type={field.type === "date" ? "date" : "datetime-local"}
-                    value={value ? new Date(value).toISOString().slice(0, field.type === "date" ? 10 : 16) : ""}
-                    onChange={(e) => handleFieldChange(field.name, e.target.value ? new Date(e.target.value).toISOString() : null)}
+                    value={
+                      value
+                        ? field.type === "date"
+                          ? isoToDateInput(value)
+                          : isoToDatetimeLocal(value)
+                        : ""
+                    }
+                    onChange={(e) =>
+                      handleFieldChange(
+                        field.name,
+                        e.target.value ? new Date(e.target.value).toISOString() : null,
+                      )
+                    }
                     required={field.required}
                     hasError={hasError}
                   />
+                ) : field.type === "videoUpload" ? (
+                  <div className="flex flex-col gap-2">
+                    <TextInput
+                      type="url"
+                      value={value || ""}
+                      onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                      placeholder="https://youtu.be/... or https://vimeo.com/..."
+                      required={field.required}
+                      hasError={hasError}
+                    />
+                    <div className="flex items-center gap-3">
+                      <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
+                        {videoUploadingField === field.name ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                            Uploading…
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" aria-hidden="true" />
+                            Upload MP4
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="video/mp4"
+                          className="hidden"
+                          disabled={videoUploadingField === field.name}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) handleVideoUpload(field.name, file);
+                          }}
+                        />
+                      </label>
+                      <span className="text-xs text-slate-500">
+                        MP4 only, 25 MB max. Server stores under <code>media/videos/</code>.
+                      </span>
+                    </div>
+                    {videoUploadError[field.name] && (
+                      <span className="text-xs text-red-600 font-medium">
+                        {videoUploadError[field.name]}
+                      </span>
+                    )}
+                    {hasError && (
+                      <span className="text-xs text-red-600 font-medium">
+                        {errorMessages.join(", ")}
+                      </span>
+                    )}
+                  </div>
                 ) : field.type === "media" ? (
                   <div className="flex flex-col gap-3">
                     {value ? (

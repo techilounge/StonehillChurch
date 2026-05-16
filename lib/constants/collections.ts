@@ -12,6 +12,7 @@ export const collections = {
   userInvites: "userInvites",
   siteSettings: "siteSettings",
   pages: "pages",
+  popups: "popups",
   youtubeSettings: "youtubeSettings",
   auditLogs: "auditLogs",
 } as const;
@@ -33,6 +34,7 @@ export const APPROVED_COLLECTION_NAMES = [
   collections.userInvites,
   collections.siteSettings,
   collections.pages,
+  collections.popups,
   collections.youtubeSettings,
   collections.auditLogs,
 ] as const satisfies readonly CollectionName[];

@@ -5,6 +5,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationJsonLd, placeJsonLd, siteSettingsToSeoSettings } from "@/lib/seo";
 
 import { AppCheckInit } from "@/components/public/AppCheckInit";
+import { PopupController } from "@/components/public/PopupController";
 
 export const revalidate = 300;
 
@@ -35,6 +36,7 @@ export default async function PublicLayout({
        */}
       <JsonLd data={[organizationJsonLd(seoSettings), placeJsonLd(seoSettings)]} />
       <AppCheckInit />
+      <PopupController />
     </div>
   );
 }

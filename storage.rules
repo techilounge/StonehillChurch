@@ -83,6 +83,28 @@ service firebase.storage {
         editorCannotSelfApprovePublicMedia();
     }
 
+    function isPopupVideoPath() {
+      return request.resource.name.matches("^media/videos/.*\\.mp4$");
+    }
+
+    function validPopupVideoUpload() {
+      return request.resource.contentType == "video/mp4" &&
+        request.resource.size <= 25 * 1024 * 1024 &&
+        request.resource.metadata.uploadPipeline == "popup-video" &&
+        request.resource.metadata.uploadedBy == request.auth.uid &&
+        editorCannotSelfApprovePublicMedia();
+    }
+
+    // More-specific match must come before /media/{allPaths=**}. Server-side
+    // uploads via Admin SDK bypass these rules; this block is defense-in-depth
+    // so a future direct-from-browser flow doesn't accidentally hit the image
+    // validator (which rejects video/mp4).
+    match /media/videos/{allPaths=**} {
+      allow read: if publicApprovedMedia() || viewerOrHigher();
+      allow write: if editorOrHigher() && isPopupVideoPath() && validPopupVideoUpload();
+      allow delete: if adminOrHigher();
+    }
+
     match /media/{allPaths=**} {
       allow read: if publicApprovedMedia() || viewerOrHigher();
       allow write: if editorOrHigher() && validCmsImageUpload();

@@ -4,6 +4,7 @@ export type * from "./content";
 export type * from "./forms";
 export type * from "./invites";
 export type * from "./media";
+export type * from "./popup";
 export type * from "./settings";
 export type * from "./audit";
 

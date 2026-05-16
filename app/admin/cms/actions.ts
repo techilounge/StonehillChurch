@@ -99,6 +99,12 @@ function revalidateCmsModule(module: CmsModule, data?: Record<string, unknown> |
       revalidatePath("/resources");
       revalidatePath("/church-bulletin");
       break;
+
+    case "popups":
+      // PopupController sits in the public layout, so flush at layout level
+      // so every page reflects the popup change immediately.
+      revalidatePath("/", "layout");
+      break;
   }
 }
 

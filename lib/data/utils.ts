@@ -28,6 +28,8 @@ const TIMESTAMP_FIELDS = [
   "endDateTime",
   "startDate",
   "endDate",
+  "startTime",
+  "endTime",
   "statusUpdatedAt",
   "lastLoginAt",
   "expiresAt",

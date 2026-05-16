@@ -432,6 +432,58 @@ export const pageSchema = z.object({
   status: contentStatusSchema,
 });
 
+// popups
+export const popupMediaTypeSchema = z.enum(["image", "video"]);
+export const popupAnimationStyleSchema = z.enum(["fade", "scale", "fade-scale"]);
+export const popupBackdropStyleSchema = z.enum(["solid", "blur", "gradient"]);
+export const popupWidthPresetSchema = z.enum(["auto", "small", "medium", "large"]);
+export const popupHeightPresetSchema = z.enum(["auto", "fit", "scroll"]);
+export const popupTriggerTypeSchema = z.enum(["image", "button", "link"]);
+export const popupCaptionAlignmentSchema = z.enum(["left", "center", "right"]);
+
+export const popupSchema = z
+  .object({
+    title: z.string().min(2).max(160),
+    mediaType: popupMediaTypeSchema,
+    imageUrl: urlSchema.nullable(),
+    imageAlt: z.string().min(2).max(200).nullable(),
+    videoUrl: urlSchema.nullable(),
+    videoAutoplay: z.boolean(),
+    videoMuted: z.boolean(),
+    videoLoop: z.boolean(),
+    videoMaintain16x9: z.boolean(),
+    startTime: isoOrDate.nullable(),
+    endTime: isoOrDate.nullable(),
+    animationStyle: popupAnimationStyleSchema,
+    animationDurationMs: z.number().int().min(100).max(2000),
+    backdropStyle: popupBackdropStyleSchema,
+    backdropOpacity: z.number().min(0).max(1),
+    backdropBlur: z.number().min(0).max(40),
+    widthPreset: popupWidthPresetSchema,
+    heightPreset: popupHeightPresetSchema,
+    triggerType: popupTriggerTypeSchema,
+    triggerLabel: z.string().min(1).max(80).nullable(),
+    captionText: z.string().max(500).nullable(),
+    captionShow: z.boolean(),
+    captionAlignment: popupCaptionAlignmentSchema,
+    status: contentStatusSchema,
+  })
+  .refine(
+    (data) => {
+      if (!data.startTime || !data.endTime) return true;
+      return new Date(data.endTime as string | Date) > new Date(data.startTime as string | Date);
+    },
+    { message: "endTime must be after startTime", path: ["endTime"] },
+  )
+  .refine(
+    (data) => data.mediaType !== "image" || Boolean(data.imageUrl),
+    { message: "Image is required for image popups", path: ["imageUrl"] },
+  )
+  .refine(
+    (data) => data.mediaType !== "video" || Boolean(data.videoUrl),
+    { message: "Video URL is required for video popups", path: ["videoUrl"] },
+  );
+
 // youtubeSettings
 export const youtubeSettingsSchema = z.object({
   channelId: z.string().max(80),
@@ -466,6 +518,7 @@ export const collectionSchemas = {
   formSubmissions: formSubmissionSchema,
   siteSettings: siteSettingSchema,
   pages: pageSchema,
+  popups: popupSchema,
   youtubeSettings: youtubeSettingsSchema,
   auditLogs: auditLogSchema,
 } as const;

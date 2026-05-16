@@ -6,7 +6,7 @@ import type { Sermon } from "@/types/content";
 import { PUBLISHED } from "@/types/shared";
 import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 import { getYoutubeSettings } from "./youtubeSettings";
-import { getLatestYoutubeUploads, getYoutubeVideoById } from "./youtubeVideos";
+import { getLatestYoutubeUploads, getYoutubeVideoById, getLiveYoutubeBroadcast } from "./youtubeVideos";
 import type { YouTubeVideo } from "@/lib/youtube";
 
 function youtubeVideoToSermon(video: YouTubeVideo): Serialized<Sermon> {
@@ -39,8 +39,22 @@ export async function getSermons(): Promise<Serialized<Sermon>[]> {
   try {
     const youtubeSettings = await getYoutubeSettings();
     if (youtubeSettings.autoFetchLatestSermons) {
-      const videos = await getLatestYoutubeUploads(youtubeSettings, 12);
-      return videos.map(youtubeVideoToSermon);
+      const [liveVideo, videos] = await Promise.all([
+        getLiveYoutubeBroadcast(youtubeSettings),
+        getLatestYoutubeUploads(youtubeSettings, 12)
+      ]);
+      
+      const sermons = videos.map(youtubeVideoToSermon);
+      
+      if (liveVideo) {
+        // Prevent duplicates in case the live video is already in the uploads playlist
+        const isDuplicate = sermons.some(s => s.youtubeVideoId === liveVideo.id);
+        if (!isDuplicate) {
+          sermons.unshift(youtubeVideoToSermon(liveVideo));
+        }
+      }
+      
+      return sermons;
     }
 
     const db = getAdminFirestore();
@@ -97,6 +111,11 @@ export async function getLatestSermon(): Promise<Serialized<Sermon> | null> {
   try {
     const youtubeSettings = await getYoutubeSettings();
     if (youtubeSettings.autoFetchLatestSermons) {
+      const liveVideo = await getLiveYoutubeBroadcast(youtubeSettings);
+      if (liveVideo) {
+        return youtubeVideoToSermon(liveVideo);
+      }
+
       const videos = await getLatestYoutubeUploads(youtubeSettings, 1);
       if (videos.length > 0) {
         return youtubeVideoToSermon(videos[0]);

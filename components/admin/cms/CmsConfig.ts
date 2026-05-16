@@ -13,6 +13,7 @@ export type FieldType =
   | "url"
   | "email"
   | "media"
+  | "videoUpload"
   | "richText";
 
 export interface FieldConfig {
@@ -24,6 +25,14 @@ export interface FieldConfig {
   options?: { label: string; value: string }[];
   placeholder?: string;
   hiddenOnList?: boolean;
+  // Initial value used when creating a new document. Lets the form open
+  // pre-populated with sensible choices (animation style, opacity, etc.)
+  // that the user can still override.
+  defaultValue?: unknown;
+  // When provided, the field is hidden in the form whenever the predicate
+  // returns false against the current form data. Validation in
+  // [lib/validators.ts] still enforces cross-field requirements server-side.
+  showWhen?: (data: Record<string, unknown>) => boolean;
 }
 
 export interface CmsUIConfig {
@@ -212,6 +221,97 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       { name: "content", label: "Page Content", type: "richText", required: true, hiddenOnList: true },
       { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },
       { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true },
+    ],
+  },
+  popups: {
+    module: "popups",
+    title: "Popups",
+    singular: "Popup",
+    description: "Site-wide popup modules (image or video) with scheduling and animation.",
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true, description: "Internal label only; shown in lists, not on the public site." },
+      { name: "mediaType", label: "Media Type", type: "select", required: true, defaultValue: "image", options: [
+        { label: "Image", value: "image" },
+        { label: "Video", value: "video" },
+      ]},
+      { name: "imageUrl", label: "Image", type: "media", required: false, hiddenOnList: true,
+        description: "Required when Media Type is Image. JPG/JPEG/PNG/WEBP, 2 MB max — uploads are auto-compressed to WebP.",
+        showWhen: (d) => d.mediaType !== "video" },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: false, hiddenOnList: true,
+        description: "Required when an image is attached. Describes the image for screen readers.",
+        showWhen: (d) => d.mediaType !== "video" },
+      { name: "videoUrl", label: "Video", type: "videoUpload", required: false, hiddenOnList: true,
+        description: "Upload an MP4 (≤ 25 MB) or paste a YouTube / Vimeo / direct MP4 URL. Required when Media Type is Video.",
+        showWhen: (d) => d.mediaType === "video" },
+      { name: "videoAutoplay", label: "Autoplay Video", type: "boolean", required: true, hiddenOnList: true,
+        defaultValue: true, showWhen: (d) => d.mediaType === "video" },
+      { name: "videoMuted", label: "Mute Video", type: "boolean", required: true, hiddenOnList: true,
+        defaultValue: true, description: "Autoplay typically requires muted=true on modern browsers.",
+        showWhen: (d) => d.mediaType === "video" },
+      { name: "videoLoop", label: "Loop Video", type: "boolean", required: true, hiddenOnList: true,
+        defaultValue: false, showWhen: (d) => d.mediaType === "video" },
+      { name: "videoMaintain16x9", label: "Maintain 16:9 Aspect Ratio", type: "boolean", required: true, hiddenOnList: true,
+        defaultValue: true, showWhen: (d) => d.mediaType === "video" },
+      { name: "startTime", label: "Start Time", type: "datetime", required: false,
+        description: "Leave empty for active immediately on publish. When set, the popup auto-opens during its window and no trigger element is shown." },
+      { name: "endTime", label: "End Time", type: "datetime", required: false, description: "Leave empty for no expiry." },
+      { name: "animationStyle", label: "Animation Style", type: "select", required: true, hiddenOnList: true,
+        defaultValue: "fade-scale", options: [
+          { label: "Fade-In", value: "fade" },
+          { label: "Scale-Up", value: "scale" },
+          { label: "Fade + Scale", value: "fade-scale" },
+        ]},
+      { name: "animationDurationMs", label: "Animation Duration (ms)", type: "number", required: true, hiddenOnList: true,
+        defaultValue: 300, description: "100 to 2000 ms." },
+      { name: "backdropStyle", label: "Backdrop Style", type: "select", required: true, hiddenOnList: true,
+        defaultValue: "blur", options: [
+          { label: "Solid Black", value: "solid" },
+          { label: "Blur Background", value: "blur" },
+          { label: "Gradient Overlay", value: "gradient" },
+        ]},
+      { name: "backdropOpacity", label: "Backdrop Opacity (0–1)", type: "number", required: true, hiddenOnList: true,
+        defaultValue: 0.6, description: "Used by solid and gradient backdrops. 0 = transparent, 1 = fully opaque." },
+      { name: "backdropBlur", label: "Backdrop Blur (px)", type: "number", required: true, hiddenOnList: true,
+        defaultValue: 8, description: "Used by blur backdrop. 0–40 px." },
+      { name: "widthPreset", label: "Width", type: "select", required: true, hiddenOnList: true,
+        defaultValue: "auto", options: [
+          { label: "Auto", value: "auto" },
+          { label: "Small (400px)", value: "small" },
+          { label: "Medium (700px)", value: "medium" },
+          { label: "Large (90vw)", value: "large" },
+        ]},
+      { name: "heightPreset", label: "Height", type: "select", required: true, hiddenOnList: true,
+        defaultValue: "auto", options: [
+          { label: "Auto", value: "auto" },
+          { label: "Fit to content", value: "fit" },
+          { label: "Max height with scroll", value: "scroll" },
+        ]},
+      // Trigger fields are only relevant when there's no schedule. A scheduled
+      // popup auto-opens during its window; the click target is the schedule
+      // itself, not an on-page button/link.
+      { name: "triggerType", label: "Trigger Type", type: "select", required: true, hiddenOnList: true,
+        defaultValue: "button",
+        showWhen: (d) => !d.startTime,
+        options: [
+          { label: "Click on image preview", value: "image" },
+          { label: "Click on button", value: "button" },
+          { label: "Click on text link", value: "link" },
+        ]},
+      { name: "triggerLabel", label: "Trigger Label", type: "text", required: false, hiddenOnList: true,
+        description: "Label shown on the button/link trigger (ignored when trigger type is image).",
+        showWhen: (d) => !d.startTime },
+      { name: "captionShow", label: "Show Caption", type: "boolean", required: true, hiddenOnList: true, defaultValue: false },
+      { name: "captionText", label: "Caption Text", type: "textarea", required: false, hiddenOnList: true,
+        description: "Displayed below the media when 'Show Caption' is on.",
+        showWhen: (d) => Boolean(d.captionShow) },
+      { name: "captionAlignment", label: "Caption Alignment", type: "select", required: true, hiddenOnList: true,
+        defaultValue: "center",
+        showWhen: (d) => Boolean(d.captionShow),
+        options: [
+          { label: "Left", value: "left" },
+          { label: "Center", value: "center" },
+          { label: "Right", value: "right" },
+        ]},
     ],
   },
 };

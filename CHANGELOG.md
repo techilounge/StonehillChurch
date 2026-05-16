@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.5] - 2026-05-16
+
+### Fixed
+- **Livestream Thumbnail Display**
+  - Updated the "Latest Sermon" section to automatically prioritize and display the thumbnail of an active livestream.
+  - Fixed an issue where the homepage would show the most recently recorded video rather than the currently ongoing live broadcast.
+  - Ensured active livestreams are also pinned to the top of the Sermon Library grid.
+
 ## [0.4.4] - 2026-05-15
 
 ### Added

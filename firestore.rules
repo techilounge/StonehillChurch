@@ -246,6 +246,13 @@ service cloud.firestore {
       allow delete: if adminOrHigher();
     }
 
+    match /popups/{popupId} {
+      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      allow create: if canCreateContent();
+      allow update: if canUpdateContent();
+      allow delete: if adminOrHigher();
+    }
+
     match /admin/{document=**} {
       allow read: if viewerOrHigher();
       allow create, update: if adminOrHigher();
