@@ -80,6 +80,19 @@ function bestThumbnail(item: YouTubePlaylistItem, videoId: string): string {
   );
 }
 
+function decodeHtmlEntities(text: string): string {
+  const entities: Record<string, string> = {
+    "&amp;": "&",
+    "&quot;": '"',
+    "&apos;": "'",
+    "&#39;": "'",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&nbsp;": " ",
+  };
+  return text.replace(/&(amp|quot|apos|#39|lt|gt|nbsp);/g, (match) => entities[match] || match);
+}
+
 export async function getLatestYoutubeUploads(
   settings: Pick<YoutubeSettingsConfig, "uploadsPlaylistId" | "channelId" | "autoFetchLatestSermons">,
   maxResults = 6,
@@ -131,8 +144,8 @@ export async function getLatestYoutubeUploads(
 
       return {
         id: videoId,
-        title: item.snippet?.title ?? "Stonehill video",
-        description: item.snippet?.description ?? "",
+        title: decodeHtmlEntities(item.snippet?.title ?? "Stonehill video"),
+        description: decodeHtmlEntities(item.snippet?.description ?? ""),
         publishedAt: item.contentDetails?.videoPublishedAt ?? item.snippet?.publishedAt ?? null,
         thumbnailUrl: bestThumbnail(item, videoId),
         url: getYouTubeWatchUrl(videoId),
@@ -187,8 +200,8 @@ export async function getLiveYoutubeBroadcast(
 
   return {
     id: videoId,
-    title: liveItem?.snippet?.title ?? "Stonehill livestream",
-    description: liveItem?.snippet?.description ?? "",
+    title: decodeHtmlEntities(liveItem?.snippet?.title ?? "Stonehill livestream"),
+    description: decodeHtmlEntities(liveItem?.snippet?.description ?? ""),
     publishedAt: liveItem?.snippet?.publishedAt ?? null,
     thumbnailUrl: bestThumbnail({ snippet: liveItem?.snippet }, videoId),
     url: getYouTubeWatchUrl(videoId),
@@ -239,8 +252,8 @@ export async function getYoutubeVideoById(videoId: string): Promise<YouTubeVideo
 
   return {
     id: actualId,
-    title: item.snippet?.title ?? "Stonehill video",
-    description: item.snippet?.description ?? "",
+    title: decodeHtmlEntities(item.snippet?.title ?? "Stonehill video"),
+    description: decodeHtmlEntities(item.snippet?.description ?? ""),
     publishedAt: item.snippet?.publishedAt ?? null,
     thumbnailUrl: bestThumbnail({ snippet: item.snippet }, actualId),
     url: getYouTubeWatchUrl(actualId),

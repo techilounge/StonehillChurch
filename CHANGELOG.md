@@ -11,6 +11,8 @@ All notable changes to the Stonehill Church website will be documented in this f
   - Added a pulsing red "LIVE" badge indicator to the corner of sermon cards when they are actively broadcasting.
   - Fixed an issue where the homepage would show the most recently recorded video rather than the currently ongoing live broadcast.
   - Ensured active livestreams are also pinned to the top of the Sermon Library grid.
+- **YouTube Video Titles**
+  - Implemented an HTML entity decoder to fix titles and descriptions that displayed `&quot;` and `&#39;` directly from the YouTube API, ensuring they render correctly across the site.
 
 ## [0.4.4] - 2026-05-15
 
