@@ -7,6 +7,7 @@ import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Book, Cross, RefreshCcw, HeartHandshake } from "lucide-react";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
+import { formatPageContent } from "@/lib/contentFormatting";
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPublicPageMetadata({
@@ -33,7 +34,7 @@ export default async function OurBeliefsPage() {
             <div className="bg-white rounded-3xl shadow-sm p-8 md:p-12 border border-slate-200">
               <div 
                 className="prose prose-lg max-w-none prose-headings:text-stonehill-primary prose-h2:text-3xl prose-p:text-slate-900/80 prose-a:text-stonehill-accent hover:prose-a:text-stonehill-accent/80 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: pageContent.content }}
+                dangerouslySetInnerHTML={{ __html: formatPageContent(pageContent.content) }}
               />
             </div>
           ) : (

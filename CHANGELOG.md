@@ -3,6 +3,16 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.4] - 2026-05-15
+
+### Added
+- **Granular ISR Revalidation**
+  - Implemented comprehensive public-side revalidation in `app/admin/cms/actions.ts` for all CMS modules (Sermons, Events, Ministries, Leaders, etc.).
+  - Added support for automatic slug-based revalidation for dynamic pages, eliminating the 5-minute wait time for editor changes.
+- **Content Formatting Utility**
+  - Created `lib/contentFormatting.ts` to automatically handle paragraph wrapping and line breaks for CMS-authored content.
+  - Integrated `formatPageContent` into About and Our Beliefs pages to ensure robust rendering of mixed HTML/prose content.
+
 ## [0.4.3] - 2026-05-15
 
 ### Added

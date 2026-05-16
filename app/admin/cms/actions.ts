@@ -39,17 +39,66 @@ function handleCmsError(error: unknown): CmsActionResponse<any> {
   };
 }
 
-function revalidateCmsModule(module: CmsModule) {
+function revalidateCmsModule(module: CmsModule, data?: Record<string, unknown> | null) {
   revalidatePath(`/admin/${module}`);
 
-  if (module === "siteSettings") {
-    revalidateTag("site-settings");
-    revalidatePath("/", "layout");
-    revalidatePath("/contact");
-    revalidatePath("/im-new");
-    revalidatePath("/plan-your-visit");
-    revalidatePath("/give");
-    revalidatePath("/live");
+  // Public-side revalidation. Without this, editors must wait for the public
+  // layout's 5-minute ISR window before their changes appear on the live site.
+  switch (module) {
+    case "siteSettings":
+      revalidateTag("site-settings");
+      revalidatePath("/", "layout");
+      revalidatePath("/contact");
+      revalidatePath("/im-new");
+      revalidatePath("/plan-your-visit");
+      revalidatePath("/give");
+      revalidatePath("/live");
+      break;
+
+    case "pages": {
+      // CMS pages map to public URLs by slug (e.g. "about" → /about).
+      const slug = typeof data?.slug === "string" ? data.slug : null;
+      if (slug) revalidatePath(`/${slug}`);
+      break;
+    }
+
+    case "homepageSlides":
+      revalidatePath("/");
+      break;
+
+    case "announcements":
+      // TopAnnouncementBar lives in the public layout, so flush at layout level.
+      revalidatePath("/", "layout");
+      break;
+
+    case "sermons":
+      revalidatePath("/sermons");
+      revalidatePath("/sermons/[slug]", "page");
+      revalidatePath("/"); // home page LatestSermonSection
+      break;
+
+    case "events":
+      revalidatePath("/events");
+      revalidatePath("/events/[slug]", "page");
+      revalidatePath("/church-calendar");
+      revalidatePath("/"); // home page UpcomingEventsPreview
+      break;
+
+    case "ministries":
+      revalidatePath("/ministries");
+      revalidatePath("/ministries/[slug]", "page");
+      revalidatePath("/"); // home page MinistriesPreview
+      break;
+
+    case "leaders":
+      revalidatePath("/our-leaders");
+      revalidatePath("/"); // WelcomeSection on home consumes leaders
+      break;
+
+    case "resources":
+      revalidatePath("/resources");
+      revalidatePath("/church-bulletin");
+      break;
   }
 }
 
@@ -70,7 +119,7 @@ export async function createDocumentAction(
     }
 
     const result = await createCmsDocument(module, payload, auth.session, options);
-    revalidateCmsModule(module);
+    revalidateCmsModule(module, result as unknown as Record<string, unknown>);
     return { ok: true, data: result };
   } catch (error) {
     return handleCmsError(error);
@@ -89,7 +138,7 @@ export async function updateDocumentAction(
     }
 
     const result = await updateCmsDocument(module, id, input, auth.session);
-    revalidateCmsModule(module);
+    revalidateCmsModule(module, result as unknown as Record<string, unknown>);
     return { ok: true, data: result };
   } catch (error) {
     return handleCmsError(error);
@@ -107,7 +156,7 @@ export async function publishDocumentAction(
     }
 
     const result = await publishCmsDocument(module, id, auth.session);
-    revalidatePath(`/admin/${module}`);
+    revalidateCmsModule(module, result as unknown as Record<string, unknown>);
     return { ok: true, data: result };
   } catch (error) {
     return handleCmsError(error);
@@ -125,7 +174,7 @@ export async function archiveDocumentAction(
     }
 
     const result = await archiveCmsDocument(module, id, auth.session);
-    revalidatePath(`/admin/${module}`);
+    revalidateCmsModule(module, result as unknown as Record<string, unknown>);
     return { ok: true, data: result };
   } catch (error) {
     return handleCmsError(error);
@@ -144,7 +193,7 @@ export async function deleteDocumentAction(
     }
 
     const result = await deleteCmsDocument(module, id, auth.session, { hardDelete });
-    revalidatePath(`/admin/${module}`);
+    revalidateCmsModule(module);
     return { ok: true, data: result };
   } catch (error) {
     return handleCmsError(error);
@@ -163,9 +212,7 @@ export async function reorderDocumentsAction(
 
     await reorderCmsDocuments(module, orderedIds, auth.session);
 
-    const routePath = module.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
-    revalidatePath(`/admin/${routePath}`);
-    revalidatePath("/"); // revalidate public homepage too
+    revalidateCmsModule(module);
     return { ok: true, data: { success: true } };
   } catch (error) {
     return handleCmsError(error);
