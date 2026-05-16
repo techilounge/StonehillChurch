@@ -39,6 +39,14 @@ export function SermonCard({ sermon }: SermonCardProps) {
             </div>
           )}
           <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300" />
+          
+          {sermon.isLive && (
+            <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-md">
+              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+              LIVE
+            </div>
+          )}
+
           <div className="absolute bottom-3 right-3 bg-black/70 text-white rounded-full p-2 backdrop-blur-sm">
             <PlayCircle className="w-5 h-5" />
           </div>

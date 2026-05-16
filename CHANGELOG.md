@@ -8,6 +8,7 @@ All notable changes to the Stonehill Church website will be documented in this f
 ### Fixed
 - **Livestream Thumbnail Display**
   - Updated the "Latest Sermon" section to automatically prioritize and display the thumbnail of an active livestream.
+  - Added a pulsing red "LIVE" badge indicator to the corner of sermon cards when they are actively broadcasting.
   - Fixed an issue where the homepage would show the most recently recorded video rather than the currently ongoing live broadcast.
   - Ensured active livestreams are also pinned to the top of the Sermon Library grid.
 

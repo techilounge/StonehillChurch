@@ -9,7 +9,7 @@ import { getYoutubeSettings } from "./youtubeSettings";
 import { getLatestYoutubeUploads, getYoutubeVideoById, getLiveYoutubeBroadcast } from "./youtubeVideos";
 import type { YouTubeVideo } from "@/lib/youtube";
 
-function youtubeVideoToSermon(video: YouTubeVideo): Serialized<Sermon> {
+function youtubeVideoToSermon(video: YouTubeVideo, isLive?: boolean): Serialized<Sermon> {
   const dateStr = video.publishedAt || new Date().toISOString();
   return {
     id: video.id,
@@ -28,6 +28,7 @@ function youtubeVideoToSermon(video: YouTubeVideo): Serialized<Sermon> {
     status: PUBLISHED,
     seoTitle: video.title,
     seoDescription: video.description.substring(0, 150),
+    isLive: !!isLive,
     createdAt: dateStr,
     updatedAt: dateStr,
     createdBy: "youtube-sync",
@@ -44,13 +45,17 @@ export async function getSermons(): Promise<Serialized<Sermon>[]> {
         getLatestYoutubeUploads(youtubeSettings, 12)
       ]);
       
-      const sermons = videos.map(youtubeVideoToSermon);
+      const sermons = videos.map(v => youtubeVideoToSermon(v, false));
       
       if (liveVideo) {
         // Prevent duplicates in case the live video is already in the uploads playlist
         const isDuplicate = sermons.some(s => s.youtubeVideoId === liveVideo.id);
         if (!isDuplicate) {
-          sermons.unshift(youtubeVideoToSermon(liveVideo));
+          sermons.unshift(youtubeVideoToSermon(liveVideo, true));
+        } else {
+          // If it's a duplicate, we should still mark it as live
+          const index = sermons.findIndex(s => s.youtubeVideoId === liveVideo.id);
+          sermons[index].isLive = true;
         }
       }
       
@@ -81,6 +86,8 @@ export async function getSermonBySlug(slug: string): Promise<Serialized<Sermon> 
     if (youtubeSettings.autoFetchLatestSermons) {
       const video = await getYoutubeVideoById(slug);
       if (video) {
+        // To be completely accurate, we could check if it's live here, but 
+        // usually the slug is opened from a card which already had it marked.
         return youtubeVideoToSermon(video);
       }
       // If auto-fetch is enabled but it's not a YouTube video (or API fails),
@@ -113,12 +120,12 @@ export async function getLatestSermon(): Promise<Serialized<Sermon> | null> {
     if (youtubeSettings.autoFetchLatestSermons) {
       const liveVideo = await getLiveYoutubeBroadcast(youtubeSettings);
       if (liveVideo) {
-        return youtubeVideoToSermon(liveVideo);
+        return youtubeVideoToSermon(liveVideo, true);
       }
 
       const videos = await getLatestYoutubeUploads(youtubeSettings, 1);
       if (videos.length > 0) {
-        return youtubeVideoToSermon(videos[0]);
+        return youtubeVideoToSermon(videos[0], false);
       }
     }
 

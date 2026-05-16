@@ -34,6 +34,7 @@ export type Sermon = AuditFields & {
   status: ContentStatus;
   seoTitle: string;
   seoDescription: string;
+  isLive?: boolean;
 };
 
 export type EventCategory =
