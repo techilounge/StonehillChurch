@@ -75,6 +75,18 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
       payload.status = forceStatus;
     }
 
+    // Normalize undefined → null for every declared field. Fields hidden by
+    // `showWhen` (e.g. video* when mediaType is "image", trigger* when the
+    // popup is scheduled) never get touched and stay undefined in state.
+    // The shared CMS schemas use `.nullable()` rather than `.nullish()`, so
+    // undefined fails validation with "Required" / "Expected string, got
+    // undefined" even though null would be perfectly valid.
+    for (const field of config.fields) {
+      if (payload[field.name] === undefined) {
+        payload[field.name] = null;
+      }
+    }
+
     try {
       const response = isNew
         ? await createDocumentAction(module, payload)

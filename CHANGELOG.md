@@ -3,6 +3,13 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.6] - 2026-05-17
+
+### Fixed
+- **CMS Admin Form Validation**
+  - Added normalization from `undefined` to `null` for all declared form fields inside `CmsModuleForm.tsx`.
+  - Resolves schema validation failures ("Required" / "Expected string, got undefined") when conditional fields hidden by `showWhen` logic remain untouched in form state.
+
 ## [0.4.5] - 2026-05-16
 
 ### Fixed
