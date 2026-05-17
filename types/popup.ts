@@ -16,6 +16,18 @@ export type PopupTriggerType = "image" | "button" | "link";
 
 export type PopupCaptionAlignment = "left" | "center" | "right";
 
+export type PopupFrequencyMode = "every" | "once" | "interval";
+
+export type PopupFrequencyIntervalUnit = "minutes" | "hours" | "days";
+
+export const POPUP_FREQUENCY_MODES: PopupFrequencyMode[] = ["every", "once", "interval"];
+
+export const POPUP_FREQUENCY_INTERVAL_UNITS: PopupFrequencyIntervalUnit[] = [
+  "minutes",
+  "hours",
+  "days",
+];
+
 export const POPUP_ANIMATION_STYLES: PopupAnimationStyle[] = [
   "fade",
   "scale",
@@ -85,6 +97,13 @@ export type Popup = {
   captionText: string | null;
   captionShow: boolean;
   captionAlignment: PopupCaptionAlignment;
+  // Frequency: how often a visitor should see this popup.
+  // "every"    – fire on every qualifying trigger (no persistence).
+  // "once"     – fire once per visitor, persisted in localStorage.
+  // "interval" – fire, then cool down for intervalValue × intervalUnit.
+  frequencyMode: PopupFrequencyMode;
+  frequencyIntervalValue: number | null;
+  frequencyIntervalUnit: PopupFrequencyIntervalUnit | null;
   // Lifecycle
   status: ContentStatus;
   createdAt: FirestoreTimestampLike;

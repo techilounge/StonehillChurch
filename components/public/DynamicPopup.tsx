@@ -4,6 +4,12 @@ import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveVideoEmbed } from "@/lib/popup/video";
+import { isPopupActiveAt } from "@/lib/popup/scheduling";
+import {
+  isPopupAllowedByFrequency,
+  markPopupShown,
+  type FrequencyStorage,
+} from "@/lib/popup/frequency";
 import type { Serialized } from "@/lib/data/utils";
 import type {
   Popup,
@@ -75,10 +81,81 @@ function backdropInlineStyle(
   };
 }
 
+// Wrap localStorage so storage-blocked environments (Safari private mode,
+// disabled cookies) degrade to "no record" rather than throwing. Falls back
+// to document.cookie for getItem if localStorage is unavailable, matching
+// the spec's "Use localStorage (preferred). Fallback to cookies if needed."
+function getBrowserFrequencyStorage(): FrequencyStorage | null {
+  if (typeof window === "undefined") return null;
+
+  let ls: Storage | null = null;
+  try {
+    // Touching localStorage can throw in sandboxed iframes / disabled storage.
+    ls = window.localStorage;
+    // Probe write — some browsers expose localStorage but reject writes.
+    const probe = "__sh_probe__";
+    ls.setItem(probe, "1");
+    ls.removeItem(probe);
+  } catch {
+    ls = null;
+  }
+
+  if (ls) {
+    return {
+      getItem: (k) => {
+        try {
+          return ls!.getItem(k);
+        } catch {
+          return null;
+        }
+      },
+      setItem: (k, v) => {
+        try {
+          ls!.setItem(k, v);
+        } catch {
+          // Swallow — overflowed quota / locked storage.
+        }
+      },
+    };
+  }
+
+  // Cookie fallback. Keep it minimal: month-long retention, root path. We
+  // never need to delete from here; the admin re-keys by changing the popup
+  // id when they want everyone to see a fresh version.
+  return {
+    getItem: (k) => {
+      const target = `${encodeURIComponent(k)}=`;
+      const found = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(target));
+      return found ? decodeURIComponent(found.slice(target.length)) : null;
+    },
+    setItem: (k, v) => {
+      const oneYear = 60 * 60 * 24 * 365;
+      document.cookie = `${encodeURIComponent(k)}=${encodeURIComponent(v)}; Max-Age=${oneYear}; Path=/; SameSite=Lax`;
+    },
+  };
+}
+
 export function DynamicPopup({ popup }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
   const [animateIn, setAnimateIn] = React.useState(false);
+  // Server-side `getActivePopup()` already filters by Start/End time, but
+  // (a) Next.js may have cached the parent layout HTML and (b) the popup's
+  // window may elapse while the user is on the page. Track schedule state
+  // on the client and stop rendering when it goes false. Default to `true`
+  // so the initial client render matches what the server sent (no hydration
+  // mismatch); the effect below corrects it within a tick.
+  const [scheduleActive, setScheduleActive] = React.useState(true);
+  // `frequencyReady` gates trigger rendering: we don't know whether the popup
+  // is allowed to display until we've checked browser storage post-hydration.
+  // Rendering the trigger pre-check would flicker when the popup turns out
+  // to be suppressed (spec: "No flicker or layout shift when popup is
+  // suppressed").
+  const [frequencyReady, setFrequencyReady] = React.useState(false);
+  const [frequencyAllowed, setFrequencyAllowed] = React.useState(false);
+  const storageRef = React.useRef<FrequencyStorage | null>(null);
   const triggerRef = React.useRef<HTMLElement | null>(null);
   const dialogRef = React.useRef<HTMLDivElement | null>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
@@ -92,21 +169,73 @@ export function DynamicPopup({ popup }: Props) {
   // trigger — no on-page button/link/image is rendered.
   const isScheduled = Boolean(popup.startTime);
 
+  const frequencyConfig = React.useMemo(
+    () => ({
+      id: popup.id,
+      frequencyMode: popup.frequencyMode ?? "every",
+      frequencyIntervalValue: popup.frequencyIntervalValue ?? null,
+      frequencyIntervalUnit: popup.frequencyIntervalUnit ?? null,
+    }),
+    [
+      popup.id,
+      popup.frequencyMode,
+      popup.frequencyIntervalValue,
+      popup.frequencyIntervalUnit,
+    ],
+  );
+
+  // One-shot storage check on mount. Storage isn't a reactive source, so we
+  // don't need to re-evaluate as the user navigates within the SPA — the
+  // layout-level mount of this component already aligns with what the spec
+  // calls a "qualifying" visit.
+  React.useEffect(() => {
+    const storage = getBrowserFrequencyStorage();
+    storageRef.current = storage;
+    const allowed = storage
+      ? isPopupAllowedByFrequency(frequencyConfig, storage, Date.now())
+      : true; // No storage = can't suppress; show the popup.
+    setFrequencyAllowed(allowed);
+    setFrequencyReady(true);
+  }, [frequencyConfig]);
+
+  // Re-evaluate the Start/End window against the client's clock and arm a
+  // one-shot timer to auto-close when endTime arrives mid-session.
+  React.useEffect(() => {
+    const recheck = () => {
+      setScheduleActive(
+        isPopupActiveAt(
+          { startTime: popup.startTime, endTime: popup.endTime },
+          Date.now(),
+        ),
+      );
+    };
+    recheck();
+
+    if (!popup.endTime) return;
+    const remaining = new Date(popup.endTime).getTime() - Date.now();
+    // Guard against past times and setTimeout's 32-bit max delay (~24.8 days).
+    if (remaining <= 0 || remaining > 2_147_483_000) return;
+    const timer = window.setTimeout(recheck, remaining + 250);
+    return () => window.clearTimeout(timer);
+  }, [popup.startTime, popup.endTime]);
+
   const open = React.useCallback(() => {
+    // Re-check at open time. For manual triggers the user may have clicked
+    // after the cooldown elapsed; for scheduled flows this is a no-op.
+    const storage = storageRef.current;
+    if (storage) {
+      if (!isPopupAllowedByFrequency(frequencyConfig, storage, Date.now())) {
+        return;
+      }
+      markPopupShown(frequencyConfig, storage, Date.now());
+    }
     triggerRef.current = document.activeElement as HTMLElement | null;
     setMounted(true);
     setIsOpen(true);
-  }, []);
+  }, [frequencyConfig]);
 
   const close = React.useCallback(() => {
     setAnimateIn(false);
-    if (isScheduled && typeof window !== "undefined") {
-      try {
-        window.sessionStorage.setItem(`popup-dismissed:${popup.id}`, "1");
-      } catch {
-        // Ignore — see the auto-open effect for the same fallback rationale.
-      }
-    }
     const t = window.setTimeout(() => {
       setIsOpen(false);
       setMounted(false);
@@ -116,7 +245,7 @@ export function DynamicPopup({ popup }: Props) {
       }
     }, Math.max(100, popup.animationDurationMs ?? 250));
     return () => window.clearTimeout(t);
-  }, [popup.animationDurationMs, isScheduled, popup.id]);
+  }, [popup.animationDurationMs]);
 
   // Trigger enter animation on next frame after mount so transition runs.
   React.useEffect(() => {
@@ -125,23 +254,15 @@ export function DynamicPopup({ popup }: Props) {
     return () => window.cancelAnimationFrame(raf);
   }, [mounted]);
 
-  // Scheduled popups auto-open on first render. Dismissals persist for the
-  // browser session keyed by popup id, so navigating between pages within
-  // the same visit doesn't keep re-opening the modal. A fresh tab / new
-  // session shows it again, which matches the original "schedule = trigger"
-  // intent without becoming spammy.
+  // Scheduled popups auto-open on first render — but only after the
+  // frequency check completes and only if frequency allows it. The schedule
+  // window itself was already enforced server-side by getActivePopup().
   React.useEffect(() => {
     if (!isScheduled) return;
-    if (typeof window === "undefined") return;
-    try {
-      const dismissed = window.sessionStorage.getItem(`popup-dismissed:${popup.id}`);
-      if (dismissed) return;
-    } catch {
-      // sessionStorage can throw in some privacy modes — fall through and
-      // open anyway. Worst case the user sees the popup on every page load.
-    }
+    if (!frequencyReady) return;
+    if (!frequencyAllowed) return;
     open();
-  }, [isScheduled, popup.id, open]);
+  }, [isScheduled, frequencyReady, frequencyAllowed, open]);
 
   // Lock body scroll while open.
   React.useEffect(() => {
@@ -259,9 +380,21 @@ export function DynamicPopup({ popup }: Props) {
     );
   };
 
+  // Manual trigger rendering rules:
+  //   • scheduled popups never render a trigger (auto-open is the trigger)
+  //   • pre-hydration we render nothing to avoid a frame where the button
+  //     appears and then disappears when frequency turns out to suppress it
+  //   • post-hydration we render only if frequency currently allows opening
+  const showManualTrigger = !isScheduled && frequencyReady && frequencyAllowed;
+
+  // Defense-in-depth: even if a stale cache served this popup past its
+  // window, the client refuses to render it. Auto-open and trigger render
+  // both fall through to nothing.
+  if (!scheduleActive) return null;
+
   return (
     <>
-      {!isScheduled && (
+      {showManualTrigger && (
         <div className="fixed bottom-6 right-6 z-40 print:hidden">
           {renderTrigger()}
         </div>

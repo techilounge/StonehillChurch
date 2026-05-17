@@ -5,6 +5,14 @@ All notable changes to the Stonehill Church website will be documented in this f
 
 ## [0.4.6] - 2026-05-17
 
+### Added
+- **Popup Frequency & Capping Control**
+  - Integrated frequency controls into the Popups CMS layout (`CmsConfig.ts`) supporting three distinct display settings: "Show Every Time", "Show Once per Visitor", and "Show on Time Interval".
+  - Created client-side frequency evaluation helpers (`lib/popup/frequency.ts`) leveraging `localStorage` for privacy-respecting visitor capping.
+  - Implemented unit testing suite (`tests/popup/frequency.test.ts`) covering all frequency cooldown policies.
+  - Updated `DynamicPopup.tsx` to respect visitor capping rules and automatically bypass display on suppression cooldown.
+  - Enhanced cache stability in `lib/data/popups.ts` by leveraging `unstable_noStore` to prevent dynamic popup configurations from being locked into 5-minute Full Route caches.
+
 ### Fixed
 - **CMS Admin Form Validation**
   - Added normalization from `undefined` to `null` for all declared form fields inside `CmsModuleForm.tsx`.

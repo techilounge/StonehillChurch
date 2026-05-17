@@ -440,6 +440,8 @@ export const popupWidthPresetSchema = z.enum(["auto", "small", "medium", "large"
 export const popupHeightPresetSchema = z.enum(["auto", "fit", "scroll"]);
 export const popupTriggerTypeSchema = z.enum(["image", "button", "link"]);
 export const popupCaptionAlignmentSchema = z.enum(["left", "center", "right"]);
+export const popupFrequencyModeSchema = z.enum(["every", "once", "interval"]);
+export const popupFrequencyIntervalUnitSchema = z.enum(["minutes", "hours", "days"]);
 
 export const popupSchema = z
   .object({
@@ -466,6 +468,9 @@ export const popupSchema = z
     captionText: z.string().max(500).nullable(),
     captionShow: z.boolean(),
     captionAlignment: popupCaptionAlignmentSchema,
+    frequencyMode: popupFrequencyModeSchema,
+    frequencyIntervalValue: z.number().int().min(1).max(10000).nullable(),
+    frequencyIntervalUnit: popupFrequencyIntervalUnitSchema.nullable(),
     status: contentStatusSchema,
   })
   .refine(
@@ -482,6 +487,22 @@ export const popupSchema = z
   .refine(
     (data) => data.mediaType !== "video" || Boolean(data.videoUrl),
     { message: "Video URL is required for video popups", path: ["videoUrl"] },
+  )
+  .refine(
+    (data) =>
+      data.frequencyMode !== "interval" ||
+      (data.frequencyIntervalValue !== null && data.frequencyIntervalValue >= 1),
+    {
+      message: "Interval value is required when frequency is 'Show on Time Interval'.",
+      path: ["frequencyIntervalValue"],
+    },
+  )
+  .refine(
+    (data) => data.frequencyMode !== "interval" || data.frequencyIntervalUnit !== null,
+    {
+      message: "Interval unit is required when frequency is 'Show on Time Interval'.",
+      path: ["frequencyIntervalUnit"],
+    },
   );
 
 // youtubeSettings
