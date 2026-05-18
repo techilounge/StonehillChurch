@@ -3,6 +3,15 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.7] - 2026-05-18
+
+### Added
+- **Hero Carousel Enhancements**
+  - Enabled smooth automatic slide transitions using the `embla-carousel-autoplay` plugin (5-second default interval).
+  - Configured auto-transition to seamlessly pause when a user hovers over the carousel and resume upon mouse leave.
+  - Replaced the default lateral sliding animation with a premium, GPU-accelerated fade effect via `embla-carousel-fade`.
+  - Manual left/right navigation arrows immediately reset the auto-transition timer to prevent unexpected early slide changes.
+
 ## [0.4.6] - 2026-05-17
 
 ### Added
