@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { User, LogOut, Menu } from "lucide-react";
+import Link from "next/link";
+import { User, LogOut, Menu, ExternalLink } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 
@@ -33,6 +34,13 @@ export function AdminHeader({ onMenuClick }: { onMenuClick: () => void }) {
           {formattedPage}
         </div>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
+          <Button variant="ghost" size="sm" asChild className="hidden sm:flex text-slate-900/70 hover:text-stonehill-primary">
+            <Link href="/" target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View Site
+            </Link>
+          </Button>
+
           {/* Separator */}
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-slate-200" aria-hidden="true" />
 

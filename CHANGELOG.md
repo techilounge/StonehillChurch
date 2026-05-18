@@ -6,6 +6,8 @@ All notable changes to the Stonehill Church website will be documented in this f
 ## [0.4.7] - 2026-05-18
 
 ### Added
+- **CMS Admin Navigation**
+  - Added a "View Site" quick-link to the `AdminHeader` to allow administrators to easily open the main public-facing site in a new tab without leaving the CMS dashboard.
 - **Hero Carousel Enhancements**
   - Enabled smooth automatic slide transitions using the `embla-carousel-autoplay` plugin (5-second default interval).
   - Configured auto-transition to seamlessly pause when a user hovers over the carousel and resume upon mouse leave.
