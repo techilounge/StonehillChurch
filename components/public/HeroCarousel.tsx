@@ -2,6 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
+import Fade from "embla-carousel-fade";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -33,7 +35,13 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
     return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: reducedMotion ? 0 : 25 });
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, duration: reducedMotion ? 0 : 40 },
+    [
+      Autoplay({ delay: 5000, stopOnInteraction: false, stopOnMouseEnter: true }),
+      Fade()
+    ]
+  );
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
