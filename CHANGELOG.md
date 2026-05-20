@@ -13,6 +13,9 @@ All notable changes to the Stonehill Church website will be documented in this f
   - Mitigated image/video cropping by using `object-contain` for image wrappers and `aspect-video` for video frames, preventing framing issues during visual scaling.
   - Ensured seamless persistence of resized layouts (pixel height when unlocked, percentage width, dynamic columns) in serializable `builderData` for Firestore drafts.
   - Maintained complete compatibility with drag-and-drop (`dnd-kit`), mobile stacking rules, and block movement controls.
+- **Public Rendering Stability & Error Boundaries**
+  - Added recursive serialization verification in `lib/data/pages.ts` to fully strip nested Firestore `Timestamp` objects from `builderData` before crossing server/client component boundaries, eliminating production hydration build crashes.
+  - Created a robust custom [error.tsx](file:///c:/Users/techi/APPs/Stonehill/app/(public)/error.tsx) error boundary for dynamic public routes, providing client diagnostics and safe UX fallback recovery options.
 
 ## [0.4.8] - 2026-05-18
 

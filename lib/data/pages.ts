@@ -27,7 +27,18 @@ export async function getPageBySlug(slug: string): Promise<Serialized<PageConten
       ...doc.data(),
     } as unknown as PageContent;
 
-    return serializeData(page);
+    const serialized = serializeData(page);
+
+    // builderData is handed to the <PageBuilderRenderer> Client Component, so it
+    // crosses the Server/Client boundary and must be fully plain JSON.
+    // serializeData only converts top-level timestamp fields; a JSON round-trip
+    // guarantees every nested value (e.g. a stray Firestore Timestamp) is
+    // serializable — otherwise a production build throws while rendering it.
+    if (serialized.builderData) {
+      serialized.builderData = JSON.parse(JSON.stringify(serialized.builderData));
+    }
+
+    return serialized;
   } catch (error) {
     logDataFallback("getPageBySlug", error);
     return null;
