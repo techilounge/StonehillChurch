@@ -3,6 +3,27 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.4.9] - 2026-05-20
+
+### Fixed
+- **Page Builder Media Resizing & Layout Reflow**
+  - Implemented 60fps real-time visual column resizing in multi-column layouts by driving the active drag loop with inline CSS custom property overrides (`--col-width`) to bypass global `!important` stylesheet rules.
+  - Added full proportional diagonal resizing (`se` corner handle) for image and video blocks while strictly preserving aspect ratio locks.
+  - Fixed visual preview stretch/squish on active drag by scaling height along with width in real-time when aspect-ratio lock is active.
+  - Mitigated image/video cropping by using `object-contain` for image wrappers and `aspect-video` for video frames, preventing framing issues during visual scaling.
+  - Ensured seamless persistence of resized layouts (pixel height when unlocked, percentage width, dynamic columns) in serializable `builderData` for Firestore drafts.
+  - Maintained complete compatibility with drag-and-drop (`dnd-kit`), mobile stacking rules, and block movement controls.
+
+## [0.4.8] - 2026-05-18
+
+
+### Added
+- **Page Builder Pattern Library**
+  - Created a centralized registry (`patternsCatalog`) of 12 branded page templates (Hero, About, Call To Action, Feature, General) matching the Stonehill design system.
+  - Implemented `PatternPickerModal` to provide a visual interface for selecting templates.
+  - Added deep-cloning and recursive ID regeneration in `PageBuilderContext` (`handleInsertTemplate`) to ensure no React key collisions when multiple templates are added to the canvas.
+  - Integrated template insertion triggers into the `BuilderCanvas` interface.
+
 ## [0.4.7] - 2026-05-18
 
 ### Added

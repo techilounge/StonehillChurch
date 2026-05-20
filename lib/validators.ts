@@ -412,6 +412,81 @@ export const siteSettingSchema = z.object({
   group: siteSettingsGroupSchema,
 });
 
+// page builder
+export const blockTypeSchema = z.enum([
+  "heading",
+  "paragraph",
+  "image",
+  "button",
+  "video",
+  "divider",
+  "spacer",
+  "card",
+  "cta",
+  "iconText",
+]);
+
+export const blockStyleSchema = z.object({
+  padding: z.string().max(80).optional(),
+  margin: z.string().max(80).optional(),
+  textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
+  textColor: z.string().max(40).optional(),
+  backgroundColor: z.string().max(40).optional(),
+  fontSize: z.string().max(40).optional(),
+  fontWeight: z.string().max(40).optional(),
+});
+
+export const pageBlockSchema = z.object({
+  id: z.string().min(1).max(80),
+  type: blockTypeSchema,
+  content: z.any(),
+  style: blockStyleSchema.optional(),
+});
+
+export const pageColumnSchema = z.object({
+  id: z.string().min(1).max(80),
+  blocks: z.array(pageBlockSchema),
+  width: z.string().max(40).optional(),
+  style: blockStyleSchema.optional(),
+});
+
+export const sectionTypeSchema = z.enum(["section", "row", "columns", "group"]);
+
+export const sectionStyleSchema = z.object({
+  padding: z.string().max(80).optional(),
+  margin: z.string().max(80).optional(),
+  backgroundColor: z.string().max(40).optional(),
+  backgroundImage: z.string().max(300).optional(),
+  textColor: z.string().max(40).optional(),
+  layoutWidth: z.enum(["full", "content"]).optional(),
+  verticalSpacing: z.string().max(40).optional(),
+  mobileStacking: z.enum(["stack", "reverse", "keep"]).optional(),
+  alignItems: z.enum(["start", "center", "end", "stretch"]).optional(),
+  justifyContent: z.enum(["start", "center", "end", "between", "around"]).optional(),
+});
+
+export const pageBuilderSectionSchema = z.object({
+  id: z.string().min(1).max(80),
+  type: sectionTypeSchema,
+  layout: z.enum(["1-col", "2-col", "3-col", "4-col", "left-sidebar", "right-sidebar"]).optional(),
+  columns: z.array(pageColumnSchema).optional(),
+  blocks: z.array(pageBlockSchema).optional(),
+  style: sectionStyleSchema.optional(),
+});
+
+export const patternTemplateSchema = z.object({
+  id: z.string().min(1).max(80),
+  name: z.string().min(1).max(120),
+  description: z.string().max(500).optional(),
+  category: z.enum(["hero", "about", "feature", "call_to_action", "general"]),
+  sections: z.array(pageBuilderSectionSchema),
+});
+
+export const pageBuilderDocumentSchema = z.object({
+  version: z.literal("1.0"),
+  sections: z.array(pageBuilderSectionSchema),
+});
+
 // pages
 export const pageSectionSchema = z.object({
   type: z.enum(["hero", "richText", "imageText", "cards", "cta"]),
@@ -427,8 +502,9 @@ export const pageSchema = z.object({
   slug: slugSchema,
   content: z.string().max(20000),
   sections: z.array(pageSectionSchema),
-  seoTitle: z.string().max(70),
-  seoDescription: z.string().max(160),
+  builderData: pageBuilderDocumentSchema.optional(),
+  seoTitle: z.string().max(70).nullable().optional(),
+  seoDescription: z.string().max(160).nullable().optional(),
   status: contentStatusSchema,
 });
 

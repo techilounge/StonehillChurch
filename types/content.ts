@@ -1,4 +1,5 @@
 import type { AuditFields, ContentStatus, FirestoreTimestampLike } from "./shared";
+import type { PageBuilderDocument } from "./pageBuilder";
 
 export type HomepageSlide = AuditFields & {
   title: string;
@@ -167,6 +168,7 @@ export type PageContent = {
   slug: string;
   content: string;
   sections: PageSection[];
+  builderData?: PageBuilderDocument;
   seoTitle: string;
   seoDescription: string;
   status: ContentStatus;

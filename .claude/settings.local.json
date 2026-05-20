@@ -6,7 +6,10 @@
       "Bash(npm run *)",
       "Bash(npm install *)",
       "Bash(npm test *)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(echo \"EXIT: $?\")",
+      "PowerShell(Get-CimInstance Win32_Process -Filter \"Name='node.exe'\")",
+      "PowerShell(foreach \\($p in 2972,21496,40776,18296,11500\\) { try { Stop-Process -Id $p -Force -ErrorAction Stop; \"Killed $p\" } catch { \"Already gone: $p\" } })"
     ]
   }
 }

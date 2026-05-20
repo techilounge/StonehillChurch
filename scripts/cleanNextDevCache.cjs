@@ -24,7 +24,7 @@ if (process.env.SKIP_NEXT_DEV_CLEAN === "1") {
 // Best-effort sweep of leftover `.next-stale-*` directories from previous
 // runs. Locked folders are skipped silently so a stuck handle never blocks
 // dev or build. Whichever folders aren't locked anymore get reclaimed.
-async function sweepStaleNextDirectories() {
+function sweepStaleNextDirectories() {
   let entries;
   try {
     entries = fs.readdirSync(workspace, { withFileTypes: true });
@@ -55,17 +55,7 @@ async function sweepStaleNextDirectories() {
     }
 
     try {
-      // Use Promise.race to enforce a timeout of 1 second per stale dir
-      // This prevents the script from hanging indefinitely on Windows due to fs.rm bugs.
-      await Promise.race([
-        fs.promises.rm(staleDir, {
-          recursive: true,
-          force: true,
-          maxRetries: 2,
-          retryDelay: 100,
-        }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 1000))
-      ]);
+      fs.rmSync(staleDir, { recursive: true, force: true });
       removed += 1;
     } catch {
       skipped += 1;
@@ -79,8 +69,8 @@ async function sweepStaleNextDirectories() {
   }
 }
 
-async function main() {
-  await sweepStaleNextDirectories();
+function main() {
+  sweepStaleNextDirectories();
 
   if (
     shouldPrepareCache &&
@@ -109,8 +99,29 @@ async function main() {
       );
     } catch (error) {
       process.stdout.write(
-        `[${lifecycleEvent}] Could not move .next (${error.code || error.message}). Continuing without cleanup.\n`,
+        `[${lifecycleEvent}] Could not move .next (${error.code || error.message}). Attempting in-place cache cleanup...\n`,
       );
+      try {
+        const files = fs.readdirSync(nextDir);
+        let cleanedCount = 0;
+        let failedCount = 0;
+        for (const file of files) {
+          const filePath = path.resolve(nextDir, file);
+          try {
+            fs.rmSync(filePath, { recursive: true, force: true });
+            cleanedCount++;
+          } catch {
+            failedCount++;
+          }
+        }
+        process.stdout.write(
+          `[${lifecycleEvent}] In-place cleanup completed: cleared ${cleanedCount} items, failed to clear ${failedCount} items.\n`,
+        );
+      } catch (innerError) {
+        process.stdout.write(
+          `[${lifecycleEvent}] In-place cleanup failed completely (${innerError.message}).\n`,
+        );
+      }
     }
 
     process.exit(0);
@@ -118,12 +129,7 @@ async function main() {
 
   if (fs.existsSync(nextDir)) {
     try {
-      await fs.promises.rm(nextDir, {
-        recursive: true,
-        force: true,
-        maxRetries: 3,
-        retryDelay: 200,
-      });
+      fs.rmSync(nextDir, { recursive: true, force: true });
       process.stdout.write(`[${lifecycleEvent}] Cleared .next before continuing.\n`);
     } catch (e) {
       process.stdout.write(`[${lifecycleEvent}] Warning: Failed to fully clear .next cache.\n`);
@@ -133,7 +139,9 @@ async function main() {
   process.exit(0);
 }
 
-main().catch((err) => {
+try {
+  main();
+} catch (err) {
   console.error(`[${lifecycleEvent}] Fatal error during cache cleanup:`, err);
   process.exit(0); // Exit successfully to not block build
-});
+}

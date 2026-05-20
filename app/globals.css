@@ -54,3 +54,19 @@ a {
   background: var(--color-stonehill-accent);
   color: #fff;
 }
+
+/* Flexible column resizing utilities */
+@media (min-width: 768px) {
+  .responsive-col {
+    width: var(--col-width) !important;
+    flex: 0 0 var(--col-width) !important;
+  }
+}
+
+/* Drag-resized media blocks collapse to full width on small screens */
+@media (max-width: 767px) {
+  .pb-resizable-media {
+    width: 100% !important;
+    height: auto !important;
+  }
+}

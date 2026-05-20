@@ -2,8 +2,8 @@ import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { hasPermission } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 import { getCmsDocument } from "@/lib/data/adminCms";
-import { CmsModuleForm } from "@/components/admin/cms/CmsModuleForm";
-import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { PageBuilderShell } from "@/components/admin/page-builder/PageBuilderShell";
+import { PageContent } from "@/types/content";
 
 export const metadata = {
   title: "Edit pages | Admin",
@@ -18,21 +18,20 @@ export default async function PagesEditPage({ params }: { params: Promise<{ id: 
 
   const canPublish = hasPermission(session, "content:publish");
 
-  let initialData = null;
+  let initialData: (PageContent & { id?: string }) | null = null;
   if (!isNew) {
-    initialData = await getCmsDocument("pages", id, session);
+    initialData = await getCmsDocument("pages", id, session) as (PageContent & { id: string });
     if (!initialData) {
       redirect("/admin/pages");
     }
   }
 
   return (
-    <AdminPageShell title="" description="">
-      <CmsModuleForm 
-        module="pages" 
+    <div className="min-h-screen bg-slate-50">
+      <PageBuilderShell 
         initialData={initialData} 
         canPublish={canPublish}
       />
-    </AdminPageShell>
+    </div>
   );
 }
