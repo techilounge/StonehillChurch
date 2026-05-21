@@ -12,7 +12,12 @@
       "PowerShell(foreach \\($p in 2972,21496,40776,18296,11500\\) { try { Stop-Process -Id $p -Force -ErrorAction Stop; \"Killed $p\" } catch { \"Already gone: $p\" } })",
       "WebFetch(domain:stonehill-church.vercel.app)",
       "Bash(curl -sS \"https://stonehill-church.vercel.app/test-page\")",
-      "Bash(curl -sS -o /dev/null -w \"%{http_code}\\\\n\" \"https://stonehill-church.vercel.app/our-beliefs\")"
+      "Bash(curl -sS -o /dev/null -w \"%{http_code}\\\\n\" \"https://stonehill-church.vercel.app/our-beliefs\")",
+      "Bash(git fetch *)",
+      "Bash(curl -sS -D - \"https://stonehill-church.vercel.app/test-page\" -o /tmp/tp.html)",
+      "Read(//tmp/**)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

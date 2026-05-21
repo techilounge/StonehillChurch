@@ -2,13 +2,16 @@ import { notFound } from "next/navigation";
 import { getPageBySlug } from "@/lib/data/pages";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 
-export const revalidate = 60; // optionally cache for 60 seconds
+// Builder pages read per-request data from Firestore and render inside the
+// dynamic (public) layout, so this route must be rendered dynamically.
+// Configuring it as static (revalidate + static generation) crashes at runtime
+// with "DYNAMIC_SERVER_USAGE".
+export const dynamic = "force-dynamic";
 
-// Builder page slugs live in Firestore and aren't known at build time, so this
-// route renders on demand. An explicit (empty) generateStaticParams is still
-// required: without it, the production build fails to generate the client
-// reference manifest for the static sibling pages in this (public) route group
-// ("Invariant: Expected clientReferenceManifest to be defined").
+// generateStaticParams stays declared even though the route is dynamic:
+// without it, the production build fails with "Invariant: Expected
+// clientReferenceManifest to be defined" for the static sibling pages in this
+// (public) route group.
 export function generateStaticParams() {
   return [];
 }
