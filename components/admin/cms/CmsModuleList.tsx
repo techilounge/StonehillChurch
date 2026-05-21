@@ -62,7 +62,7 @@ export function CmsModuleList({
   const [confirmDialog, setConfirmDialog] = React.useState<{isOpen: boolean, id: string, name: string, isFeatured: boolean} | null>(null);
 
   /* ─── Sortable state ──────────────────────────────────────────── */
-  const isSortable = module === "homepageSlides";
+  const isSortable = module === "homepageSlides" || module === "ministries";
   const [items, setItems] = React.useState<CmsDocument[]>(data);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -113,12 +113,13 @@ export function CmsModuleList({
       const orderedIds = reordered.map((item) => item.id);
       const result = await reorderDocumentsAction(module, orderedIds);
 
+      const moduleName = module === "homepageSlides" ? "slide" : "ministry";
       if (!result.ok) {
         // Revert on failure
         setItems(oldItems);
-        toast.error("Unable to save slide order. Please try again.");
+        toast.error(`Unable to save ${moduleName} order. Please try again.`);
       } else {
-        toast.success("Slide order saved");
+        toast.success(`${moduleName.charAt(0).toUpperCase() + moduleName.slice(1)} order saved`);
       }
       setIsSaving(false);
     },
@@ -325,7 +326,7 @@ export function CmsModuleList({
           {isSortable && !isSearching && (
             <div className="flex items-center gap-2 text-xs text-slate-900/50">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-stonehill-accent" />
-              Drag the handle to reorder slides. Changes save automatically.
+              Drag the handle to reorder {module === "homepageSlides" ? "slides" : "ministries"}. Changes save automatically.
               {isSaving && (
                 <span className="ml-2 inline-flex items-center gap-1 text-stonehill-accent animate-pulse">
                   <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">

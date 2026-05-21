@@ -162,6 +162,8 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
                 <div className="mt-4 pt-6 border-t border-slate-200">
                   <Link
                     href={ministry.ctaHref}
+                    target={ministry.openInNewTab ? "_blank" : undefined}
+                    rel={ministry.openInNewTab ? "noopener noreferrer" : undefined}
                     className="w-full flex items-center justify-center gap-2 bg-stonehill-accent hover:bg-stonehill-accent/90 text-slate-900 py-3.5 px-6 rounded-xl transition-all font-semibold shadow-sm hover:-translate-y-0.5 text-center"
                   >
                     {ministry.ctaLabel || "Get Involved"}

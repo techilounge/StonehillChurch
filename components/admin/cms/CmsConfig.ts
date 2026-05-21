@@ -148,6 +148,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true },
       { name: "ctaLabel", label: "Button Label", type: "text", required: true, hiddenOnList: true },
       { name: "ctaHref", label: "Button URL", type: "url", required: true, hiddenOnList: true },
+      { name: "openInNewTab", label: "Open in New Tab", type: "boolean", required: false, defaultValue: false, hiddenOnList: true },
       { name: "featured", label: "Featured", type: "boolean", required: true },
       { name: "sortOrder", label: "Sort Order", type: "number", required: true },
       { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },

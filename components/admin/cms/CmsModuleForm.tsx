@@ -213,14 +213,37 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
                     hasError={hasError}
                   />
                 ) : field.type === "textarea" || field.type === "richText" ? (
-                  <TextArea
-                    value={value || ""}
-                    onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                    placeholder={field.placeholder}
-                    required={field.required}
-                    hasError={hasError}
-                    rows={field.type === "richText" ? 10 : 4}
-                  />
+                  <>
+                    <TextArea
+                      value={value || ""}
+                      onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      hasError={hasError}
+                      rows={field.type === "richText" ? 10 : 4}
+                    />
+                    {field.name === "seoDescription" && (() => {
+                      const text = value || "";
+                      const length = text.length;
+                      const limit = 160;
+                      const remaining = limit - length;
+                      const isOver = length > limit;
+                      const isWarning = length >= limit * 0.9 && length <= limit;
+                      
+                      let colorClass = "text-slate-500";
+                      if (isOver) {
+                        colorClass = "text-red-600 font-semibold";
+                      } else if (isWarning) {
+                        colorClass = "text-amber-600 font-semibold";
+                      }
+                      
+                      return (
+                        <div className={`text-xs mt-1 transition-colors ${colorClass}`}>
+                          {length} / {limit} characters used ({remaining >= 0 ? `${remaining} remaining` : `${Math.abs(remaining)} over limit`})
+                        </div>
+                      );
+                    })()}
+                  </>
                 ) : field.type === "number" ? (
                   <TextInput
                     type="number"

@@ -93,6 +93,7 @@ export type Ministry = AuditFields & {
   imageAlt: string;
   ctaLabel: string;
   ctaHref: string;
+  openInNewTab?: boolean;
   featured: boolean;
   status: ContentStatus;
   sortOrder: number;

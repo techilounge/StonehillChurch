@@ -180,6 +180,7 @@ export const ministrySchema = z.object({
   imageAlt: z.string().min(2).max(200),
   ctaLabel: z.string().min(1).max(40),
   ctaHref: z.string().min(1).max(300),
+  openInNewTab: z.boolean().optional().default(false),
   featured: z.boolean().optional(),
   status: contentStatusSchema,
   sortOrder: z.number().int().min(0),

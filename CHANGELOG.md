@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.0] - 2026-05-21
+
+### Added
+- **Ministries Module Enhancements**
+  - **Open in New Tab Option**: Integrated an "Open in New Tab" checkbox for the Ministry CTA button URL inside [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts). Extended database schema validation (`ministrySchema` in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts)), type definitions ([content.ts](file:///c:/Users/techi/APPs/Stonehill/types/content.ts)), and applied conditional `target="_blank" rel="noopener noreferrer"` attributes on the dynamic public Ministry details page button.
+  - **SEO Description Character Counter**: Added a dynamic, real-time character counter under the `seoDescription` textarea field in [CmsModuleForm.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsModuleForm.tsx). Employs color warnings: slate-gray under 144 characters (90%), bold amber-600 warning from 144 to 160 characters, and bold red-600 error above 160 characters.
+  - **Drag-and-Drop Ordering**: Enabled drag-and-drop row reordering for the Ministries admin table in [CmsModuleList.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsModuleList.tsx), successfully reusing the robust `@dnd-kit/sortable` implementation. Fully customized list hint labels and toast success/error notifications to adapt dynamically to slides or ministries.
+
 ## [0.4.9] - 2026-05-20
 
 ### Fixed
