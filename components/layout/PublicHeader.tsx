@@ -1,36 +1,40 @@
 import Link from "next/link";
 import Image from "next/image";
-import { DesktopNav } from "./DesktopNav";
+import { DesktopNav, type NavItem } from "./DesktopNav";
 import { MobileNav } from "./MobileNav";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
+import type { MenuItem } from "@/types/menus";
+import { DEFAULT_HEADER_MENU } from "@/lib/constants/defaultMenus";
 
-const navigation = [
-  { href: "/im-new", label: "I'm New" },
-  { href: "/sermons", label: "Sermons" },
-  { href: "/events", label: "Events" },
-  { href: "/ministries", label: "Ministries" },
-  { href: "/resources", label: "Resources" },
-  { href: "/contact", label: "Contact" },
-  {
-    href: "/about",
-    label: "About",
-    // The "About" parent link itself goes to /about. Sub-items are only the
-    // pages that branch off About; we intentionally don't repeat /about here.
-    subItems: [
-      { href: "/our-beliefs", label: "Our Beliefs" },
-      { href: "/our-leaders", label: "Our Leaders" },
-    ],
-  },
-];
+/** Convert a MenuItem (from Firestore) to a NavItem (used by DesktopNav/MobileNav). */
+function menuItemToNavItem(item: MenuItem): NavItem {
+  return {
+    href: item.url,
+    label: item.label,
+    openInNewTab: item.openInNewTab || undefined,
+    subItems: item.children.length > 0
+      ? item.children.map(menuItemToNavItem)
+      : undefined,
+  };
+}
+
+/** Hardcoded fallback used when no dynamic menu data is available. */
+const defaultNavigation: NavItem[] = DEFAULT_HEADER_MENU.map(menuItemToNavItem);
 
 export interface PublicHeaderProps {
   settings?: Record<string, any>;
+  headerMenu?: MenuItem[];
 }
 
-export function PublicHeader({ settings }: PublicHeaderProps) {
+export function PublicHeader({ settings, headerMenu }: PublicHeaderProps) {
   const logoUrl = typeof settings?.["general.logo_url"] === "string" ? settings["general.logo_url"] : null;
   const churchName = typeof settings?.["general.churchName"] === "string" ? settings["general.churchName"] : "Stonehill SDA Church";
+
+  const navigation: NavItem[] =
+    headerMenu && headerMenu.length > 0
+      ? headerMenu.map(menuItemToNavItem)
+      : defaultNavigation;
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/85 backdrop-blur shadow-sm">
@@ -85,3 +89,4 @@ export function PublicHeader({ settings }: PublicHeaderProps) {
     </header>
   );
 }
+

@@ -603,6 +603,30 @@ export const auditLogSchema = z.object({
   details: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).nullable(),
 });
 
+// menus
+export const menuLocationSchema = z.enum(["header", "footer"]);
+
+const menuChildItemSchema = z.object({
+  id: z.string().min(1).max(80),
+  label: z.string().min(1).max(80),
+  url: z.string().min(1).max(500),
+  openInNewTab: z.boolean(),
+  children: z.array(z.any()).max(0).default([]),
+});
+
+export const menuItemSchema = z.object({
+  id: z.string().min(1).max(80),
+  label: z.string().min(1).max(80),
+  url: z.string().min(1).max(500),
+  openInNewTab: z.boolean(),
+  children: z.array(menuChildItemSchema).max(20).default([]),
+});
+
+export const menuDocumentSchema = z.object({
+  location: menuLocationSchema,
+  items: z.array(menuItemSchema).max(30),
+});
+
 export const collectionSchemas = {
   users: userSchema,
   homepageSlides: homepageSlideSchema,

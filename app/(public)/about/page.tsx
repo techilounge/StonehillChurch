@@ -42,6 +42,7 @@ export default async function AboutPage() {
       <PageHero
         title={pageContent?.title || "About Stonehill SDA Church"}
         subtitle="A community built on faith, love, and service."
+        hasOverlap
       />
 
       <section className="py-16 md:py-24 bg-white overflow-hidden -mt-16 md:-mt-24 relative z-20">

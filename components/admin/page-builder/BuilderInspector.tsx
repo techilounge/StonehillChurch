@@ -313,6 +313,10 @@ function BlockInspector({
               <option value="outline">Outline</option>
             </SelectInput>
           </div>
+          <PaddingControl
+            content={block.content}
+            onContentChange={(u) => onChange({ content: { ...block.content, ...u } })}
+          />
         </>
       )}
 
@@ -736,3 +740,128 @@ function CornerRadiusControl({
     </div>
   );
 }
+
+function PaddingControl({
+  content,
+  onContentChange,
+}: {
+  content: Record<string, any>;
+  onContentChange: (updates: Record<string, unknown>) => void;
+}) {
+  const pad = content.padding || {};
+  const linked = content.paddingLinked !== false;
+
+  const defaultPadding = {
+    top: "8px",
+    right: "16px",
+    bottom: "8px",
+    left: "16px",
+  };
+
+  const getPadVal = (key: "top" | "right" | "bottom" | "left") => {
+    return typeof pad[key] === "string" ? pad[key] : defaultPadding[key];
+  };
+
+  const setPad = (key: "top" | "right" | "bottom" | "left", value: string) => {
+    let cleanVal = value;
+    
+    if (linked) {
+      onContentChange({
+        padding: {
+          top: cleanVal,
+          right: cleanVal,
+          bottom: cleanVal,
+          left: cleanVal,
+        },
+      });
+    } else {
+      onContentChange({
+        padding: {
+          top: getPadVal("top"),
+          right: getPadVal("right"),
+          bottom: getPadVal("bottom"),
+          left: getPadVal("left"),
+          [key]: cleanVal,
+        },
+      });
+    }
+  };
+
+  const toggleLinked = (next: boolean) => {
+    if (next) {
+      const v = getPadVal("top");
+      onContentChange({
+        paddingLinked: true,
+        padding: { top: v, right: v, bottom: v, left: v },
+      });
+    } else {
+      onContentChange({ paddingLinked: false });
+    }
+  };
+
+  const reset = () => {
+    onContentChange({
+      paddingLinked: false,
+      padding: { ...defaultPadding },
+    });
+  };
+
+  const paddingField = (key: "top" | "right" | "bottom" | "left", labelText: string) => (
+    <div className="space-y-1">
+      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">{labelText}</span>
+      <TextInput
+        value={pad[key] ?? ""}
+        placeholder={defaultPadding[key]}
+        onChange={(e) => setPad(key, e.target.value)}
+        onBlur={() => {
+          if (!pad[key] || pad[key].trim() === "") {
+            setPad(key, defaultPadding[key]);
+          }
+        }}
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-2 border-t border-slate-100 pt-4">
+      <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Label Padding</label>
+      <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+        <input
+          type="checkbox"
+          checked={linked}
+          onChange={(e) => toggleLinked(e.target.checked)}
+          className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+        />
+        Link padding
+      </label>
+      {linked ? (
+        <TextInput
+          value={pad.top ?? ""}
+          placeholder="e.g. 8px"
+          onChange={(e) => setPad("top", e.target.value)}
+          onBlur={() => {
+            if (!pad.top || pad.top.trim() === "") {
+              onContentChange({
+                padding: { top: "8px", right: "8px", bottom: "8px", left: "8px" },
+              });
+            }
+          }}
+        />
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {paddingField("top", "Top")}
+          {paddingField("right", "Right")}
+          {paddingField("bottom", "Bottom")}
+          {paddingField("left", "Left")}
+        </div>
+      )}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-slate-500">Specify px or % values.</p>
+        <button type="button" onClick={reset} className="text-xs font-medium text-stonehill-accent hover:underline">
+          Reset to Default
+        </button>
+      </div>
+    </div>
+  );
+}
+

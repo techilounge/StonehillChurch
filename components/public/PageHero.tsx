@@ -9,6 +9,7 @@ interface PageHeroProps {
   imageAlt?: string | null;
   className?: string;
   headingAs?: "h1" | "h2";
+  hasOverlap?: boolean;
 }
 
 export function PageHero({
@@ -18,11 +19,30 @@ export function PageHero({
   imageAlt,
   className,
   headingAs = "h1",
+  hasOverlap = false,
 }: PageHeroProps) {
   const Heading = headingAs;
 
+  // When overlapped by a negative margin section below (e.g. -mt-16 md:-mt-24),
+  // we increase the container height and padding-bottom by 64px (mobile) / 96px (desktop).
+  // This keeps the visible portion of the hero exactly at 40vh / min-300px and keeps text centered.
+  const heroStyle: React.CSSProperties = hasOverlap
+    ? {
+        paddingBottom: "var(--overlap-pb, 64px)",
+        height: "calc(40vh + var(--overlap-h, 64px))",
+        minHeight: "calc(300px + var(--overlap-h, 64px))",
+      }
+    : {};
+
   return (
-    <section className={cn("relative w-full h-[40vh] min-h-[300px] flex items-center justify-center bg-stonehill-primary", className)}>
+    <section 
+      className={cn(
+        "relative w-full h-[40vh] min-h-[300px] flex items-center justify-center bg-stonehill-primary", 
+        hasOverlap && "[--overlap-pb:64px] md:[--overlap-pb:96px] [--overlap-h:64px] md:[--overlap-h:96px]",
+        className
+      )}
+      style={heroStyle}
+    >
       {/* Background Image */}
       {imageUrl && (
         <>

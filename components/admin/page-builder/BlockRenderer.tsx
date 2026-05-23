@@ -171,31 +171,43 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
           </div>
         )}
 
-        {block.type === "button" && (
-          <div>
-            <div className={`flex ${
-              content.alignment === "center" ? "justify-center" : content.alignment === "right" ? "justify-end" : "justify-start"
-            }`}>
-              <span className={`inline-block px-6 py-3 rounded-full font-sans font-medium transition-colors shadow-sm ${
-                content.variant === "outline" ? "border-2 border-stonehill-primary text-stonehill-primary bg-transparent" :
-                content.variant === "secondary" ? "bg-stonehill-secondary text-stonehill-dark" :
-                "bg-stonehill-primary text-white"
+        {block.type === "button" && (() => {
+          const pad = content.padding || {};
+          const paddingStyle: React.CSSProperties = {
+            paddingTop: pad.top ?? "8px",
+            paddingRight: pad.right ?? "16px",
+            paddingBottom: pad.bottom ?? "8px",
+            paddingLeft: pad.left ?? "16px",
+          };
+          return (
+            <div>
+              <div className={`flex ${
+                content.alignment === "center" ? "justify-center" : content.alignment === "right" ? "justify-end" : "justify-start"
               }`}>
-                {content.label || content.text || "Button label"}
-              </span>
+                <span 
+                  className={`inline-block rounded-full font-sans font-medium transition-colors shadow-sm ${
+                    content.variant === "outline" ? "border-2 border-stonehill-primary text-stonehill-primary bg-transparent" :
+                    content.variant === "secondary" ? "bg-stonehill-secondary text-stonehill-dark" :
+                    "bg-stonehill-primary text-white"
+                  }`}
+                  style={paddingStyle}
+                >
+                  {content.label || content.text || "Button label"}
+                </span>
+              </div>
+              {(!content.label && !content.text) && (
+                <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Button label is empty
+                </div>
+              )}
+              {content.url && !isValidSafeUrl(content.url) && (
+                <div className="mt-2 bg-red-50 text-red-800 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Unsafe URL: "{content.url}"
+                </div>
+              )}
             </div>
-            {(!content.label && !content.text) && (
-              <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
-                ⚠️ Button label is empty
-              </div>
-            )}
-            {content.url && !isValidSafeUrl(content.url) && (
-              <div className="mt-2 bg-red-50 text-red-800 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
-                ⚠️ Unsafe URL: "{content.url}"
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
 
         {block.type === "spacer" && (
           <div className="flex items-center justify-center border border-dashed border-slate-200 bg-slate-50 opacity-50 rounded" style={{ height: content.height || "2rem" }}>

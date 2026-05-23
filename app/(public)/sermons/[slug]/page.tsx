@@ -82,6 +82,7 @@ export default async function SermonDetailPage({ params }: SermonPageProps) {
       <PageHero
         title={sermon.title}
         subtitle={sermon.series ? `Part of the ${sermon.series} series` : undefined}
+        hasOverlap
       />
 
       <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">

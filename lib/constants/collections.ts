@@ -15,6 +15,7 @@ export const collections = {
   popups: "popups",
   youtubeSettings: "youtubeSettings",
   auditLogs: "auditLogs",
+  menus: "menus",
 } as const;
 
 export type CollectionKey = keyof typeof collections;
@@ -37,6 +38,7 @@ export const APPROVED_COLLECTION_NAMES = [
   collections.popups,
   collections.youtubeSettings,
   collections.auditLogs,
+  collections.menus,
 ] as const satisfies readonly CollectionName[];
 
 export const SINGLETON_DOCS = {

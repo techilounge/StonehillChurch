@@ -83,6 +83,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         title={event.title}
         imageUrl={event.imageUrl}
         imageAlt={event.imageAlt}
+        hasOverlap
       />
 
       <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">

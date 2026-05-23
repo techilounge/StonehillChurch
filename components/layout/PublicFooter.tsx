@@ -2,9 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { MenuItem } from "@/types/menus";
+import { DEFAULT_FOOTER_MENU } from "@/lib/constants/defaultMenus";
 
 type PublicFooterProps = {
   settings?: Record<string, unknown>;
+  footerMenu?: MenuItem[];
 };
 
 const footerLinkClassName =
@@ -21,7 +24,36 @@ function externalLinkProps(href: string) {
     : {};
 }
 
-export function PublicFooter({ settings }: PublicFooterProps) {
+/** Hardcoded fallback footer columns used when no dynamic menu data is available. */
+const defaultFooterColumns: MenuItem[] = DEFAULT_FOOTER_MENU;
+
+function FooterLink({ item }: { item: MenuItem }) {
+  const isExternal = item.url.startsWith("http://") || item.url.startsWith("https://");
+
+  if (item.openInNewTab || isExternal) {
+    return (
+      <li>
+        <a
+          href={item.url}
+          className={footerLinkClassName}
+          {...(item.openInNewTab ? { target: "_blank", rel: "noopener noreferrer" } : externalLinkProps(item.url))}
+        >
+          {item.label}
+        </a>
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <Link href={item.url} className={footerLinkClassName}>
+        {item.label}
+      </Link>
+    </li>
+  );
+}
+
+export function PublicFooter({ settings, footerMenu }: PublicFooterProps) {
   const churchName =
     settingString(settings, "general.churchName") || "Stonehill Seventh-day Adventist Church";
   const tagline =
@@ -37,6 +69,12 @@ export function PublicFooter({ settings }: PublicFooterProps) {
   ].filter((item) => item.href);
 
   const logoUrl = settingString(settings, "general.logo_url");
+
+  // Use dynamic menu data if available, otherwise fall back to hardcoded columns
+  const menuColumns = footerMenu && footerMenu.length > 0 ? footerMenu : defaultFooterColumns;
+
+  // Determine if we have contact info for a contact column
+  const hasContactInfo = Boolean(address || email || phone);
 
   return (
     <footer className="border-t border-slate-200 bg-white py-16">
@@ -73,53 +111,43 @@ export function PublicFooter({ settings }: PublicFooterProps) {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 lg:col-span-2">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Connect</h3>
-              <ul className="mt-6 space-y-4 text-sm text-slate-500">
-                <li><Link href="/im-new" className={footerLinkClassName}>I&apos;m New</Link></li>
-                <li><Link href="/plan-your-visit" className={footerLinkClassName}>Plan Your Visit</Link></li>
-                <li><Link href="/contact" className={footerLinkClassName}>Contact</Link></li>
-                <li><Link href="/give" className={footerLinkClassName}>Give</Link></li>
-                <li><Link href="/volunteer" className={footerLinkClassName}>Volunteer</Link></li>
-                <li><Link href="/submit-announcement" className={footerLinkClassName}>Submit Announcement</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Discover</h3>
-              <ul className="mt-6 space-y-4 text-sm text-slate-500">
-                <li><Link href="/sermons" className={footerLinkClassName}>Sermons</Link></li>
-                <li><Link href="/events" className={footerLinkClassName}>Events</Link></li>
-                <li><Link href="/church-calendar" className={footerLinkClassName}>Calendar</Link></li>
-                <li><Link href="/ministries" className={footerLinkClassName}>Ministries</Link></li>
-                <li><Link href="/resources" className={footerLinkClassName}>Resources</Link></li>
-                <li><Link href="/live" className={footerLinkClassName}>Live Stream</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">About</h3>
-              <ul className="mt-6 space-y-4 text-sm text-slate-500">
-                <li><Link href="/about" className={footerLinkClassName}>About Us</Link></li>
-                <li><Link href="/our-beliefs" className={footerLinkClassName}>Our Beliefs</Link></li>
-                <li><Link href="/our-leaders" className={footerLinkClassName}>Our Leaders</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Contact</h3>
-              <ul className="mt-6 space-y-4 text-sm text-slate-500">
-                {address && <li className="max-w-xs">{address}</li>}
-                {email && (
-                  <li>
-                    <a href={`mailto:${email}`} className={footerLinkClassName}>{email}</a>
-                  </li>
+          <div className={cn(
+            "grid grid-cols-1 gap-8 lg:col-span-2",
+            `sm:grid-cols-2 md:grid-cols-${Math.min(menuColumns.length + (hasContactInfo ? 1 : 0), 4)}`,
+          )}>
+            {/* Dynamic menu columns */}
+            {menuColumns.map((column) => (
+              <div key={column.id}>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">{column.label}</h3>
+                {column.children.length > 0 && (
+                  <ul className="mt-6 space-y-4 text-sm text-slate-500">
+                    {column.children.map((child) => (
+                      <FooterLink key={child.id} item={child} />
+                    ))}
+                  </ul>
                 )}
-                {phone && (
-                  <li>
-                    <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className={footerLinkClassName}>{phone}</a>
-                  </li>
-                )}
-              </ul>
-            </div>
+              </div>
+            ))}
+
+            {/* Contact column — always auto-generated from site settings */}
+            {hasContactInfo && (
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Contact</h3>
+                <ul className="mt-6 space-y-4 text-sm text-slate-500">
+                  {address && <li className="max-w-xs">{address}</li>}
+                  {email && (
+                    <li>
+                      <a href={`mailto:${email}`} className={footerLinkClassName}>{email}</a>
+                    </li>
+                  )}
+                  {phone && (
+                    <li>
+                      <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`} className={footerLinkClassName}>{phone}</a>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
         <div className="mt-16 flex flex-col items-center justify-between border-t border-slate-200 pt-8 sm:flex-row">
@@ -134,4 +162,3 @@ export function PublicFooter({ settings }: PublicFooterProps) {
     </footer>
   );
 }
-

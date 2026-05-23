@@ -443,7 +443,19 @@ function getInitialBlockContent(type: PageBlock["type"]) {
     case "heading": return { text: "Heading Text", level: "h2", alignment: "left", variant: "default" };
     case "paragraph": return { text: "Add your text here...", alignment: "left", maxWidth: "full" };
     case "image": return { url: "", alt: "", caption: "", alignment: "center", widthStyle: "full" };
-    case "button": return { label: "Click Here", url: "#", variant: "primary", alignment: "left" };
+    case "button": return { 
+      label: "Click Here", 
+      url: "#", 
+      variant: "primary", 
+      alignment: "left",
+      padding: {
+        top: "8px",
+        right: "16px",
+        bottom: "8px",
+        left: "16px"
+      },
+      paddingLinked: false
+    };
     case "video": return { url: "", title: "Video Player", thumbnailFirst: false };
     case "divider": return { thickness: 1, color: "slate-200", spacing: "py-4" };
     case "spacer": return { heightDesktop: "h-8", heightMobile: "h-4" };

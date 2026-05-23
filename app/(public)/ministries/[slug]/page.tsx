@@ -68,6 +68,7 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
       <PageHero
         title={ministry.name}
         subtitle={ministry.shortDescription}
+        hasOverlap
       />
 
       <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">

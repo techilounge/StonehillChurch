@@ -59,6 +59,8 @@ function revalidateCmsModule(module: CmsModule, data?: Record<string, unknown> |
       // CMS pages map to public URLs by slug (e.g. "about" → /about).
       const slug = typeof data?.slug === "string" ? data.slug : null;
       if (slug) revalidatePath(`/${slug}`);
+      // Menu items may link to pages by slug — flush menu cache too.
+      revalidateTag("menus");
       break;
     }
 

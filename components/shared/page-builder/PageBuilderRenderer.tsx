@@ -295,6 +295,13 @@ function BlockRenderer({ block }: { block: PageBlock }) {
     }
     case "button": {
       const safeUrl = isValidSafeUrl(content?.url) ? (content?.url || "#") : "#";
+      const pad = content?.padding || {};
+      const paddingStyle: React.CSSProperties = {
+        paddingTop: pad.top ?? "8px",
+        paddingRight: pad.right ?? "16px",
+        paddingBottom: pad.bottom ?? "8px",
+        paddingLeft: pad.left ?? "16px",
+      };
       return (
         <div style={inlineStyles} className={`w-full flex ${cleanStyle.textAlign === 'center' ? 'justify-center' : cleanStyle.textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
           <Button 
@@ -304,6 +311,7 @@ function BlockRenderer({ block }: { block: PageBlock }) {
               "default"
             } 
             size={content?.size || "md"}
+            style={paddingStyle}
             asChild
           >
             <a href={safeUrl}>{content?.label || content?.text || "Click Here"}</a>

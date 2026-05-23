@@ -3,6 +3,24 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.1] - 2026-05-23
+
+### Added
+- **Navigation Menu Management System**
+  - **Dynamic Navigation Control**: Implemented a comprehensive Header & Footer Navigation Menu Management dashboard in the CMS, supporting custom labels, URLs (internal routes or external pages), and target window settings (same tab vs new tab).
+  - **System Defaults & Reset System**: Established baseline menu configurations in [defaultMenus.ts](file:///c:/Users/techi/APPs/Stonehill/lib/constants/defaultMenus.ts) and added a "Reset to Default" button with a confirmation modal in [MenuManager.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/menus/MenuManager.tsx). Reverts menus in Firestore and fires server-side revalidation actions.
+  - **Dynamic Live Site Fallback**: Updated [PublicHeader.tsx](file:///c:/Users/techi/APPs/Stonehill/components/layout/PublicHeader.tsx) and [PublicFooter.tsx](file:///c:/Users/techi/APPs/Stonehill/components/layout/PublicFooter.tsx) to fetch menu configurations from Firestore dynamically and automatically fall back to the system defaults when none exist.
+  - **Firestore Rules & Types**: Added security rules for the `/menus` collection in `firestore.rules` and validation schemas in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts). Added the menus endpoint route in `AdminSidebar.tsx` and collection keys in `collections.ts`.
+- **Button Block Padding Controls**
+  - **Configurable Button Padding**: Extended Page Builder Button Block settings in [BuilderInspector.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/BuilderInspector.tsx) with a granular padding control panel (Top, Right, Bottom, Left).
+  - **Link/Unlink & Reset Actions**: Added a button to lock/unlock all sides for uniform scaling and quick-reset action back to theme defaults (12px top/bottom, 24px left/right).
+  - **Canvas & Live Render Integration**: Integrated padding style injection in [BlockRenderer.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/BlockRenderer.tsx) and public [PageBuilderRenderer.tsx](file:///c:/Users/techi/APPs/Stonehill/components/shared/page-builder/PageBuilderRenderer.tsx).
+
+### Fixed
+- **Public Layout Header Heights & Section Overlaps**
+  - **Overlap Padding Adjustment**: Added a `hasOverlap` parameter to [PageHero.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/PageHero.tsx) to increase hero height and shift content upward when standard sections use negative margins (`-mt-16 md:-mt-24`).
+  - **Uniform Heights**: Fixed the layout height discrepancy on About, Sermons (details), Resources, Ministries (details), and Events (details) pages by passing `hasOverlap={true}` so that all page headers render with consistent height across the site.
+
 ## [0.5.0] - 2026-05-21
 
 ### Added

@@ -15,17 +15,21 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }>) {
   const { getCachedSiteSettings } = await import("@/lib/data/siteSettings");
-  const siteSettings = await getCachedSiteSettings();
+  const { getCachedMenus } = await import("@/lib/data/menus");
+  const [siteSettings, menus] = await Promise.all([
+    getCachedSiteSettings(),
+    getCachedMenus(),
+  ]);
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <TopAnnouncementBar />
-      <PublicHeader settings={siteSettings} />
+      <PublicHeader settings={siteSettings} headerMenu={menus.header} />
       <main id="main-content" tabIndex={-1}>
         {children}
       </main>
-      <PublicFooter settings={siteSettings} />
+      <PublicFooter settings={siteSettings} footerMenu={menus.footer} />
       {/*
        * JSON-LD lives at the bottom of the layout as the last child of the
        * outer div. Placing it here (rather than as a Fragment sibling at the
@@ -40,3 +44,4 @@ export default async function PublicLayout({
     </div>
   );
 }
+

@@ -51,6 +51,7 @@ export default async function ResourcesPage() {
       <PageHero
         title="Resources"
         subtitle="Documents, study guides, forms, and more."
+        hasOverlap
       />
 
       <section className="py-16 md:py-24 overflow-hidden -mt-16 md:-mt-24 relative z-20">

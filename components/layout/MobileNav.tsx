@@ -10,6 +10,7 @@ import { Button } from "@/components/shared/Button";
 export interface NavItem {
   href: string;
   label: string;
+  openInNewTab?: boolean;
   subItems?: NavItem[];
 }
 
@@ -92,26 +93,51 @@ export function MobileNav({ items, churchName = "Stonehill SDA Church", logoUrl 
                 <div className="space-y-2 py-6">
                   {items.map((item) => (
                     <div key={item.href}>
-                      <Link
-                        href={item.href}
-                        aria-current={pathname === item.href ? "page" : undefined}
-                        className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-slate-900 hover:bg-slate-50 hover:text-stonehill-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
+                      {item.openInNewTab ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-slate-900 hover:bg-slate-50 hover:text-stonehill-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {item.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          aria-current={pathname === item.href ? "page" : undefined}
+                          className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-slate-900 hover:bg-slate-50 hover:text-stonehill-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      )}
                       {item.subItems && (
                         <div className="ml-4 mt-1 border-l border-slate-200 pl-4 space-y-1">
                           {item.subItems.map((subItem) => (
-                            <Link
-                              key={subItem.href}
-                              href={subItem.href}
-                              aria-current={pathname === subItem.href ? "page" : undefined}
-                              className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 text-slate-600 hover:bg-slate-50 hover:text-stonehill-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
-                              onClick={() => setIsOpen(false)}
-                            >
-                              {subItem.label}
-                            </Link>
+                            subItem.openInNewTab ? (
+                              <a
+                                key={subItem.href}
+                                href={subItem.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 text-slate-600 hover:bg-slate-50 hover:text-stonehill-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                                onClick={() => setIsOpen(false)}
+                              >
+                                {subItem.label}
+                              </a>
+                            ) : (
+                              <Link
+                                key={subItem.href}
+                                href={subItem.href}
+                                aria-current={pathname === subItem.href ? "page" : undefined}
+                                className="-mx-3 block rounded-lg px-3 py-2 text-base font-medium leading-7 text-slate-600 hover:bg-slate-50 hover:text-stonehill-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                                onClick={() => setIsOpen(false)}
+                              >
+                                {subItem.label}
+                              </Link>
+                            )
                           ))}
                         </div>
                       )}
