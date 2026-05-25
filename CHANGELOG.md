@@ -3,6 +3,15 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.2] - 2026-05-24
+
+### Added
+- **Clickable Leader Cards & Details Modal**
+  - **Interactivity Enhancements**: Converted [LeaderCard.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/LeaderCard.tsx) into a client component. Added a card lift transition effect (`hover:-translate-y-1 hover:shadow-lg`) and focus outline. Added an invisible overlay trigger button inside the card for seamless mouse and tab key click capture.
+  - **Responsive Details Modal**: Implemented a responsive details modal using Headless UI `Dialog` and `Transition` with a backdrop blur overlay (`backdrop-blur-sm bg-slate-900/70`) and scale entrance animations.
+  - **Preserved Circular Image Shape**: Styled the modal image container to perfectly match the card's circular frame and crop styling (`rounded-full overflow-hidden object-cover`) without stretching or distortion.
+  - **A11y & Focus Control**: Configured full keyboard accessibility, including focus trapping inside the modal when open and focus restoration to the triggering card when closed.
+
 ## [0.5.1] - 2026-05-23
 
 ### Added
