@@ -168,6 +168,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       { name: "bio", label: "Biography", type: "textarea", required: true, hiddenOnList: true },
       { name: "email", label: "Email", type: "email", required: true },
       { name: "sortOrder", label: "Sort Order", type: "number", required: true },
+      { name: "active", label: "Active", type: "boolean", required: true, defaultValue: true },
     ],
   },
   announcements: {
