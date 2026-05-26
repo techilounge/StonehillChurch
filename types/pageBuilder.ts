@@ -8,6 +8,8 @@ export type BlockType =
   | "spacer"
   | "card"
   | "iconText"
+  | "iconBox"
+  | "googleMap"
   | "cta";
 
 export type BlockStyle = {

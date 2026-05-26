@@ -2,7 +2,7 @@ import * as React from "react";
 import { PageBlock } from "@/types/pageBuilder";
 import { usePageBuilder } from "./PageBuilderContext";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { isValidSafeUrl, sanitizeCornerRadius, formatParagraphHtml } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from "@/lib/youtube";
 import { BlockResizer } from "./BlockResizer";
 
@@ -332,6 +332,82 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
             </div>
           </div>
         )}
+
+        {block.type === "iconBox" && (() => {
+          const align = content.alignment || "center";
+          const itemsClass =
+            align === "center" ? "items-center text-center" :
+            align === "right" ? "items-end text-right" : "items-start text-left";
+          const Heading = (content.level || "h3") as React.ElementType;
+          const sizeClass =
+            content.level === "h1" ? "text-3xl md:text-4xl" :
+            content.level === "h2" ? "text-2xl md:text-3xl" :
+            content.level === "h3" ? "text-xl md:text-2xl" :
+            content.level === "h4" ? "text-lg md:text-xl" :
+            content.level === "h5" ? "text-base md:text-lg" :
+            content.level === "h6" ? "text-sm md:text-base" : "text-xl md:text-2xl";
+          const isImage = content.variant === "image";
+          return (
+            <div className={`flex flex-col gap-3 ${itemsClass}`}>
+              <div className={`flex-shrink-0 ${isImage ? "w-24 h-24" : "w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary"} rounded-full flex items-center justify-center overflow-hidden`}>
+                {isImage && content.iconUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={content.iconUrl} alt={content.alt || ""} className="w-full h-full object-cover" />
+                ) : content.iconUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={content.iconUrl} alt="icon" className="w-8 h-8 object-contain" />
+                ) : content.icon ? (
+                  <span className="text-2xl">{content.icon}</span>
+                ) : (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                )}
+              </div>
+              <Heading className={`font-display font-bold text-stonehill-dark ${sizeClass}`}>
+                {content.title || "Feature title"}
+              </Heading>
+              <p className="text-slate-600 text-sm max-w-md font-sans leading-relaxed">{content.description || "Short supporting description."}</p>
+              {content.url && !isValidSafeUrl(content.url) && (
+                <div className="mt-2 bg-red-50 text-red-800 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Unsafe URL: "{content.url}"
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {block.type === "googleMap" && (() => {
+          const validEmbed = content.embedUrl && isValidGoogleMapsEmbedUrl(content.embedUrl);
+          const height = typeof content.height === "number" ? content.height : 400;
+          const previewHeight = Math.max(150, Math.min(500, height));
+          return (
+            <div>
+              <div
+                className="w-full bg-slate-100 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-500 overflow-hidden"
+                style={{ height: `${previewHeight}px` }}
+              >
+                <svg className="w-10 h-10 mb-2 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <circle cx="12" cy="11" r="3" strokeWidth="1.5" />
+                </svg>
+                <span className="text-sm font-medium">Google Map</span>
+                {content.embedUrl ? (
+                  <span className="text-xs text-slate-400 mt-1 max-w-[80%] truncate px-4">{content.embedUrl}</span>
+                ) : (
+                  <span className="text-xs text-slate-400 mt-1">Add an embed URL in the Inspector →</span>
+                )}
+              </div>
+              {!content.embedUrl ? (
+                <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Embed URL is required
+                </div>
+              ) : !validEmbed ? (
+                <div className="mt-2 bg-red-50 text-red-800 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Not a Google Maps embed URL
+                </div>
+              ) : null}
+            </div>
+          );
+        })()}
 
         {block.type === "cta" && (
           <div className={`p-8 md:p-12 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 ${

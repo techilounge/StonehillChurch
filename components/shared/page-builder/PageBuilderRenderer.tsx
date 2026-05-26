@@ -10,7 +10,7 @@ import {
 } from "@/types/pageBuilder";
 import { Button } from "@/components/shared/Button";
 import { Card } from "@/components/shared/Card";
-import { isValidSafeUrl, sanitizeHtml, sanitizeStyle, sanitizeCornerRadius, formatParagraphHtml } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, sanitizeHtml, sanitizeStyle, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeEmbedUrl, getYouTubeThumbnailUrl } from "@/lib/youtube";
 
 interface PageBuilderRendererProps {
@@ -482,6 +482,75 @@ function BlockRenderer({ block }: { block: PageBlock }) {
             {content?.title && <h4 className="font-bold text-lg mb-1">{content.title}</h4>}
             {(content?.description || content?.text) && <p className="text-slate-600 leading-relaxed">{content.description || content.text}</p>}
           </div>
+        </div>
+      );
+    }
+    case "iconBox": {
+      const safeIconUrl = isValidSafeUrl(content?.iconUrl) ? (content?.iconUrl || "") : "";
+      const align = content?.alignment === "left" ? "items-start text-left"
+        : content?.alignment === "right" ? "items-end text-right"
+        : "items-center text-center";
+      const HTag = (content?.level || "h3") as React.ElementType;
+      const level = content?.level || "h3";
+      const titleSize =
+        level === "h1" ? "text-4xl md:text-5xl" :
+        level === "h2" ? "text-3xl md:text-4xl" :
+        level === "h3" ? "text-2xl md:text-3xl" :
+        level === "h4" ? "text-xl md:text-2xl" :
+        level === "h5" ? "text-lg md:text-xl" :
+        "text-base md:text-lg";
+      const isImage = content?.variant === "image";
+      const safeLink = isValidSafeUrl(content?.url) ? (content?.url || "") : "";
+      const inner = (
+        <>
+          {(safeIconUrl || content?.icon) && (
+            <div className={`shrink-0 ${isImage ? "w-24 h-24" : "w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary"} rounded-full flex items-center justify-center overflow-hidden`}>
+              {isImage && safeIconUrl ? (
+                <img src={safeIconUrl} alt={content?.alt || ""} className="w-full h-full object-cover" />
+              ) : safeIconUrl ? (
+                <img src={safeIconUrl} alt="" className="w-8 h-8 object-contain" />
+              ) : (
+                <span className="text-2xl">{content?.icon}</span>
+              )}
+            </div>
+          )}
+          {content?.title && <HTag className={`font-display font-bold text-stonehill-dark ${titleSize}`}>{content.title}</HTag>}
+          {content?.description && <p className="text-slate-600 leading-relaxed max-w-md">{content.description}</p>}
+        </>
+      );
+      return (
+        <div style={inlineStyles} className={`flex flex-col gap-3 ${align}`}>
+          {safeLink ? (
+            <a
+              href={safeLink}
+              target={content?.openInNewTab ? "_blank" : undefined}
+              rel={content?.openInNewTab ? "noopener noreferrer" : undefined}
+              className={`flex flex-col gap-3 ${align} no-underline hover:opacity-90 transition-opacity`}
+            >
+              {inner}
+            </a>
+          ) : (
+            inner
+          )}
+        </div>
+      );
+    }
+    case "googleMap": {
+      const validEmbed = !!content?.embedUrl && isValidGoogleMapsEmbedUrl(content.embedUrl);
+      if (!validEmbed) return null;
+      const heightPx = typeof content?.height === "number" ? Math.max(150, Math.min(1200, content.height)) : 400;
+      const fullWidth = !!content?.fullWidth;
+      return (
+        <div style={inlineStyles} className={fullWidth ? "w-screen relative left-1/2 right-1/2 -mx-[50vw]" : "w-full"}>
+          <iframe
+            src={content.embedUrl}
+            title="Google Map"
+            className="w-full border-0 rounded-lg"
+            style={{ height: `${heightPx}px` }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
         </div>
       );
     }

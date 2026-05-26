@@ -137,6 +137,21 @@ export function formatParagraphHtml(text: string | null | undefined): string {
 }
 
 /**
+ * Validates that a URL is a Google Maps embed URL. The map block iframes
+ * arbitrary URLs, so we restrict the src to the official embed endpoints
+ * (covered by the site's CSP frame-src for google.com / maps.google.com).
+ */
+export function isValidGoogleMapsEmbedUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  return (
+    trimmed.startsWith("https://www.google.com/maps/embed?") ||
+    trimmed.startsWith("https://maps.google.com/maps/embed?") ||
+    trimmed.startsWith("https://www.google.com/maps/embed/v1/")
+  );
+}
+
+/**
  * Strips script tags, unsafe onload/onerror handlers, iframe/object tags, and javascript: links to prevent script injection.
  */
 export function sanitizeHtml(html: string | null | undefined): string {
@@ -329,6 +344,14 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
         validateUrl(block.content.buttonUrl, bName);
       } else if (block.type === "image") {
         validateUrl(block.content.url, bName);
+      } else if (block.type === "iconBox") {
+        validateUrl(block.content.url, bName);
+        validateUrl(block.content.iconUrl, bName);
+      } else if (block.type === "googleMap") {
+        const embedUrl = block.content?.embedUrl;
+        if (embedUrl && !isValidGoogleMapsEmbedUrl(embedUrl)) {
+          unsafeUrls.push(`${bName}: "${embedUrl}" is not a Google Maps embed URL`);
+        }
       }
     });
 
@@ -344,6 +367,14 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
         validateUrl(block.content.buttonUrl, location);
       } else if (block.type === "image") {
         validateUrl(block.content.url, location);
+      } else if (block.type === "iconBox") {
+        validateUrl(block.content.url, location);
+        validateUrl(block.content.iconUrl, location);
+      } else if (block.type === "googleMap") {
+        const embedUrl = block.content?.embedUrl;
+        if (embedUrl && !isValidGoogleMapsEmbedUrl(embedUrl)) {
+          unsafeUrls.push(`${location}: "${embedUrl}" is not a Google Maps embed URL`);
+        }
       }
     };
 

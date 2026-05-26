@@ -7,7 +7,7 @@ import { Button } from "@/components/shared/Button";
 import { usePageBuilder } from "./PageBuilderContext";
 import { PageBlock, PageBuilderRow, PageBuilderSection } from "@/types/pageBuilder";
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
-import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId } from "@/lib/youtube";
 
 export function BuilderInspector() {
@@ -386,6 +386,8 @@ function BlockInspector({
               <option value="h2">H2</option>
               <option value="h3">H3</option>
               <option value="h4">H4</option>
+              <option value="h5">H5</option>
+              <option value="h6">H6</option>
             </SelectInput>
           </div>
         </>
@@ -717,6 +719,182 @@ function BlockInspector({
               onChange={(e) => onChange({ content: { ...block.content, description: e.target.value, text: e.target.value } })}
               rows={3}
             />
+          </div>
+        </>
+      )}
+
+      {block.type === "iconBox" && (
+        <>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Top Element</label>
+            <SelectInput
+              value={block.content.variant || "icon"}
+              onChange={(e) => onChange({ content: { ...block.content, variant: e.target.value } })}
+            >
+              <option value="icon">Icon / Emoji</option>
+              <option value="image">Image</option>
+            </SelectInput>
+          </div>
+
+          {block.content.variant === "image" ? (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Image</label>
+                <div className="flex gap-2">
+                  <TextInput
+                    value={block.content.iconUrl || ""}
+                    onChange={(e) => onChange({ content: { ...block.content, iconUrl: e.target.value } })}
+                    placeholder="Image URL"
+                    className="flex-1"
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={() => onOpenMediaSelector("iconUrl")} className="shrink-0">
+                    Browse
+                  </Button>
+                </div>
+                {block.content.iconUrl && !isValidSafeUrl(block.content.iconUrl) && (
+                  <p className="text-xs text-red-600 font-medium mt-1">⚠️ Unsafe image URL.</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Alt Text</label>
+                <TextInput
+                  value={block.content.alt || ""}
+                  onChange={(e) => onChange({ content: { ...block.content, alt: e.target.value } })}
+                  placeholder="Describe the image for screen readers"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Icon (emoji or text)</label>
+                <TextInput
+                  value={block.content.icon || ""}
+                  onChange={(e) => onChange({ content: { ...block.content, icon: e.target.value } })}
+                  placeholder="e.g. ⭐ or A"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Icon Image (optional)</label>
+                <div className="flex gap-2">
+                  <TextInput
+                    value={block.content.iconUrl || ""}
+                    onChange={(e) => onChange({ content: { ...block.content, iconUrl: e.target.value } })}
+                    placeholder="Icon image URL"
+                    className="flex-1"
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={() => onOpenMediaSelector("iconUrl")} className="shrink-0">
+                    Browse
+                  </Button>
+                </div>
+                <p className="text-xs text-slate-500">If set, the image overrides the emoji.</p>
+              </div>
+            </>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Title</label>
+            <TextInput
+              value={block.content.title || ""}
+              onChange={(e) => onChange({ content: { ...block.content, title: e.target.value } })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Title Level</label>
+            <SelectInput
+              value={block.content.level || "h3"}
+              onChange={(e) => onChange({ content: { ...block.content, level: e.target.value } })}
+            >
+              <option value="h1">H1</option>
+              <option value="h2">H2</option>
+              <option value="h3">H3</option>
+              <option value="h4">H4</option>
+              <option value="h5">H5</option>
+              <option value="h6">H6</option>
+            </SelectInput>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Description</label>
+            <TextArea
+              value={block.content.description || ""}
+              onChange={(e) => onChange({ content: { ...block.content, description: e.target.value } })}
+              rows={4}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Alignment</label>
+            <SelectInput
+              value={block.content.alignment || "center"}
+              onChange={(e) => onChange({ content: { ...block.content, alignment: e.target.value } })}
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </SelectInput>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Link URL (optional)</label>
+            <TextInput
+              value={block.content.url || ""}
+              onChange={(e) => onChange({ content: { ...block.content, url: e.target.value } })}
+              placeholder="e.g. /ministries or https://..."
+            />
+            {block.content.url && !isValidSafeUrl(block.content.url) && (
+              <p className="text-xs text-red-600 font-medium mt-1">⚠️ Unsafe URL. Use an internal path or secure https:// URL.</p>
+            )}
+            {block.content.url && (
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-600 mt-2">
+                <input
+                  type="checkbox"
+                  checked={!!block.content.openInNewTab}
+                  onChange={(e) => onChange({ content: { ...block.content, openInNewTab: e.target.checked } })}
+                  className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                />
+                Open in new tab
+              </label>
+            )}
+          </div>
+        </>
+      )}
+
+      {block.type === "googleMap" && (
+        <>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Embed URL</label>
+            <TextArea
+              value={block.content.embedUrl || ""}
+              onChange={(e) => onChange({ content: { ...block.content, embedUrl: e.target.value } })}
+              placeholder="https://www.google.com/maps/embed?pb=..."
+              rows={3}
+            />
+            {!block.content.embedUrl ? (
+              <p className="text-xs text-yellow-600 font-medium mt-1">⚠️ Embed URL is required.</p>
+            ) : !isValidGoogleMapsEmbedUrl(block.content.embedUrl) ? (
+              <p className="text-xs text-red-600 font-medium mt-1">⚠️ Must be a Google Maps embed URL (https://www.google.com/maps/embed?...).</p>
+            ) : null}
+            <p className="text-xs text-slate-500">
+              In Google Maps: Share → Embed a map → Copy HTML and paste the value of the <code>src=&quot;…&quot;</code> attribute here.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Height (px)</label>
+            <TextInput
+              type="number"
+              value={typeof block.content.height === "number" ? String(block.content.height) : ""}
+              onChange={(e) => onChange({ content: { ...block.content, height: e.target.value === "" ? undefined : Math.max(150, Math.min(1200, Number(e.target.value))) } })}
+              placeholder="400"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={!!block.content.fullWidth}
+                onChange={(e) => onChange({ content: { ...block.content, fullWidth: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Full width (break out of the centered content container)
+            </label>
           </div>
         </>
       )}

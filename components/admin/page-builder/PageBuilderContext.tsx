@@ -462,6 +462,25 @@ function getInitialBlockContent(type: PageBlock["type"]) {
       };
     case "iconText":
       return { icon: "star", title: "Feature", description: "Details here" };
+    case "iconBox":
+      return {
+        variant: "icon",
+        icon: "star",
+        iconUrl: "",
+        alt: "",
+        title: "Feature title",
+        description: "Short supporting description.",
+        level: "h3",
+        url: "",
+        openInNewTab: false,
+        alignment: "center",
+      };
+    case "googleMap":
+      return {
+        embedUrl: "",
+        height: 400,
+        fullWidth: false,
+      };
     case "cta":
       return {
         title: "Call to action",
