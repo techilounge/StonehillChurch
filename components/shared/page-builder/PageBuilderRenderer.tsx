@@ -501,12 +501,46 @@ function BlockRenderer({ block }: { block: PageBlock }) {
         "text-base md:text-lg";
       const isImage = content?.variant === "image";
       const safeLink = isValidSafeUrl(content?.url) ? (content?.url || "") : "";
+
+      // Image styling (size, radius, shadow, border, object-fit).
+      const lockAspect = content?.lockAspectRatio === true;
+      const widthVal = typeof content?.imageWidth === "string" && content.imageWidth ? content.imageWidth : undefined;
+      const heightVal = !lockAspect && typeof content?.imageHeight === "string" && content.imageHeight ? content.imageHeight : undefined;
+      const fitVal = content?.objectFit || "cover";
+      const cornerCss = sanitizeCornerRadius(content?.cornerRadius);
+      const shadowClass =
+        content?.shadowSize === "sm" ? "shadow-sm" :
+        content?.shadowSize === "md" ? "shadow-md" :
+        content?.shadowSize === "lg" ? "shadow-lg" : "";
+      const wrapperStyle: React.CSSProperties = {
+        width: widthVal,
+        height: heightVal,
+        borderRadius: cornerCss || undefined,
+      };
+      if (content?.border) {
+        const bw = Math.max(0, Math.min(20, Number(content?.borderWidth) || 2));
+        wrapperStyle.borderWidth = `${bw}px`;
+        wrapperStyle.borderStyle = "solid";
+        wrapperStyle.borderColor = typeof content?.borderColor === "string" ? content.borderColor : "#e7ab10";
+      }
+      const hasExplicitSize = !!(widthVal || heightVal);
+      const defaultSizeClass = hasExplicitSize ? "" : (isImage ? "w-24 h-24" : "w-16 h-16");
+      const radiusClass = cornerCss ? "" : "rounded-full";
+
       const inner = (
         <>
           {(safeIconUrl || content?.icon) && (
-            <div className={`shrink-0 ${isImage ? "w-24 h-24" : "w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary"} rounded-full flex items-center justify-center overflow-hidden`}>
+            <div
+              className={`shrink-0 ${defaultSizeClass} ${!isImage ? "bg-stonehill-primary/10 text-stonehill-primary" : ""} ${shadowClass} ${radiusClass} flex items-center justify-center overflow-hidden`}
+              style={wrapperStyle}
+            >
               {isImage && safeIconUrl ? (
-                <img src={safeIconUrl} alt={content?.alt || ""} className="w-full h-full object-cover" />
+                <img
+                  src={safeIconUrl}
+                  alt={content?.alt || ""}
+                  className={`block w-full ${lockAspect ? "h-auto" : "h-full"}`}
+                  style={lockAspect ? undefined : { objectFit: fitVal }}
+                />
               ) : safeIconUrl ? (
                 <img src={safeIconUrl} alt="" className="w-8 h-8 object-contain" />
               ) : (

@@ -347,12 +347,45 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
             content.level === "h5" ? "text-base md:text-lg" :
             content.level === "h6" ? "text-sm md:text-base" : "text-xl md:text-2xl";
           const isImage = content.variant === "image";
+
+          const lockAspect = content.lockAspectRatio === true;
+          const widthVal = typeof content.imageWidth === "string" && content.imageWidth ? content.imageWidth : undefined;
+          const heightVal = !lockAspect && typeof content.imageHeight === "string" && content.imageHeight ? content.imageHeight : undefined;
+          const fitVal = content.objectFit || "cover";
+          const cornerCss = sanitizeCornerRadius(content.cornerRadius);
+          const shadowClass =
+            content.shadowSize === "sm" ? "shadow-sm" :
+            content.shadowSize === "md" ? "shadow-md" :
+            content.shadowSize === "lg" ? "shadow-lg" : "";
+          const wrapperStyle: React.CSSProperties = {
+            width: widthVal,
+            height: heightVal,
+            borderRadius: cornerCss || undefined,
+          };
+          if (content.border) {
+            const bw = Math.max(0, Math.min(20, Number(content.borderWidth) || 2));
+            wrapperStyle.borderWidth = `${bw}px`;
+            wrapperStyle.borderStyle = "solid";
+            wrapperStyle.borderColor = typeof content.borderColor === "string" ? content.borderColor : "#e7ab10";
+          }
+          const hasExplicitSize = !!(widthVal || heightVal);
+          const defaultSizeClass = hasExplicitSize ? "" : (isImage ? "w-24 h-24" : "w-16 h-16");
+          const radiusClass = cornerCss ? "" : "rounded-full";
+
           return (
             <div className={`flex flex-col gap-3 ${itemsClass}`}>
-              <div className={`flex-shrink-0 ${isImage ? "w-24 h-24" : "w-16 h-16 bg-stonehill-primary/10 text-stonehill-primary"} rounded-full flex items-center justify-center overflow-hidden`}>
+              <div
+                className={`flex-shrink-0 ${defaultSizeClass} ${!isImage ? "bg-stonehill-primary/10 text-stonehill-primary" : ""} ${shadowClass} ${radiusClass} flex items-center justify-center overflow-hidden`}
+                style={wrapperStyle}
+              >
                 {isImage && content.iconUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={content.iconUrl} alt={content.alt || ""} className="w-full h-full object-cover" />
+                  <img
+                    src={content.iconUrl}
+                    alt={content.alt || ""}
+                    className={`block w-full ${lockAspect ? "h-auto" : "h-full"}`}
+                    style={lockAspect ? undefined : { objectFit: fitVal }}
+                  />
                 ) : content.iconUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={content.iconUrl} alt="icon" className="w-8 h-8 object-contain" />

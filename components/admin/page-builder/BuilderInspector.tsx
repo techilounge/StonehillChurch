@@ -854,6 +854,137 @@ function BlockInspector({
               </label>
             )}
           </div>
+
+          <div className="pt-4 mt-2 border-t border-slate-200 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Image Styling</h4>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Width</span>
+                <TextInput
+                  value={block.content.imageWidth || ""}
+                  onChange={(e) => onChange({ content: { ...block.content, imageWidth: e.target.value } })}
+                  placeholder="e.g. 200px, 50%"
+                />
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Height</span>
+                <TextInput
+                  value={block.content.lockAspectRatio === true ? "auto" : (block.content.imageHeight || "")}
+                  onChange={(e) => onChange({ content: { ...block.content, imageHeight: e.target.value } })}
+                  placeholder="e.g. 200px"
+                  disabled={block.content.lockAspectRatio === true}
+                />
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={block.content.lockAspectRatio === true}
+                onChange={(e) => onChange({
+                  content: {
+                    ...block.content,
+                    lockAspectRatio: e.target.checked,
+                    // Clear an explicit height when locking; height becomes auto.
+                    ...(e.target.checked ? { imageHeight: undefined } : {}),
+                  },
+                })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Maintain aspect ratio (lock height to image's natural ratio)
+            </label>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Object Fit</label>
+              <SelectInput
+                value={block.content.objectFit || "cover"}
+                onChange={(e) => onChange({ content: { ...block.content, objectFit: e.target.value } })}
+                disabled={block.content.lockAspectRatio === true}
+              >
+                <option value="cover">Cover — crop to fill</option>
+                <option value="contain">Contain — fit entirely</option>
+                <option value="fill">Fill — stretch</option>
+                <option value="scale-down">Scale down</option>
+              </SelectInput>
+              <p className="text-xs text-slate-500">Only applies when aspect ratio is unlocked.</p>
+            </div>
+
+            <CornerRadiusControl
+              content={block.content}
+              onContentChange={(u) => onChange({ content: { ...block.content, ...u } })}
+            />
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Shadow</label>
+              <SelectInput
+                value={block.content.shadowSize || "none"}
+                onChange={(e) => onChange({ content: { ...block.content, shadowSize: e.target.value } })}
+              >
+                <option value="none">None</option>
+                <option value="sm">Small</option>
+                <option value="md">Medium</option>
+                <option value="lg">Large</option>
+              </SelectInput>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={!!block.content.border}
+                  onChange={(e) => onChange({ content: { ...block.content, border: e.target.checked } })}
+                  className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                />
+                Show border
+              </label>
+              {block.content.border && (
+                <>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Border Color</span>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: "#e7ab10", label: "Gold (Accent)" },
+                        { value: "#1e3f66", label: "Navy (Primary)" },
+                        { value: "#1c6b8d", label: "Blue (Secondary)" },
+                        { value: "#8eb5c7", label: "Light Blue" },
+                        { value: "#fbfaf6", label: "Cream" },
+                        { value: "#ffffff", label: "White" },
+                        { value: "#17201d", label: "Dark" },
+                      ].map((color) => (
+                        <button
+                          key={color.value}
+                          type="button"
+                          className={`w-7 h-7 rounded border transition-all ${
+                            (block.content.borderColor || "#e7ab10") === color.value
+                              ? "border-stonehill-accent ring-2 ring-stonehill-accent ring-offset-1 scale-110"
+                              : "border-slate-200 hover:scale-105"
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          onClick={() => onChange({ content: { ...block.content, borderColor: color.value } })}
+                          title={color.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Border Width (px)</span>
+                    <TextInput
+                      type="number"
+                      value={typeof block.content.borderWidth === "number" ? String(block.content.borderWidth) : ""}
+                      onChange={(e) => onChange({
+                        content: {
+                          ...block.content,
+                          borderWidth: e.target.value === "" ? undefined : Math.max(0, Math.min(20, Number(e.target.value))),
+                        },
+                      })}
+                      placeholder="2"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </>
       )}
 
