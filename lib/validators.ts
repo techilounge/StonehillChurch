@@ -475,10 +475,21 @@ export const sectionStyleSchema = z.object({
   justifyContent: z.enum(["start", "center", "end", "between", "around"]).optional(),
 });
 
+export const pageBuilderRowSchema = z.object({
+  id: z.string().min(1).max(80),
+  layout: z.enum(["1-col", "2-col", "3-col", "4-col", "left-sidebar", "right-sidebar"]).optional(),
+  columns: z.array(pageColumnSchema),
+  style: sectionStyleSchema.optional(),
+});
+
 export const pageBuilderSectionSchema = z.object({
   id: z.string().min(1).max(80),
   type: sectionTypeSchema,
   layout: z.enum(["1-col", "2-col", "3-col", "4-col", "left-sidebar", "right-sidebar"]).optional(),
+  // Preferred shape — a section is a stack of rows.
+  rows: z.array(pageBuilderRowSchema).optional(),
+  // Legacy fields are still accepted for backward compatibility with documents
+  // that pre-date the rows model.
   columns: z.array(pageColumnSchema).optional(),
   blocks: z.array(pageBlockSchema).optional(),
   style: sectionStyleSchema.optional(),

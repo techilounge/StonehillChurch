@@ -3,6 +3,7 @@
 import React from "react";
 import {
   PageBuilderDocument,
+  PageBuilderRow,
   PageBuilderSection,
   PageColumn,
   PageBlock,
@@ -68,10 +69,21 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   const containerClasses = `relative ${padding} ${margin}`;
   const inlineStyles = { ...bgStyle, ...bgImage, ...textColor };
 
+  // Preferred shape: render the section as a vertical stack of rows. Legacy
+  // shapes (section.columns / section.blocks) still render via the original
+  // branches so older documents keep working until they're re-saved.
+  const hasRows = !!section.rows && section.rows.length > 0;
+
   return (
     <section className={containerClasses} style={inlineStyles}>
       <div className={layoutWidth}>
-        {section.type === "section" || section.type === "group" ? (
+        {hasRows ? (
+          <div className={`flex flex-col ${verticalSpacing}`}>
+            {section.rows!.map((row) => (
+              <RowRenderer key={row.id} row={row} />
+            ))}
+          </div>
+        ) : section.type === "section" || section.type === "group" ? (
           <div className={`flex flex-col ${verticalSpacing}`}>
             {section.blocks?.map((block) => (
               <BlockRenderer key={block.id} block={block} />
@@ -86,6 +98,31 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
         ) : null}
       </div>
     </section>
+  );
+}
+
+function RowRenderer({ row }: { row: PageBuilderRow }) {
+  const cleanStyle = sanitizeStyle(row.style || {}, false) || {};
+  const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
+  const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
+  const padding = cleanStyle.padding || "";
+  const margin = cleanStyle.margin || "";
+  const verticalSpacing = cleanStyle.verticalSpacing || "gap-6";
+  const alignItems = COLUMN_ALIGN_CLASS[row.style?.alignItems || "start"];
+  const justifyContent = row.style?.justifyContent ? `justify-${row.style.justifyContent}` : "";
+
+  let flexClass = "flex flex-col md:flex-row";
+  if (row.style?.mobileStacking === "reverse") flexClass = "flex flex-col-reverse md:flex-row";
+  else if (row.style?.mobileStacking === "keep") flexClass = "flex flex-row";
+
+  return (
+    <div className={`${padding} ${margin}`} style={{ ...bgStyle, ...textColor }}>
+      <div className={`w-full ${flexClass} ${verticalSpacing} ${alignItems} ${justifyContent}`}>
+        {row.columns.map((col) => (
+          <ColumnRenderer key={col.id} column={col} />
+        ))}
+      </div>
+    </div>
   );
 }
 

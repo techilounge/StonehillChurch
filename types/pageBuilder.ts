@@ -52,13 +52,30 @@ export type SectionStyle = {
   justifyContent?: "start" | "center" | "end" | "between" | "around";
 };
 
+export type RowLayout = "1-col" | "2-col" | "3-col" | "4-col" | "left-sidebar" | "right-sidebar";
+
+export type PageBuilderRow = {
+  id: string;
+  columns: PageColumn[];
+  layout?: RowLayout;
+  // Rows reuse SectionStyle so editors get the same padding/background/alignment
+  // controls they're used to at the section level.
+  style?: SectionStyle;
+};
+
 export type PageBuilderSection = {
   id: string;
   type: SectionType;
-  columns?: PageColumn[]; // for "columns" or "row" type
-  blocks?: PageBlock[]; // for "section" or "group" type
+  // Preferred shape: a section is a vertical stack of rows, each row contains
+  // columns. `rows` is optional so legacy documents that store columns/blocks
+  // directly on the section continue to render via the migration shim.
+  rows?: PageBuilderRow[];
+  // Legacy shape — still honored by readers and migrated to a single row on
+  // load. New writes should populate `rows` and leave these undefined.
+  columns?: PageColumn[];
+  blocks?: PageBlock[];
   style?: SectionStyle;
-  layout?: "1-col" | "2-col" | "3-col" | "4-col" | "left-sidebar" | "right-sidebar";
+  layout?: RowLayout;
 };
 
 export type PatternTemplate = {

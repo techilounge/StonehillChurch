@@ -3,18 +3,23 @@
 import React, { useRef, useState } from "react";
 import { usePageBuilder } from "./PageBuilderContext";
 
-export function ColumnResizeSeparator({ 
-  sectionId, 
-  leftIndex, 
-  rightIndex, 
-  columns 
-}: { 
-  sectionId: string; 
-  leftIndex: number; 
-  rightIndex: number; 
-  columns: any[]; 
+export function ColumnResizeSeparator({
+  sectionId,
+  rowId,
+  leftIndex,
+  rightIndex,
+  columns,
+}: {
+  sectionId: string;
+  // When present the separator commits the new widths to a row inside the
+  // section (the rows-based shape). When absent it commits to the legacy
+  // section.columns shape.
+  rowId?: string;
+  leftIndex: number;
+  rightIndex: number;
+  columns: any[];
 }) {
-  const { handleUpdateSection } = usePageBuilder();
+  const { handleUpdateSection, handleUpdateRow } = usePageBuilder();
   const separatorRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -112,7 +117,11 @@ export function ColumnResizeSeparator({
         };
       });
 
-      handleUpdateSection(sectionId, { columns: updatedColumns });
+      if (rowId) {
+        handleUpdateRow(sectionId, rowId, { columns: updatedColumns });
+      } else {
+        handleUpdateSection(sectionId, { columns: updatedColumns });
+      }
     };
 
     window.addEventListener("mousemove", handleMouseMove);

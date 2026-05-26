@@ -5,13 +5,21 @@ import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { Button } from "@/components/shared/Button";
 import { usePageBuilder } from "./PageBuilderContext";
-import { PageBuilderSection, PageBlock } from "@/types/pageBuilder";
+import { PageBlock, PageBuilderRow, PageBuilderSection } from "@/types/pageBuilder";
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
 import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId } from "@/lib/youtube";
 
 export function BuilderInspector() {
-  const { formData, selectedElementId, handleUpdateSection, handleChangeSectionLayout, handleUpdateBlock } = usePageBuilder();
+  const {
+    formData,
+    selectedElementId,
+    handleUpdateSection,
+    handleChangeSectionLayout,
+    handleUpdateBlock,
+    handleUpdateRow,
+    handleChangeRowLayout,
+  } = usePageBuilder();
   const builderData = formData.builderData || { version: "1.0", sections: [] };
 
   const [isMediaOpen, setIsMediaOpen] = React.useState(false);
@@ -22,32 +30,54 @@ export function BuilderInspector() {
     columnId?: string;
   } | null>(null);
 
-  // Find the selected element (could be a section or a block, searching main blocks and column blocks)
+  // Resolve the selected element. It can be a section, row, or block — the
+  // block can live either directly on the section (legacy), inside
+  // section.columns (legacy), or inside section.rows[].columns[].
   let selectedSection: PageBuilderSection | undefined;
+  let selectedRow: PageBuilderRow | undefined;
   let selectedBlock: PageBlock | undefined;
   let selectedColumnId: string | undefined;
 
-  for (const section of builderData.sections) {
+  outer: for (const section of builderData.sections) {
     if (section.id === selectedElementId) {
       selectedSection = section;
-      break;
+      break outer;
     }
-    
-    const block = section.blocks?.find(b => b.id === selectedElementId);
-    if (block) {
+
+    const directBlock = section.blocks?.find((b) => b.id === selectedElementId);
+    if (directBlock) {
       selectedSection = section;
-      selectedBlock = block;
-      break;
+      selectedBlock = directBlock;
+      break outer;
     }
 
     if (section.columns) {
       for (const col of section.columns) {
-        const colBlock = col.blocks?.find(b => b.id === selectedElementId);
-        if (colBlock) {
+        const cb = col.blocks?.find((b) => b.id === selectedElementId);
+        if (cb) {
           selectedSection = section;
-          selectedBlock = colBlock;
+          selectedBlock = cb;
           selectedColumnId = col.id;
-          break;
+          break outer;
+        }
+      }
+    }
+
+    if (section.rows) {
+      for (const row of section.rows) {
+        if (row.id === selectedElementId) {
+          selectedSection = section;
+          selectedRow = row;
+          break outer;
+        }
+        for (const col of row.columns) {
+          const cb = col.blocks?.find((b) => b.id === selectedElementId);
+          if (cb) {
+            selectedSection = section;
+            selectedBlock = cb;
+            selectedColumnId = col.id;
+            break outer;
+          }
         }
       }
     }
@@ -83,7 +113,7 @@ export function BuilderInspector() {
     <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col flex-none overflow-y-auto">
       <div className="p-4 border-b border-slate-200 bg-slate-50/50 sticky top-0">
         <h3 className="font-semibold text-slate-900 text-sm">
-          {selectedBlock ? "Block Settings" : "Section Settings"}
+          {selectedBlock ? "Block Settings" : selectedRow ? "Row Settings" : "Section Settings"}
         </h3>
       </div>
       <div className="p-4 space-y-6">
@@ -92,19 +122,25 @@ export function BuilderInspector() {
         </div>
 
         {selectedBlock ? (
-          <BlockInspector 
+          <BlockInspector
             sectionId={selectedSection!.id}
-            block={selectedBlock} 
-            onChange={(updates) => handleUpdateBlock(selectedSection!.id, selectedBlock!.id, updates, selectedColumnId)} 
+            block={selectedBlock}
+            onChange={(updates) => handleUpdateBlock(selectedSection!.id, selectedBlock!.id, updates, selectedColumnId)}
             onOpenMediaSelector={(field) => {
               setMediaTarget({
                 sectionId: selectedSection!.id,
                 blockId: selectedBlock!.id,
                 field,
-                columnId: selectedColumnId
+                columnId: selectedColumnId,
               });
               setIsMediaOpen(true);
             }}
+          />
+        ) : selectedRow ? (
+          <RowInspector
+            row={selectedRow}
+            onChange={(updates) => handleUpdateRow(selectedSection!.id, selectedRow!.id, updates)}
+            onLayoutChange={(layout) => handleChangeRowLayout(selectedSection!.id, selectedRow!.id, layout)}
           />
         ) : selectedSection ? (
           <SectionInspector
@@ -132,24 +168,30 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
   onChange: (updates: Partial<PageBuilderSection>) => void,
   onLayoutChange: (layout: NonNullable<PageBuilderSection["layout"]>) => void,
 }) {
+  // Sections that have been migrated to the rows shape configure layout
+  // per row, so the legacy section-level layout/alignment controls are
+  // hidden in that case.
+  const usesRows = !!section.rows && section.rows.length > 0;
   return (
     <>
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Layout Structure</label>
-        <SelectInput
-          value={section.layout || "1-col"}
-          onChange={(e) => onLayoutChange(e.target.value as NonNullable<PageBuilderSection["layout"]>)}
-        >
-          <option value="1-col">Single Column</option>
-          <option value="2-col">Two Columns (1:1)</option>
-          <option value="3-col">Three Columns (1:1:1)</option>
-          <option value="4-col">Four Columns (1:1:1:1)</option>
-          <option value="left-sidebar">Left Sidebar (1:3)</option>
-          <option value="right-sidebar">Right Sidebar (3:1)</option>
-        </SelectInput>
-      </div>
+      {!usesRows && (
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Layout Structure</label>
+          <SelectInput
+            value={section.layout || "1-col"}
+            onChange={(e) => onLayoutChange(e.target.value as NonNullable<PageBuilderSection["layout"]>)}
+          >
+            <option value="1-col">Single Column</option>
+            <option value="2-col">Two Columns (1:1)</option>
+            <option value="3-col">Three Columns (1:1:1)</option>
+            <option value="4-col">Four Columns (1:1:1:1)</option>
+            <option value="left-sidebar">Left Sidebar (1:3)</option>
+            <option value="right-sidebar">Right Sidebar (3:1)</option>
+          </SelectInput>
+        </div>
+      )}
 
-      {section.layout && section.layout !== "1-col" && (
+      {!usesRows && section.layout && section.layout !== "1-col" && (
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Column Vertical Alignment</label>
           <SelectInput
@@ -219,13 +261,99 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
   );
 }
 
-function BlockInspector({ 
-  block, 
+function RowInspector({ row, onChange, onLayoutChange }: {
+  row: PageBuilderRow,
+  onChange: (updates: Partial<PageBuilderRow>) => void,
+  onLayoutChange: (layout: NonNullable<PageBuilderRow["layout"]>) => void,
+}) {
+  const isMultiCol = row.columns.length > 1;
+  return (
+    <>
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Row Layout</label>
+        <SelectInput
+          value={row.layout || "1-col"}
+          onChange={(e) => onLayoutChange(e.target.value as NonNullable<PageBuilderRow["layout"]>)}
+        >
+          <option value="1-col">Single Column</option>
+          <option value="2-col">Two Columns (1:1)</option>
+          <option value="3-col">Three Columns (1:1:1)</option>
+          <option value="4-col">Four Columns (1:1:1:1)</option>
+          <option value="left-sidebar">Left Sidebar (1:3)</option>
+          <option value="right-sidebar">Right Sidebar (3:1)</option>
+        </SelectInput>
+        <p className="text-xs text-slate-500">Drag the bar between columns in the canvas to fine-tune widths.</p>
+      </div>
+
+      {isMultiCol && (
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Column Vertical Alignment</label>
+          <SelectInput
+            value={row.style?.alignItems || "start"}
+            onChange={(e) => onChange({ style: { ...row.style, alignItems: e.target.value as NonNullable<PageBuilderRow["style"]>["alignItems"] } })}
+          >
+            <option value="start">Top — auto height (recommended)</option>
+            <option value="stretch">Stretch — equal height</option>
+            <option value="center">Center</option>
+            <option value="end">Bottom</option>
+          </SelectInput>
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Padding</label>
+        <SelectInput
+          value={row.style?.padding || ""}
+          onChange={(e) => onChange({ style: { ...row.style, padding: e.target.value } })}
+        >
+          <option value="">None</option>
+          <option value="p-2">XS (8px)</option>
+          <option value="p-4">Small (16px)</option>
+          <option value="p-6">Medium (24px)</option>
+          <option value="p-8">Large (32px)</option>
+          <option value="py-6">Vertical only — Small</option>
+          <option value="py-12">Vertical only — Medium</option>
+          <option value="py-24">Vertical only — Large</option>
+        </SelectInput>
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background Color</label>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { value: "#ffffff", label: "White" },
+            { value: "#fbfaf6", label: "Cream (Stonehill Bg)" },
+            { value: "#1e3f66", label: "Navy (Primary)" },
+            { value: "#1c6b8d", label: "Blue (Secondary)" },
+            { value: "#8eb5c7", label: "Light Blue" },
+            { value: "#e7ab10", label: "Gold (Accent)" },
+          ].map((color) => (
+            <button
+              key={color.value}
+              type="button"
+              className={`w-8 h-8 rounded border transition-all ${
+                row.style?.backgroundColor === color.value
+                  ? "border-stonehill-accent ring-2 ring-stonehill-accent ring-offset-1 scale-110"
+                  : "border-slate-200 hover:scale-105"
+              }`}
+              style={{ backgroundColor: color.value }}
+              onClick={() => onChange({ style: { ...row.style, backgroundColor: color.value } })}
+              title={color.label}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function BlockInspector({
+  block,
   onChange,
-  onOpenMediaSelector 
-}: { 
-  sectionId: string, 
-  block: PageBlock, 
+  onOpenMediaSelector
+}: {
+  sectionId: string,
+  block: PageBlock,
   onChange: (updates: Partial<PageBlock>) => void,
   onOpenMediaSelector: (field: string) => void
 }) {

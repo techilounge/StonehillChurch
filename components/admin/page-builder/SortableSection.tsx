@@ -42,14 +42,18 @@ interface SortableSectionProps {
 }
 
 export function SortableSection({ section, index, totalSections }: SortableSectionProps) {
-  const { 
-    selectedElementId, 
-    setSelectedElementId, 
+  const {
+    selectedElementId,
+    setSelectedElementId,
     handleRemoveSection,
     handleReorderSections,
     handleDuplicateSection,
     handleAddBlock,
-    handleRemoveBlock 
+    handleRemoveBlock,
+    handleAddRow,
+    handleRemoveRow,
+    handleDuplicateRow,
+    handleReorderRows,
   } = usePageBuilder();
   
   const {
@@ -167,98 +171,149 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
             color: section.style?.textColor
           }}
         >
-          {section.type === "columns" || (section.columns && section.columns.length > 0) ? (
-            <div className={`
-              flex flex-col md:flex-row ${COLUMN_ALIGN_CLASS[section.style?.alignItems || "start"]}
-              ${!section.layout || section.layout === "1-col" ? "space-y-4 md:space-y-0" : ""}
-            `}>
-              {section.columns?.map((column, colIndex) => {
-                const numCols = section.columns!.length;
-                const colPct = parseColWidth(column.width, numCols);
-                return (
-                  <React.Fragment key={column.id}>
-                    {colIndex > 0 && (
-                      <ColumnResizeSeparator
-                        sectionId={section.id}
-                        leftIndex={colIndex - 1}
-                        rightIndex={colIndex}
-                        columns={section.columns!}
-                      />
-                    )}
-                    <div
-                      data-column-id={column.id}
-                      className="responsive-col flex flex-col min-h-[100px] border border-dashed border-slate-300/50 rounded-lg p-3 bg-white/10"
-                      style={{ "--col-width": `${colPct}%` } as React.CSSProperties}
-                    >
-                      <div className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider flex justify-between items-center">
-                        <span className="opacity-70">Column {colIndex + 1}</span>
-                        <span className="bg-slate-200/50 text-slate-600 px-1.5 py-0.5 rounded text-[9px] tabular-nums">
-                          {Math.round(colPct)}%
-                        </span>
-                      </div>
-                      <SortableContext 
-                        items={column.blocks?.map(b => b.id) || []}
-                        strategy={rectSortingStrategy}
-                      >
-                        <div className="space-y-3 flex-1 mb-4">
-                          {column.blocks && column.blocks.length > 0 ? (
-                            column.blocks.map((block, i) => (
-                              <SortableBlock 
-                                key={block.id} 
-                                block={block} 
-                                sectionId={section.id}
-                                columnId={column.id}
-                                index={i}
-                                totalBlocks={column.blocks!.length}
-                              />
-                            ))
-                          ) : (
-                            <div className="flex flex-col items-center justify-center text-slate-400 h-full py-4 opacity-50">
-                              <span className="text-xs">Empty Column</span>
+          {(section.rows ?? []).map((row, rowIndex) => {
+            const totalRows = section.rows?.length ?? 0;
+            const isRowSelected = selectedElementId === row.id;
+            const colAlignClass = COLUMN_ALIGN_CLASS[row.style?.alignItems || "start"];
+            const isMultiCol = row.columns.length > 1;
+            return (
+              <div
+                key={row.id}
+                data-row-id={row.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedElementId(row.id);
+                }}
+                className={`relative group/row rounded-lg transition-colors ${
+                  isRowSelected ? "ring-1 ring-stonehill-accent" : ""
+                } ${row.style?.padding || "p-2"}`}
+                style={{
+                  backgroundColor:
+                    row.style?.backgroundColor && row.style.backgroundColor !== "#ffffff"
+                      ? row.style.backgroundColor
+                      : undefined,
+                  color: row.style?.textColor,
+                }}
+              >
+                {/* Row toolbar */}
+                <div className="absolute top-1 right-1 z-10 flex items-center gap-1 opacity-0 group-hover/row:opacity-100 focus-within:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleReorderRows(section.id, rowIndex, rowIndex - 1); }}
+                    disabled={rowIndex === 0}
+                    title="Move row up"
+                    aria-label="Move row up"
+                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
+                  >
+                    <ChevronUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleReorderRows(section.id, rowIndex, rowIndex + 1); }}
+                    disabled={rowIndex === totalRows - 1}
+                    title="Move row down"
+                    aria-label="Move row down"
+                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                  <span className="text-[10px] bg-slate-800 text-white px-1.5 py-0.5 rounded shadow-sm opacity-80 uppercase tracking-wider font-mono">
+                    Row
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleDuplicateRow(section.id, row.id); }}
+                    title="Duplicate row"
+                    aria-label="Duplicate row"
+                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleRemoveRow(section.id, row.id); }}
+                    disabled={totalRows <= 1}
+                    title={totalRows <= 1 ? "A section needs at least one row" : "Remove row"}
+                    aria-label="Remove row"
+                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-slate-200 hover:border-red-100 shadow-sm transition-colors disabled:opacity-30"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+
+                {/* Row's columns */}
+                <div
+                  className={`flex flex-col md:flex-row ${colAlignClass} ${!isMultiCol ? "space-y-4 md:space-y-0" : ""}`}
+                >
+                  {row.columns.map((column, colIndex) => {
+                    const numCols = row.columns.length;
+                    const colPct = parseColWidth(column.width, numCols);
+                    return (
+                      <React.Fragment key={column.id}>
+                        {colIndex > 0 && (
+                          <ColumnResizeSeparator
+                            sectionId={section.id}
+                            rowId={row.id}
+                            leftIndex={colIndex - 1}
+                            rightIndex={colIndex}
+                            columns={row.columns}
+                          />
+                        )}
+                        <div
+                          data-column-id={column.id}
+                          className="responsive-col flex flex-col min-h-[100px] border border-dashed border-slate-300/50 rounded-lg p-3 bg-white/10"
+                          style={{ "--col-width": `${colPct}%` } as React.CSSProperties}
+                        >
+                          <div className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider flex justify-between items-center">
+                            <span className="opacity-70">Column {colIndex + 1}</span>
+                            <span className="bg-slate-200/50 text-slate-600 px-1.5 py-0.5 rounded text-[9px] tabular-nums">
+                              {Math.round(colPct)}%
+                            </span>
+                          </div>
+                          <SortableContext
+                            items={column.blocks?.map((b) => b.id) || []}
+                            strategy={rectSortingStrategy}
+                          >
+                            <div className="space-y-3 flex-1 mb-4">
+                              {column.blocks && column.blocks.length > 0 ? (
+                                column.blocks.map((block, i) => (
+                                  <SortableBlock
+                                    key={block.id}
+                                    block={block}
+                                    sectionId={section.id}
+                                    columnId={column.id}
+                                    index={i}
+                                    totalBlocks={column.blocks!.length}
+                                  />
+                                ))
+                              ) : (
+                                <div className="flex flex-col items-center justify-center text-slate-400 h-full py-4 opacity-50">
+                                  <span className="text-xs">Empty Column</span>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </SortableContext>
+                          <AddBlockMenu onAdd={(type) => handleAddBlock(section.id, type, column.id)} />
                         </div>
-                      </SortableContext>
-                      <AddBlockMenu onAdd={(type) => handleAddBlock(section.id, type, column.id)} />
-                    </div>
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          ) : (
-            <SortableContext 
-              items={section.blocks?.map(b => b.id) || []}
-              strategy={rectSortingStrategy}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Add Row button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleAddRow(section.id); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 bg-white border border-dashed border-slate-300 rounded-md hover:border-stonehill-accent hover:text-stonehill-accent transition-colors shadow-sm"
             >
-              {section.blocks && section.blocks.length > 0 ? (
-                <div className={`
-                  ${section.layout === "2-col" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}
-                  ${section.layout === "3-col" ? "grid grid-cols-1 md:grid-cols-3 gap-6" : ""}
-                  ${section.layout === "4-col" ? "grid grid-cols-1 md:grid-cols-4 gap-6" : ""}
-                  ${section.layout === "left-sidebar" ? "grid grid-cols-1 md:grid-cols-4 gap-6 [&>*:nth-child(1)]:col-span-1 [&>*:nth-child(2)]:col-span-3" : ""}
-                  ${section.layout === "right-sidebar" ? "grid grid-cols-1 md:grid-cols-4 gap-6 [&>*:nth-child(1)]:col-span-3 [&>*:nth-child(2)]:col-span-1" : ""}
-                  ${!section.layout || section.layout === "1-col" ? "space-y-4" : ""}
-                `}>
-                  {section.blocks.map((block, i) => (
-                    <SortableBlock 
-                      key={block.id} 
-                      block={block} 
-                      sectionId={section.id}
-                      index={i}
-                      totalBlocks={section.blocks!.length}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center text-slate-400 h-full py-8">
-                  <span className="text-sm font-medium">Empty Section</span>
-                  <span className="text-xs mt-1 mb-4">Add blocks to build your layout</span>
-                </div>
-              )}
-              
-              <AddBlockMenu onAdd={(type) => handleAddBlock(section.id, type)} />
-            </SortableContext>
-          )}
+              <Plus className="h-3 w-3" />
+              Add Row
+            </button>
+          </div>
         </div>
       </div>
     </div>

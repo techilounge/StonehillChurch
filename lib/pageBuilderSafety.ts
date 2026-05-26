@@ -1,4 +1,4 @@
-import { PageBuilderSection } from "@/types/pageBuilder";
+import { PageBlock, PageBuilderSection } from "@/types/pageBuilder";
 
 // Approved style presets
 export const APPROVED_BG_COLORS = [
@@ -220,16 +220,35 @@ export function sanitizeCornerRadius(
 /**
  * Recursively filters and sanitizes all styles throughout the page builder document.
  */
+function sanitizeColumns(cols: PageBuilderSection["columns"]) {
+  return cols?.map((col) => {
+    const cleanCol = { ...col };
+    if (cleanCol.style) {
+      cleanCol.style = sanitizeStyle(cleanCol.style, false);
+    }
+    if (cleanCol.blocks) {
+      cleanCol.blocks = cleanCol.blocks.map((blk) => {
+        const cleanBlk = { ...blk };
+        if (cleanBlk.style) {
+          cleanBlk.style = sanitizeStyle(cleanBlk.style, true);
+        }
+        return cleanBlk;
+      });
+    }
+    return cleanCol;
+  });
+}
+
 export function sanitizeDocumentStyles(sections: PageBuilderSection[]): PageBuilderSection[] {
   if (!sections || !Array.isArray(sections)) return [];
-  
-  return sections.map(sec => {
+
+  return sections.map((sec) => {
     const cleanSec = { ...sec };
     if (cleanSec.style) {
       cleanSec.style = sanitizeStyle(cleanSec.style, false);
     }
     if (cleanSec.blocks) {
-      cleanSec.blocks = cleanSec.blocks.map(blk => {
+      cleanSec.blocks = cleanSec.blocks.map((blk) => {
         const cleanBlk = { ...blk };
         if (cleanBlk.style) {
           cleanBlk.style = sanitizeStyle(cleanBlk.style, true);
@@ -238,21 +257,18 @@ export function sanitizeDocumentStyles(sections: PageBuilderSection[]): PageBuil
       });
     }
     if (cleanSec.columns) {
-      cleanSec.columns = cleanSec.columns.map(col => {
-        const cleanCol = { ...col };
-        if (cleanCol.style) {
-          cleanCol.style = sanitizeStyle(cleanCol.style, false);
+      cleanSec.columns = sanitizeColumns(cleanSec.columns);
+    }
+    if (cleanSec.rows) {
+      cleanSec.rows = cleanSec.rows.map((row) => {
+        const cleanRow = { ...row };
+        if (cleanRow.style) {
+          cleanRow.style = sanitizeStyle(cleanRow.style, false);
         }
-        if (cleanCol.blocks) {
-          cleanCol.blocks = cleanCol.blocks.map(blk => {
-            const cleanBlk = { ...blk };
-            if (cleanBlk.style) {
-              cleanBlk.style = sanitizeStyle(cleanBlk.style, true);
-            }
-            return cleanBlk;
-          });
+        if (cleanRow.columns) {
+          cleanRow.columns = sanitizeColumns(cleanRow.columns) || [];
         }
-        return cleanCol;
+        return cleanRow;
       });
     }
     return cleanSec;
@@ -292,23 +308,37 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
       }
     });
 
-    // Check blocks in columns
+    const validateBlock = (block: PageBlock, location: string) => {
+      if (block.type === "button") {
+        validateUrl(block.content.url, location);
+      } else if (block.type === "video") {
+        validateUrl(block.content.url, location);
+      } else if (block.type === "card") {
+        validateUrl(block.content.buttonUrl, location);
+        validateUrl(block.content.imageUrl, location);
+      } else if (block.type === "cta") {
+        validateUrl(block.content.buttonUrl, location);
+      } else if (block.type === "image") {
+        validateUrl(block.content.url, location);
+      }
+    };
+
+    // Check blocks in legacy section.columns
     section.columns?.forEach((column, cIdx) => {
       const cName = `${sName} > Column ${cIdx + 1}`;
       column.blocks?.forEach((block, bIdx) => {
-        const bName = `${cName} > Block ${bIdx + 1} (${block.type})`;
-        if (block.type === "button") {
-          validateUrl(block.content.url, bName);
-        } else if (block.type === "video") {
-          validateUrl(block.content.url, bName);
-        } else if (block.type === "card") {
-          validateUrl(block.content.buttonUrl, bName);
-          validateUrl(block.content.imageUrl, bName);
-        } else if (block.type === "cta") {
-          validateUrl(block.content.buttonUrl, bName);
-        } else if (block.type === "image") {
-          validateUrl(block.content.url, bName);
-        }
+        validateBlock(block, `${cName} > Block ${bIdx + 1} (${block.type})`);
+      });
+    });
+
+    // Check blocks in rows[].columns[]
+    section.rows?.forEach((row, rIdx) => {
+      const rName = `${sName} > Row ${rIdx + 1}`;
+      row.columns?.forEach((column, cIdx) => {
+        const cName = `${rName} > Column ${cIdx + 1}`;
+        column.blocks?.forEach((block, bIdx) => {
+          validateBlock(block, `${cName} > Block ${bIdx + 1} (${block.type})`);
+        });
       });
     });
   });
