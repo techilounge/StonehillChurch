@@ -110,8 +110,16 @@ export type Leader = {
   email: string;
   sortOrder: number;
   active: boolean;
+  category?: string; // category id; empty/missing = Uncategorized
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
+};
+
+export type LeaderCategory = {
+  name: string;
+  sortOrder: number;
+  createdAt?: FirestoreTimestampLike;
+  updatedAt?: FirestoreTimestampLike;
 };
 
 export type AnnouncementPriority = "low" | "normal" | "high" | "urgent";

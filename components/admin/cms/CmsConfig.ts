@@ -169,6 +169,19 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       { name: "email", label: "Email", type: "email", required: true },
       { name: "sortOrder", label: "Sort Order", type: "number", required: true },
       { name: "active", label: "Active", type: "boolean", required: true, defaultValue: true },
+      // Options are injected at runtime from the leaderCategories collection
+      // by app/admin/leaders/[id]/page.tsx; an empty value means Uncategorized.
+      { name: "category", label: "Category", type: "select", required: false, options: [] },
+    ],
+  },
+  leaderCategories: {
+    module: "leaderCategories",
+    title: "Leader Categories",
+    singular: "Leader Category",
+    description: "Group leaders into categories (e.g. Pastors, Elders) and order them on the public page.",
+    fields: [
+      { name: "name", label: "Name", type: "text", required: true },
+      { name: "sortOrder", label: "Sort Order", type: "number", required: true },
     ],
   },
   announcements: {

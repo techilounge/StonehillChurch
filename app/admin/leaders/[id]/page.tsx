@@ -1,7 +1,7 @@
 import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { hasPermission } from "@/lib/permissions";
 import { redirect } from "next/navigation";
-import { getCmsDocument } from "@/lib/data/adminCms";
+import { getCmsDocument, listCmsDocuments } from "@/lib/data/adminCms";
 import { CmsModuleForm } from "@/components/admin/cms/CmsModuleForm";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 
@@ -26,12 +26,20 @@ export default async function LeadersEditPage({ params }: { params: Promise<{ id
     }
   }
 
+  // Populate the Category dropdown from the leaderCategories collection.
+  const categoryDocs = await listCmsDocuments("leaderCategories", session);
+  const categoryOptions = categoryDocs.map((c) => ({
+    label: typeof c.name === "string" ? c.name : "(unnamed)",
+    value: c.id,
+  }));
+
   return (
     <AdminPageShell title="" description="">
-      <CmsModuleForm 
-        module="leaders" 
-        initialData={initialData} 
+      <CmsModuleForm
+        module="leaders"
+        initialData={initialData}
         canPublish={canPublish}
+        dynamicOptions={{ category: categoryOptions }}
       />
     </AdminPageShell>
   );

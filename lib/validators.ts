@@ -198,6 +198,15 @@ export const leaderSchema = z.object({
   email: emailSchema,
   sortOrder: z.number().int().min(0),
   active: z.boolean(),
+  // Category is optional; empty string means "Uncategorized". The form sends
+  // "" when nothing is selected, so we accept any short string.
+  category: z.string().max(80).optional(),
+});
+
+// leaderCategories
+export const leaderCategorySchema = z.object({
+  name: z.string().min(2).max(80),
+  sortOrder: z.number().int().min(0),
 });
 
 // announcements
@@ -634,6 +643,7 @@ export const collectionSchemas = {
   events: eventSchema,
   ministries: ministrySchema,
   leaders: leaderSchema,
+  leaderCategories: leaderCategorySchema,
   announcements: announcementSchema,
   resources: resourceSchema,
   mediaAssets: mediaAssetSchema,

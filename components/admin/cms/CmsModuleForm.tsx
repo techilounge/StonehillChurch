@@ -19,9 +19,15 @@ interface CmsModuleFormProps {
   module: Exclude<CmsModule, "siteSettings">;
   initialData: CmsDocument | null;
   canPublish: boolean;
+  /**
+   * Per-field option overrides, keyed by field name. Used for select fields
+   * whose options are populated from another collection at request time
+   * (e.g. the leaders "category" dropdown sourced from leaderCategories).
+   */
+  dynamicOptions?: Record<string, { label: string; value: string }[]>;
 }
 
-export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleFormProps) {
+export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions }: CmsModuleFormProps) {
   const router = useRouter();
   const config = CMS_CONFIG[module];
   const isNew = !initialData;
@@ -266,7 +272,10 @@ export function CmsModuleForm({ module, initialData, canPublish }: CmsModuleForm
                     hasError={hasError}
                   >
                     <option value="">Select an option...</option>
-                    {field.options?.map((opt) => (
+                    {(dynamicOptions?.[field.name] && dynamicOptions[field.name].length > 0
+                      ? dynamicOptions[field.name]
+                      : field.options ?? []
+                    ).map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </SelectInput>

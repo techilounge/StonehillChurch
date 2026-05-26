@@ -97,6 +97,11 @@ function revalidateCmsModule(module: CmsModule, data?: Record<string, unknown> |
       revalidatePath("/"); // WelcomeSection on home consumes leaders
       break;
 
+    case "leaderCategories":
+      revalidatePath("/our-leaders");
+      revalidatePath("/"); // home may show leader cards grouped by category
+      break;
+
     case "resources":
       revalidatePath("/resources");
       revalidatePath("/church-bulletin");

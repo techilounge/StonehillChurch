@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { LeaderCard } from "@/components/public/LeaderCard";
 import { getLeaders } from "@/lib/data/leaders";
+import { getLeaderCategories } from "@/lib/data/leaderCategories";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Users } from "lucide-react";
 import { buttonVariants } from "@/lib/buttonVariants";
@@ -19,7 +20,41 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function OurLeadersPage() {
-  const leaders = await getLeaders();
+  const [leaders, categories] = await Promise.all([getLeaders(), getLeaderCategories()]);
+
+  // Group leaders by category id. getLeaders() already returns them in
+  // per-category sort order, so the group order is preserved on push.
+  const leadersByCategory = new Map<string, typeof leaders>();
+  for (const leader of leaders) {
+    const key = typeof leader.category === "string" && leader.category ? leader.category : "";
+    const bucket = leadersByCategory.get(key);
+    if (bucket) {
+      bucket.push(leader);
+    } else {
+      leadersByCategory.set(key, [leader]);
+    }
+  }
+
+  // Render categories in their admin-defined sortOrder. Any leaders whose
+  // category is missing or no longer exists fall into a trailing "Uncategorized"
+  // group.
+  const orderedGroups: { id: string; name: string; leaders: typeof leaders }[] = [];
+  for (const category of categories) {
+    const bucket = leadersByCategory.get(category.id);
+    if (bucket && bucket.length > 0) {
+      orderedGroups.push({ id: category.id, name: category.name, leaders: bucket });
+    }
+  }
+  const knownCategoryIds = new Set(categories.map((c) => c.id));
+  const uncategorized: typeof leaders = [];
+  for (const [key, bucket] of leadersByCategory.entries()) {
+    if (key === "" || !knownCategoryIds.has(key)) {
+      uncategorized.push(...bucket);
+    }
+  }
+  if (uncategorized.length > 0) {
+    orderedGroups.push({ id: "__uncategorized__", name: "Uncategorized", leaders: uncategorized });
+  }
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
@@ -31,9 +66,18 @@ export default async function OurLeadersPage() {
       <section className="py-16 md:py-24 bg-white overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {leaders.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {leaders.map((leader) => (
-                <LeaderCard key={leader.id} leader={leader} />
+            <div className="space-y-16">
+              {orderedGroups.map((group) => (
+                <div key={group.id}>
+                  <h2 className="font-display text-3xl font-bold tracking-tight text-stonehill-primary mb-8">
+                    {group.name}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {group.leaders.map((leader) => (
+                      <LeaderCard key={leader.id} leader={leader} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (

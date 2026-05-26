@@ -26,6 +26,7 @@ import {
   FileText,
   Sparkles,
   Menu,
+  Tags,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -42,6 +43,7 @@ export const adminNavigation: AdminNavItem[] = [
   { href: "/admin/events", label: "Events", icon: CalendarDays },
   { href: "/admin/ministries", label: "Ministries", icon: Users },
   { href: "/admin/leaders", label: "Leaders", icon: Contact },
+  { href: "/admin/leader-categories", label: "Leader Categories", icon: Tags },
   { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
   { href: "/admin/resources", label: "Resources", icon: BookOpen },
   { href: "/admin/pages", label: "Pages", icon: FileText, requiredPermission: "settings:manage" },
