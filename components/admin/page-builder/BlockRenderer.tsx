@@ -2,7 +2,7 @@ import * as React from "react";
 import { PageBlock } from "@/types/pageBuilder";
 import { usePageBuilder } from "./PageBuilderContext";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { isValidSafeUrl, sanitizeCornerRadius } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, sanitizeCornerRadius, formatParagraphHtml } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from "@/lib/youtube";
 import { BlockResizer } from "./BlockResizer";
 
@@ -114,20 +114,31 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
           </div>
         )}
 
-        {block.type === "paragraph" && (
-          <div>
-            <p className={`text-slate-700 leading-relaxed font-sans ${
-              content.alignment === "center" ? "text-center" : content.alignment === "right" ? "text-right" : "text-left"
-            }`}>
-              {content.text || "Paragraph text goes here."}
-            </p>
-            {(!content.text || content.text.trim() === "") && (
-              <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
-                ⚠️ Paragraph is empty
-              </div>
-            )}
-          </div>
-        )}
+        {block.type === "paragraph" && (() => {
+          const alignClass =
+            content.alignment === "center" ? "text-center" :
+            content.alignment === "right" ? "text-right" : "text-left";
+          const hasText = !!(content.text && content.text.trim());
+          return (
+            <div>
+              {hasText ? (
+                <div
+                  className={`text-slate-700 leading-relaxed font-sans paragraph-content ${alignClass}`}
+                  dangerouslySetInnerHTML={{ __html: formatParagraphHtml(content.text) }}
+                />
+              ) : (
+                <p className={`text-slate-700 leading-relaxed font-sans ${alignClass}`}>
+                  Paragraph text goes here.
+                </p>
+              )}
+              {!hasText && (
+                <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Paragraph is empty
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {block.type === "image" && (
           <div className={`relative ${fixedHeight ? "flex flex-col flex-1 min-h-0" : ""}`}>

@@ -70,3 +70,10 @@ a {
     height: auto !important;
   }
 }
+
+/* Paragraph blocks preserve the source formatting they were pasted with:
+   double newlines become a new <p>, single newlines become <br>. Give the
+   <p> children a vertical rhythm so multi-paragraph content reads cleanly. */
+.paragraph-content p + p {
+  margin-top: 1em;
+}

@@ -10,7 +10,7 @@ import {
 } from "@/types/pageBuilder";
 import { Button } from "@/components/shared/Button";
 import { Card } from "@/components/shared/Card";
-import { isValidSafeUrl, sanitizeHtml, sanitizeStyle, sanitizeCornerRadius } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, sanitizeHtml, sanitizeStyle, sanitizeCornerRadius, formatParagraphHtml } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeEmbedUrl, getYouTubeThumbnailUrl } from "@/lib/youtube";
 
 interface PageBuilderRendererProps {
@@ -281,10 +281,10 @@ function BlockRenderer({ block }: { block: PageBlock }) {
     }
     case "paragraph": {
       return (
-        <div 
-          style={inlineStyles} 
+        <div
+          style={inlineStyles}
           className={`${textAlignClass} leading-relaxed paragraph-content`}
-          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content?.text || "") }}
+          dangerouslySetInnerHTML={{ __html: formatParagraphHtml(content?.text) }}
         />
       );
     }

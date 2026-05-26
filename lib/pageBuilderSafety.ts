@@ -113,6 +113,30 @@ export function isValidSafeUrl(url: string | null | undefined): boolean {
 }
 
 /**
+ * Converts plain-text paragraph content (as produced by the textarea input) to
+ * HTML that preserves the source's line breaks. Double newlines become a new
+ * <p>, single newlines become <br>. The text is HTML-escaped first so it can
+ * be safely injected via dangerouslySetInnerHTML — even content that happens
+ * to contain "<script>" or HTML markup is rendered as literal text.
+ */
+export function formatParagraphHtml(text: string | null | undefined): string {
+  if (!text) return "";
+  const escape = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  return text
+    .split(/\n\s*\n+/)
+    .map((para) => para.replace(/^\n+|\n+$/g, ""))
+    .filter((para) => para.length > 0)
+    .map((para) => `<p>${escape(para).replace(/\n/g, "<br/>")}</p>`)
+    .join("");
+}
+
+/**
  * Strips script tags, unsafe onload/onerror handlers, iframe/object tags, and javascript: links to prevent script injection.
  */
 export function sanitizeHtml(html: string | null | undefined): string {
