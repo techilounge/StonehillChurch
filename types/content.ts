@@ -181,6 +181,11 @@ export type PageContent = {
   seoTitle: string;
   seoDescription: string;
   status: ContentStatus;
+  // Optional back-link rendered above the builder content
+  // (e.g. "← Back to Home"). Disabled by default.
+  backLinkEnabled?: boolean;
+  backLinkHref?: string;
+  backLinkLabel?: string;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
 };

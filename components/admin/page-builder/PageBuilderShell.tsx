@@ -231,6 +231,40 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
                   />
                   <CharCounter value={formData.seoDescription || ""} limit={160} />
                 </div>
+                <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.backLinkEnabled}
+                      onChange={(e) => handleFieldChange("backLinkEnabled", e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                    />
+                    Show a Back link at the top of the page
+                  </label>
+                  <p className="text-xs text-slate-500 mt-1 ml-6">
+                    Adds a small &ldquo;← {formData.backLinkLabel || "Back to Home"}&rdquo; link above the page content, matching pages like <code>/resources</code>.
+                  </p>
+                  {formData.backLinkEnabled && (
+                    <div className="mt-3 ml-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Label</label>
+                        <TextInput
+                          value={formData.backLinkLabel || ""}
+                          onChange={(e) => handleFieldChange("backLinkLabel", e.target.value)}
+                          placeholder="Back to Home"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Link URL</label>
+                        <TextInput
+                          value={formData.backLinkHref || ""}
+                          onChange={(e) => handleFieldChange("backLinkHref", e.target.value)}
+                          placeholder="/"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -529,6 +529,12 @@ export const pageSchema = z.object({
   seoTitle: z.string().max(70).nullable().optional(),
   seoDescription: z.string().max(160).nullable().optional(),
   status: contentStatusSchema,
+  // Optional "Back to ..." link rendered above the builder content. URL safety
+  // is also enforced by isValidSafeUrl on render so a bad value never produces
+  // a working javascript:/data: link.
+  backLinkEnabled: z.boolean().optional(),
+  backLinkHref: z.string().max(300).optional(),
+  backLinkLabel: z.string().max(80).optional(),
 });
 
 // popups
