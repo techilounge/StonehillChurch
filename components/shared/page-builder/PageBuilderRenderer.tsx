@@ -351,7 +351,13 @@ function BlockRenderer({ block }: { block: PageBlock }) {
             style={paddingStyle}
             asChild
           >
-            <a href={safeUrl}>{content?.label || content?.text || "Click Here"}</a>
+            <a
+              href={safeUrl}
+              target={content?.openInNewTab ? "_blank" : undefined}
+              rel={content?.openInNewTab ? "noopener noreferrer" : undefined}
+            >
+              {content?.label || content?.text || "Click Here"}
+            </a>
           </Button>
         </div>
       );

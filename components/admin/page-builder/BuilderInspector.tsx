@@ -443,8 +443,8 @@ function BlockInspector({
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Variant</label>
-            <SelectInput 
-              value={block.content.variant || "primary"} 
+            <SelectInput
+              value={block.content.variant || "primary"}
               onChange={(e) => onChange({ content: { ...block.content, variant: e.target.value } })}
             >
               <option value="primary">Primary</option>
@@ -452,6 +452,15 @@ function BlockInspector({
               <option value="outline">Outline</option>
             </SelectInput>
           </div>
+          <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+            <input
+              type="checkbox"
+              checked={!!block.content.openInNewTab}
+              onChange={(e) => onChange({ content: { ...block.content, openInNewTab: e.target.checked } })}
+              className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+            />
+            Open in new tab
+          </label>
           <PaddingControl
             content={block.content}
             onContentChange={(u) => onChange({ content: { ...block.content, ...u } })}
