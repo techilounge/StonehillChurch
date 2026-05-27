@@ -356,6 +356,70 @@ export async function uploadMediaAsset({
   };
 }
 
+export type DeleteMediaResult = {
+  deletedCount: number;
+  failed: { id: string; reason: string }[];
+};
+
+async function deleteSingleAsset(id: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (!id || typeof id !== "string") {
+    return { ok: false, reason: "Invalid id." };
+  }
+
+  const docRef = getAdminFirestore().collection(collections.mediaAssets).doc(id);
+  const snapshot = await docRef.get();
+
+  if (!snapshot.exists) {
+    return { ok: false, reason: "Asset not found." };
+  }
+
+  const data = snapshot.data() as MediaAsset | undefined;
+  const storagePath = data?.storagePath;
+
+  if (storagePath && typeof storagePath === "string") {
+    try {
+      const bucket = getAdminStorage().bucket();
+      await bucket.file(storagePath).delete({ ignoreNotFound: true });
+    } catch (error) {
+      console.error(`[mediaAssets] failed to delete storage object for ${id}:`, error);
+      return { ok: false, reason: "Failed to delete storage object." };
+    }
+  }
+
+  try {
+    await docRef.delete();
+  } catch (error) {
+    console.error(`[mediaAssets] failed to delete Firestore doc for ${id}:`, error);
+    return { ok: false, reason: "Failed to delete metadata document." };
+  }
+
+  return { ok: true };
+}
+
+export async function deleteMediaAsset(id: string): Promise<DeleteMediaResult> {
+  const result = await deleteSingleAsset(id);
+  return result.ok
+    ? { deletedCount: 1, failed: [] }
+    : { deletedCount: 0, failed: [{ id, reason: result.reason }] };
+}
+
+export async function deleteMediaAssets(ids: string[]): Promise<DeleteMediaResult> {
+  const unique = Array.from(new Set(ids.filter((id) => typeof id === "string" && id.length > 0)));
+  let deletedCount = 0;
+  const failed: { id: string; reason: string }[] = [];
+
+  for (const id of unique) {
+    const result = await deleteSingleAsset(id);
+    if (result.ok) {
+      deletedCount += 1;
+    } else {
+      failed.push({ id, reason: result.reason });
+    }
+  }
+
+  return { deletedCount, failed };
+}
+
 export async function listMediaAssets(options?: {
   limit?: number;
 }): Promise<Serialized<MediaAsset>[]> {
