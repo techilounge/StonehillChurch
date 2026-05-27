@@ -436,6 +436,9 @@ export const blockTypeSchema = z.enum([
   "iconText",
   "iconBox",
   "googleMap",
+  "gallery",
+  "carousel",
+  "countdown",
 ]);
 
 export const blockStyleSchema = z.object({

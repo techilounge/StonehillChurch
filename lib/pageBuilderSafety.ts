@@ -342,6 +342,7 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
         validateUrl(block.content.imageUrl, bName);
       } else if (block.type === "cta") {
         validateUrl(block.content.buttonUrl, bName);
+        validateUrl(block.content.backgroundImage, bName);
       } else if (block.type === "image") {
         validateUrl(block.content.url, bName);
       } else if (block.type === "iconBox") {
@@ -352,6 +353,13 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
         if (embedUrl && !isValidGoogleMapsEmbedUrl(embedUrl)) {
           unsafeUrls.push(`${bName}: "${embedUrl}" is not a Google Maps embed URL`);
         }
+      } else if (block.type === "gallery" || block.type === "carousel") {
+        const images = Array.isArray(block.content?.images) ? block.content.images : [];
+        images.forEach((img: { url?: string }, i: number) => {
+          if (img && typeof img === "object") {
+            validateUrl(img.url, `${bName} > image ${i + 1}`);
+          }
+        });
       }
     });
 
@@ -365,6 +373,7 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
         validateUrl(block.content.imageUrl, location);
       } else if (block.type === "cta") {
         validateUrl(block.content.buttonUrl, location);
+        validateUrl(block.content.backgroundImage, location);
       } else if (block.type === "image") {
         validateUrl(block.content.url, location);
       } else if (block.type === "iconBox") {
@@ -375,6 +384,13 @@ export function getUnsafeUrlsInDocument(sections: PageBuilderSection[]): string[
         if (embedUrl && !isValidGoogleMapsEmbedUrl(embedUrl)) {
           unsafeUrls.push(`${location}: "${embedUrl}" is not a Google Maps embed URL`);
         }
+      } else if (block.type === "gallery" || block.type === "carousel") {
+        const images = Array.isArray(block.content?.images) ? block.content.images : [];
+        images.forEach((img: { url?: string }, i: number) => {
+          if (img && typeof img === "object") {
+            validateUrl(img.url, `${location} > image ${i + 1}`);
+          }
+        });
       }
     };
 

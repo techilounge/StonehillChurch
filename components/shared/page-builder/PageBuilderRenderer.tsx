@@ -356,26 +356,63 @@ function BlockRenderer({ block }: { block: PageBlock }) {
         </div>
       );
     }
+    case "gallery": {
+      const images = (Array.isArray(content?.images) ? content.images : [])
+        .filter((img: { url?: string }) => img && typeof img.url === "string" && isValidSafeUrl(img.url));
+      if (images.length === 0) return null;
+      return <GalleryBlock images={images} content={content} inlineStyles={inlineStyles} />;
+    }
+    case "carousel": {
+      const images = (Array.isArray(content?.images) ? content.images : [])
+        .filter((img: { url?: string }) => img && typeof img.url === "string" && isValidSafeUrl(img.url));
+      if (images.length === 0) return null;
+      return <CarouselBlock images={images} content={content} inlineStyles={inlineStyles} />;
+    }
+    case "countdown": {
+      return <CountdownBlock content={content} inlineStyles={inlineStyles} />;
+    }
     case "cta": {
       const safeUrl = isValidSafeUrl(content?.buttonUrl) ? (content?.buttonUrl || "#") : "#";
+      const safeBgImg = isValidSafeUrl(content?.backgroundImage) ? (content?.backgroundImage || "") : "";
+      const padClass =
+        content?.padding === "small" ? "p-6 md:p-8" :
+        content?.padding === "large" ? "p-12 md:p-20" :
+        "p-8 md:p-12";
+      const isLight = content?.background === "light";
+      const containerStyle: React.CSSProperties = { ...inlineStyles };
+      if (safeBgImg) {
+        containerStyle.backgroundImage = `url(${safeBgImg})`;
+        containerStyle.backgroundSize = "cover";
+        containerStyle.backgroundPosition = "center";
+      }
       return (
-        <div style={inlineStyles} className={`w-full p-8 md:p-12 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 ${
+        <div
+          style={containerStyle}
+          className={`relative w-full ${padClass} rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden ${
+            safeBgImg ? "bg-stonehill-primary text-white" :
             content?.background === "accent" ? "bg-stonehill-accent text-white" :
-            content?.background === "light" ? "bg-stonehill-light text-stonehill-dark border border-stonehill-border" :
+            isLight ? "bg-stonehill-light text-stonehill-dark border border-stonehill-border" :
             "bg-stonehill-primary text-white"
-          }`}>
-          <div className="flex-1 text-center md:text-left">
-            <h2 className={`text-2xl md:text-3xl font-display font-bold mb-2 ${content?.background === "light" ? "text-stonehill-dark" : "text-white"}`}>
+          }`}
+        >
+          {safeBgImg && <div className="absolute inset-0 bg-black/55" aria-hidden="true" />}
+          <div className="relative flex-1 text-center md:text-left">
+            {content?.subheading && (
+              <p className={`italic text-sm md:text-base mb-2 ${safeBgImg ? "text-stonehill-accent" : isLight ? "text-stonehill-accent" : "text-stonehill-accent"}`}>
+                {content.subheading}
+              </p>
+            )}
+            <h2 className={`text-2xl md:text-3xl font-display font-bold mb-2 ${!safeBgImg && isLight ? "text-stonehill-dark" : "text-white"}`}>
               {content?.title || "Call to Action"}
             </h2>
-            <p className={`font-sans text-lg ${content?.background === "light" ? "text-slate-600" : "text-white/90"}`}>
+            <p className={`font-sans text-lg ${!safeBgImg && isLight ? "text-slate-600" : "text-white/90"}`}>
               {content?.text || "Compelling description to encourage users to click the button below."}
             </p>
           </div>
-          <div className="flex-shrink-0">
-            <Button 
-              variant={content?.background === "light" ? "default" : "outline"}
-              className={content?.background !== "light" ? "bg-white text-stonehill-primary hover:bg-slate-100 border-none" : ""}
+          <div className="relative flex-shrink-0">
+            <Button
+              variant={!safeBgImg && isLight ? "default" : "outline"}
+              className={safeBgImg || !isLight ? "bg-white text-stonehill-primary hover:bg-slate-100 border-none" : ""}
               size="lg"
               asChild
             >
@@ -592,4 +629,310 @@ function BlockRenderer({ block }: { block: PageBlock }) {
       console.warn(`Unknown block type encountered: ${type}`);
       return null;
   }
+}
+
+/* ─── Gallery ──────────────────────────────────────────────────────── */
+
+interface GalleryImage { url: string; alt?: string; caption?: string; }
+
+function GalleryBlock({ images, content, inlineStyles }: {
+  images: GalleryImage[];
+  content: any;
+  inlineStyles: React.CSSProperties;
+}) {
+  const [openIndex, setOpenIndex] = React.useState<number | null>(null);
+  const columnsClass =
+    content?.columns === 2 ? "sm:grid-cols-2 md:grid-cols-2" :
+    content?.columns === 4 ? "sm:grid-cols-2 md:grid-cols-4" :
+    "sm:grid-cols-2 md:grid-cols-3";
+  const gutterClass = content?.gutter === "sm" ? "gap-2" : content?.gutter === "lg" ? "gap-6" : "gap-4";
+  const roundedClass = content?.rounded === false ? "" : "rounded-lg";
+  const lightbox = !!content?.lightbox;
+
+  return (
+    <div style={inlineStyles} className="w-full">
+      <div className={`grid grid-cols-1 ${columnsClass} ${gutterClass}`}>
+        {images.map((img, i) => {
+          const tile = (
+            <div className={`relative ${roundedClass} overflow-hidden bg-slate-100 aspect-square group`}>
+              <img
+                src={img.url}
+                alt={img.alt || ""}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+              {img.caption && (
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent text-white text-sm p-3">
+                  {img.caption}
+                </div>
+              )}
+            </div>
+          );
+          return lightbox ? (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setOpenIndex(i)}
+              className="block w-full cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent rounded-lg"
+              aria-label={`Open image ${i + 1}${img.alt ? `: ${img.alt}` : ""}`}
+            >
+              {tile}
+            </button>
+          ) : (
+            <div key={i}>{tile}</div>
+          );
+        })}
+      </div>
+      {lightbox && openIndex !== null && (
+        <GalleryLightbox
+          images={images}
+          index={openIndex}
+          onChange={setOpenIndex}
+          onClose={() => setOpenIndex(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function GalleryLightbox({ images, index, onChange, onClose }: {
+  images: GalleryImage[];
+  index: number;
+  onChange: (i: number) => void;
+  onClose: () => void;
+}) {
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") onChange((index + 1) % images.length);
+      if (e.key === "ArrowLeft") onChange((index - 1 + images.length) % images.length);
+    };
+    window.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [index, images.length, onChange, onClose]);
+
+  const img = images[index];
+  return (
+    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl font-light leading-none"
+        aria-label="Close lightbox"
+      >
+        ×
+      </button>
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => onChange((index - 1 + images.length) % images.length)}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-4xl font-light leading-none"
+            aria-label="Previous image"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange((index + 1) % images.length)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white text-4xl font-light leading-none"
+            aria-label="Next image"
+          >
+            ›
+          </button>
+        </>
+      )}
+      <div className="max-w-6xl max-h-full flex flex-col items-center gap-3">
+        <img src={img.url} alt={img.alt || ""} className="max-w-full max-h-[85vh] object-contain" />
+        {img.caption && <p className="text-white/90 text-sm max-w-2xl text-center">{img.caption}</p>}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Carousel ─────────────────────────────────────────────────────── */
+
+function CarouselBlock({ images, content, inlineStyles }: {
+  images: Array<{ url: string; alt?: string }>;
+  content: any;
+  inlineStyles: React.CSSProperties;
+}) {
+  const [index, setIndex] = React.useState(0);
+  const autoplay = content?.autoplay !== false;
+  const autoplaySpeed = typeof content?.autoplaySpeedMs === "number"
+    ? Math.max(1000, Math.min(20000, content.autoplaySpeedMs))
+    : 5000;
+  const showArrows = content?.showArrows !== false;
+  const showDots = content?.showDots !== false;
+  const transition = content?.transition === "fade" ? "fade" : "slide";
+  const heightPx = typeof content?.height === "number" ? Math.max(160, Math.min(800, content.height)) : 480;
+  const rounded = content?.rounded !== false;
+  const shadow = !!content?.shadow;
+
+  React.useEffect(() => {
+    if (!autoplay || images.length < 2) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % images.length), autoplaySpeed);
+    return () => clearInterval(id);
+  }, [autoplay, autoplaySpeed, images.length]);
+
+  const goTo = (i: number) => setIndex(((i % images.length) + images.length) % images.length);
+
+  return (
+    <div
+      style={inlineStyles}
+      className={`relative w-full ${rounded ? "rounded-lg" : ""} ${shadow ? "shadow-lg" : ""} overflow-hidden bg-slate-900`}
+    >
+      <div className="relative" style={{ height: `${heightPx}px` }}>
+        {transition === "fade" ? (
+          images.map((img, i) => (
+            <img
+              key={i}
+              src={img.url}
+              alt={img.alt || ""}
+              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+              style={{ opacity: i === index ? 1 : 0 }}
+              aria-hidden={i !== index}
+            />
+          ))
+        ) : (
+          <div
+            className="flex h-full transition-transform duration-500 ease-out"
+            style={{ transform: `translateX(-${index * 100}%)` }}
+          >
+            {images.map((img, i) => (
+              <img
+                key={i}
+                src={img.url}
+                alt={img.alt || ""}
+                className="w-full h-full object-cover shrink-0"
+                style={{ width: "100%" }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {showArrows && images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={() => goTo(index - 1)}
+            className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl leading-none transition-colors"
+            aria-label="Previous slide"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => goTo(index + 1)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl leading-none transition-colors"
+            aria-label="Next slide"
+          >
+            ›
+          </button>
+        </>
+      )}
+
+      {showDots && images.length > 1 && (
+        <div className="absolute bottom-3 inset-x-0 flex items-center justify-center gap-2">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goTo(i)}
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
+                i === index ? "bg-white scale-110" : "bg-white/40 hover:bg-white/70"
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+              aria-current={i === index ? "true" : undefined}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Countdown ────────────────────────────────────────────────────── */
+
+function CountdownBlock({ content, inlineStyles }: { content: any; inlineStyles: React.CSSProperties; }) {
+  const target = React.useMemo(() => {
+    const v = content?.targetDateTime;
+    if (!v) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d.getTime();
+  }, [content?.targetDateTime]);
+
+  const computeRemaining = React.useCallback(() => {
+    if (target === null) return 0;
+    return Math.max(0, target - Date.now());
+  }, [target]);
+
+  const [remaining, setRemaining] = React.useState<number>(() => computeRemaining());
+
+  React.useEffect(() => {
+    setRemaining(computeRemaining());
+    if (target === null) return;
+    const id = setInterval(() => setRemaining(computeRemaining()), 1000);
+    return () => clearInterval(id);
+  }, [target, computeRemaining]);
+
+  if (target === null) return null;
+
+  const days = Math.floor(remaining / 86400000);
+  const hours = Math.floor((remaining % 86400000) / 3600000);
+  const minutes = Math.floor((remaining % 3600000) / 60000);
+  const seconds = Math.floor((remaining % 60000) / 1000);
+  const accent = typeof content?.accentColor === "string" ? content.accentColor : "#e7ab10";
+  const alignClass =
+    content?.alignment === "left" ? "items-start text-left" :
+    content?.alignment === "right" ? "items-end text-right" :
+    "items-center text-center";
+  const isBoxed = content?.style !== "inline";
+  const reachedZero = remaining === 0;
+
+  const cells = [
+    { value: days, label: "Days" },
+    { value: hours, label: "Hours" },
+    { value: minutes, label: "Min" },
+    { value: seconds, label: "Sec" },
+  ];
+
+  return (
+    <div style={inlineStyles} className={`flex flex-col gap-3 ${alignClass}`}>
+      {content?.label && (
+        <span className="text-sm md:text-base font-medium text-slate-700">{content.label}</span>
+      )}
+      {reachedZero ? (
+        <div className="text-2xl md:text-3xl font-bold" style={{ color: accent }}>
+          The wait is over!
+        </div>
+      ) : isBoxed ? (
+        <div className="flex gap-3 flex-wrap">
+          {cells.map((c) => (
+            <div
+              key={c.label}
+              className="bg-white border border-slate-200 rounded-xl px-4 py-3 min-w-[80px] text-center shadow-sm"
+            >
+              <div className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: accent }}>
+                {String(c.value).padStart(2, "0")}
+              </div>
+              <div className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold mt-1">
+                {c.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-2xl md:text-3xl font-bold tabular-nums" style={{ color: accent }}>
+          {days}d · {String(hours).padStart(2, "0")}h · {String(minutes).padStart(2, "0")}m · {String(seconds).padStart(2, "0")}s
+        </div>
+      )}
+    </div>
+  );
 }

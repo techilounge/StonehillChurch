@@ -481,6 +481,35 @@ function getInitialBlockContent(type: PageBlock["type"]) {
         height: 400,
         fullWidth: false,
       };
+    case "gallery":
+      return {
+        images: [] as Array<{ url: string; alt?: string; caption?: string }>,
+        columns: 3,
+        gutter: "md",
+        rounded: true,
+        lightbox: true,
+      };
+    case "carousel":
+      return {
+        images: [] as Array<{ url: string; alt?: string }>,
+        autoplay: true,
+        autoplaySpeedMs: 5000,
+        showArrows: true,
+        showDots: true,
+        transition: "slide" as "slide" | "fade",
+        height: 480,
+        rounded: true,
+        shadow: false,
+      };
+    case "countdown":
+      return {
+        // Default to 7 days from now so the editor preview is meaningful.
+        targetDateTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        label: "Event starts in",
+        style: "boxed" as "boxed" | "inline",
+        accentColor: "#e7ab10",
+        alignment: "center" as "left" | "center" | "right",
+      };
     case "cta":
       return {
         title: "Call to action",

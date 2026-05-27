@@ -408,6 +408,118 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
           );
         })()}
 
+        {block.type === "gallery" && (() => {
+          const images = Array.isArray(content.images) ? content.images : [];
+          const columns = content.columns === 2 ? "grid-cols-2" : content.columns === 4 ? "grid-cols-4" : "grid-cols-3";
+          const gutter = content.gutter === "sm" ? "gap-1" : content.gutter === "lg" ? "gap-6" : "gap-3";
+          const rounded = content.rounded !== false;
+          if (images.length === 0) {
+            return (
+              <div className="bg-slate-100 border border-slate-200 rounded-lg p-8 text-center text-slate-400">
+                <span className="text-sm">No images yet. Add some in the Inspector →</span>
+              </div>
+            );
+          }
+          return (
+            <div className={`grid ${columns} ${gutter}`}>
+              {images.map((img: { url?: string; alt?: string; caption?: string }, i: number) => (
+                <div key={i} className={`relative ${rounded ? "rounded-lg" : ""} overflow-hidden bg-slate-100 aspect-square`}>
+                  {img?.url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={img.url} alt={img.alt || ""} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">No image</div>
+                  )}
+                  {img?.caption && (
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-xs p-1.5 truncate">{img.caption}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
+        {block.type === "carousel" && (() => {
+          const images = Array.isArray(content.images) ? content.images : [];
+          const heightPx = typeof content.height === "number" ? Math.max(160, Math.min(800, content.height)) : 480;
+          const rounded = content.rounded !== false;
+          const shadow = !!content.shadow;
+          if (images.length === 0) {
+            return (
+              <div className="bg-slate-100 border border-slate-200 rounded-lg p-8 text-center text-slate-400">
+                <svg className="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span className="text-sm">Add images to the carousel in the Inspector →</span>
+              </div>
+            );
+          }
+          const first = images[0];
+          return (
+            <div
+              className={`relative ${rounded ? "rounded-lg" : ""} ${shadow ? "shadow-lg" : ""} overflow-hidden bg-slate-900`}
+              style={{ height: `${heightPx}px` }}
+            >
+              {first?.url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={first.url} alt={first.alt || ""} className="w-full h-full object-cover" />
+              ) : null}
+              <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs font-medium px-2.5 py-1 rounded-full">
+                Carousel • {images.length} image{images.length === 1 ? "" : "s"}
+              </div>
+              {content.autoplay && (
+                <div className="absolute top-3 right-3 bg-stonehill-accent text-white text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded">Autoplay</div>
+              )}
+            </div>
+          );
+        })()}
+
+        {block.type === "countdown" && (() => {
+          const target = content.targetDateTime ? new Date(content.targetDateTime) : null;
+          const isValid = target && !isNaN(target.getTime());
+          const diffMs = isValid ? Math.max(0, target.getTime() - Date.now()) : 0;
+          const days = Math.floor(diffMs / 86400000);
+          const hours = Math.floor((diffMs % 86400000) / 3600000);
+          const minutes = Math.floor((diffMs % 3600000) / 60000);
+          const seconds = Math.floor((diffMs % 60000) / 1000);
+          const alignClass =
+            content.alignment === "left" ? "items-start text-left" :
+            content.alignment === "right" ? "items-end text-right" :
+            "items-center text-center";
+          const accent = typeof content.accentColor === "string" ? content.accentColor : "#e7ab10";
+          const isBoxed = content.style !== "inline";
+          const cells = [
+            { value: days, label: "Days" },
+            { value: hours, label: "Hours" },
+            { value: minutes, label: "Min" },
+            { value: seconds, label: "Sec" },
+          ];
+          return (
+            <div className={`flex flex-col gap-3 ${alignClass}`}>
+              {content.label && (
+                <span className="text-sm font-medium text-slate-700">{content.label}</span>
+              )}
+              {isBoxed ? (
+                <div className="flex gap-2 flex-wrap">
+                  {cells.map((c) => (
+                    <div key={c.label} className="bg-white border border-slate-200 rounded-lg px-3 py-2 min-w-[64px] text-center shadow-sm">
+                      <div className="text-2xl font-bold tabular-nums" style={{ color: accent }}>{String(c.value).padStart(2, "0")}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">{c.label}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-2xl font-bold tabular-nums" style={{ color: accent }}>
+                  {days}d · {String(hours).padStart(2, "0")}h · {String(minutes).padStart(2, "0")}m · {String(seconds).padStart(2, "0")}s
+                </div>
+              )}
+              {!isValid && (
+                <div className="bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Set a valid target date in the Inspector
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {block.type === "googleMap" && (() => {
           const validEmbed = content.embedUrl && isValidGoogleMapsEmbedUrl(content.embedUrl);
           const height = typeof content.height === "number" ? content.height : 400;
@@ -442,41 +554,64 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
           );
         })()}
 
-        {block.type === "cta" && (
-          <div className={`p-8 md:p-12 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 ${
-            content.background === "accent" ? "bg-stonehill-accent text-white" :
-            content.background === "light" ? "bg-stonehill-light text-stonehill-dark border border-stonehill-border" :
-            "bg-stonehill-primary text-white"
-          }`}>
-            <div className="flex-1 text-center md:text-left">
-              <h2 className={`text-2xl md:text-3xl font-display font-bold mb-2 ${content.background === "light" ? "text-stonehill-dark" : "text-white"}`}>
-                {content.title || "Call to Action"}
-              </h2>
-              <p className={`font-sans text-lg ${content.background === "light" ? "text-slate-600" : "text-white/90"}`}>
-                {content.text || "Compelling description to encourage users to click the button below."}
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <span className={`inline-block px-8 py-3 rounded-full font-sans font-medium transition-colors shadow-md ${
-                content.background === "light" ? "bg-stonehill-primary text-white" :
-                "bg-white text-stonehill-dark"
-              }`}>
-                {content.buttonLabel || content.buttonText || "Take Action"}
-              </span>
-            </div>
+        {block.type === "cta" && (() => {
+          const safeBgImg = isValidSafeUrl(content.backgroundImage) ? (content.backgroundImage || "") : "";
+          const padClass =
+            content.padding === "small" ? "p-6 md:p-8" :
+            content.padding === "large" ? "p-12 md:p-20" :
+            "p-8 md:p-12";
+          const isLight = content.background === "light";
+          const ctaStyle: React.CSSProperties = safeBgImg
+            ? { backgroundImage: `url(${safeBgImg})`, backgroundSize: "cover", backgroundPosition: "center" }
+            : {};
+          return (
+            <div
+              style={ctaStyle}
+              className={`relative ${padClass} rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden ${
+                safeBgImg ? "bg-stonehill-primary text-white" :
+                content.background === "accent" ? "bg-stonehill-accent text-white" :
+                isLight ? "bg-stonehill-light text-stonehill-dark border border-stonehill-border" :
+                "bg-stonehill-primary text-white"
+              }`}
+            >
+              {safeBgImg && <div className="absolute inset-0 bg-black/55" />}
+              <div className="relative flex-1 text-center md:text-left">
+                {content.subheading && (
+                  <p className="italic text-sm md:text-base mb-2 text-stonehill-accent">{content.subheading}</p>
+                )}
+                <h2 className={`text-2xl md:text-3xl font-display font-bold mb-2 ${!safeBgImg && isLight ? "text-stonehill-dark" : "text-white"}`}>
+                  {content.title || "Call to Action"}
+                </h2>
+                <p className={`font-sans text-lg ${!safeBgImg && isLight ? "text-slate-600" : "text-white/90"}`}>
+                  {content.text || "Compelling description to encourage users to click the button below."}
+                </p>
+              </div>
+              <div className="relative flex-shrink-0">
+                <span className={`inline-block px-8 py-3 rounded-full font-sans font-medium transition-colors shadow-md ${
+                  safeBgImg || !isLight ? "bg-white text-stonehill-dark" : "bg-stonehill-primary text-white"
+                }`}>
+                  {content.buttonLabel || content.buttonText || "Take Action"}
+                </span>
+              </div>
 
-            {content.buttonUrl && !isValidSafeUrl(content.buttonUrl) && (
-              <div className="absolute bottom-2 left-2 bg-red-100 text-red-850 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
-                ⚠️ Unsafe CTA button URL
-              </div>
-            )}
-            {content.buttonUrl && !content.buttonLabel && !content.buttonText && (
-              <div className="absolute bottom-2 left-2 bg-yellow-100 text-yellow-850 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
-                ⚠️ CTA button label is required for link
-              </div>
-            )}
-          </div>
-        )}
+              {content.buttonUrl && !isValidSafeUrl(content.buttonUrl) && (
+                <div className="absolute bottom-2 left-2 bg-red-100 text-red-850 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Unsafe CTA button URL
+                </div>
+              )}
+              {content.backgroundImage && !isValidSafeUrl(content.backgroundImage) && (
+                <div className="absolute bottom-2 left-2 bg-red-100 text-red-850 text-xs px-2.5 py-1 rounded border border-red-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Unsafe background image URL
+                </div>
+              )}
+              {content.buttonUrl && !content.buttonLabel && !content.buttonText && (
+                <div className="absolute bottom-2 left-2 bg-yellow-100 text-yellow-850 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ CTA button label is required for link
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

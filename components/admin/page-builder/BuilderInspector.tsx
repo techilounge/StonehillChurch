@@ -86,6 +86,15 @@ export function BuilderInspector() {
   const handleMediaSelect = (url: string) => {
     if (mediaTarget && selectedBlock && selectedBlock.id === mediaTarget.blockId) {
       const { sectionId, blockId, field, columnId } = mediaTarget;
+      // Sentinel "images[]" appends to the gallery/carousel images array
+      // instead of setting a single field.
+      if (field === "images[]") {
+        const current = Array.isArray(selectedBlock.content?.images) ? selectedBlock.content.images : [];
+        handleUpdateBlock(sectionId, blockId, {
+          content: { ...selectedBlock.content, images: [...current, { url, alt: "", caption: "" }] },
+        }, columnId);
+        return;
+      }
       handleUpdateBlock(sectionId, blockId, {
         content: {
           ...selectedBlock.content,
@@ -1030,12 +1039,305 @@ function BlockInspector({
         </>
       )}
 
+      {block.type === "gallery" && (() => {
+        const images: Array<{ url?: string; alt?: string; caption?: string }> = Array.isArray(block.content.images) ? block.content.images : [];
+        const setImages = (next: typeof images) => onChange({ content: { ...block.content, images: next } });
+        const updateImage = (idx: number, updates: Partial<{ url: string; alt: string; caption: string }>) => {
+          const next = images.map((img, i) => (i === idx ? { ...img, ...updates } : img));
+          setImages(next);
+        };
+        return (
+          <>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Images ({images.length})</label>
+              <div className="space-y-2">
+                {images.map((img, i) => (
+                  <div key={i} className="flex gap-2 p-2 border border-slate-200 rounded-md bg-slate-50">
+                    <div className="w-12 h-12 shrink-0 bg-slate-200 rounded overflow-hidden flex items-center justify-center">
+                      {img.url ? (
+                        <img src={img.url} alt={img.alt || ""} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-[10px] text-slate-400">No URL</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <TextInput
+                        value={img.alt || ""}
+                        onChange={(e) => updateImage(i, { alt: e.target.value })}
+                        placeholder="Alt text"
+                      />
+                      <TextInput
+                        value={img.caption || ""}
+                        onChange={(e) => updateImage(i, { caption: e.target.value })}
+                        placeholder="Caption (optional)"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setImages(images.filter((_, j) => j !== i))}
+                      className="self-start text-xs text-red-600 hover:underline"
+                      title="Remove image"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => onOpenMediaSelector("images[]")}>
+                + Add image
+              </Button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Columns</label>
+              <SelectInput
+                value={String(block.content.columns || 3)}
+                onChange={(e) => onChange({ content: { ...block.content, columns: Number(e.target.value) } })}
+              >
+                <option value="2">2 columns</option>
+                <option value="3">3 columns</option>
+                <option value="4">4 columns</option>
+              </SelectInput>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Spacing (gutter)</label>
+              <SelectInput
+                value={block.content.gutter || "md"}
+                onChange={(e) => onChange({ content: { ...block.content, gutter: e.target.value } })}
+              >
+                <option value="sm">Small</option>
+                <option value="md">Medium</option>
+                <option value="lg">Large</option>
+              </SelectInput>
+            </div>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={block.content.rounded !== false}
+                onChange={(e) => onChange({ content: { ...block.content, rounded: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Rounded corners
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={!!block.content.lightbox}
+                onChange={(e) => onChange({ content: { ...block.content, lightbox: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Open full-size image in lightbox on click
+            </label>
+          </>
+        );
+      })()}
+
+      {block.type === "carousel" && (() => {
+        const images: Array<{ url?: string; alt?: string }> = Array.isArray(block.content.images) ? block.content.images : [];
+        const setImages = (next: typeof images) => onChange({ content: { ...block.content, images: next } });
+        const updateImage = (idx: number, updates: Partial<{ url: string; alt: string }>) => {
+          setImages(images.map((img, i) => (i === idx ? { ...img, ...updates } : img)));
+        };
+        return (
+          <>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Slides ({images.length})</label>
+              <div className="space-y-2">
+                {images.map((img, i) => (
+                  <div key={i} className="flex gap-2 p-2 border border-slate-200 rounded-md bg-slate-50">
+                    <div className="w-12 h-12 shrink-0 bg-slate-200 rounded overflow-hidden">
+                      {img.url ? (
+                        <img src={img.url} alt={img.alt || ""} className="w-full h-full object-cover" />
+                      ) : null}
+                    </div>
+                    <TextInput
+                      value={img.alt || ""}
+                      onChange={(e) => updateImage(i, { alt: e.target.value })}
+                      placeholder="Alt text"
+                      className="flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setImages(images.filter((_, j) => j !== i))}
+                      className="self-start text-xs text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => onOpenMediaSelector("images[]")}>
+                + Add slide
+              </Button>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Transition</label>
+              <SelectInput
+                value={block.content.transition || "slide"}
+                onChange={(e) => onChange({ content: { ...block.content, transition: e.target.value } })}
+              >
+                <option value="slide">Slide</option>
+                <option value="fade">Fade</option>
+              </SelectInput>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Height (px)</label>
+              <TextInput
+                type="number"
+                value={typeof block.content.height === "number" ? String(block.content.height) : ""}
+                onChange={(e) => onChange({ content: { ...block.content, height: e.target.value === "" ? undefined : Math.max(160, Math.min(800, Number(e.target.value))) } })}
+                placeholder="480"
+              />
+            </div>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={block.content.autoplay !== false}
+                onChange={(e) => onChange({ content: { ...block.content, autoplay: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Autoplay
+            </label>
+            {block.content.autoplay !== false && (
+              <div className="space-y-1.5 ml-6">
+                <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Autoplay speed (ms)</label>
+                <TextInput
+                  type="number"
+                  value={typeof block.content.autoplaySpeedMs === "number" ? String(block.content.autoplaySpeedMs) : ""}
+                  onChange={(e) => onChange({ content: { ...block.content, autoplaySpeedMs: e.target.value === "" ? undefined : Math.max(1000, Math.min(20000, Number(e.target.value))) } })}
+                  placeholder="5000"
+                />
+              </div>
+            )}
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={block.content.showArrows !== false}
+                onChange={(e) => onChange({ content: { ...block.content, showArrows: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Show navigation arrows
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={block.content.showDots !== false}
+                onChange={(e) => onChange({ content: { ...block.content, showDots: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Show pagination dots
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={block.content.rounded !== false}
+                onChange={(e) => onChange({ content: { ...block.content, rounded: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Rounded corners
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={!!block.content.shadow}
+                onChange={(e) => onChange({ content: { ...block.content, shadow: e.target.checked } })}
+                className="h-3.5 w-3.5 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+              />
+              Drop shadow
+            </label>
+          </>
+        );
+      })()}
+
+      {block.type === "countdown" && (
+        <>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Target date &amp; time</label>
+            <TextInput
+              type="datetime-local"
+              value={(() => {
+                const v = block.content.targetDateTime;
+                if (!v) return "";
+                const d = new Date(v);
+                if (isNaN(d.getTime())) return "";
+                // datetime-local expects YYYY-MM-DDTHH:mm (local)
+                const pad = (n: number) => String(n).padStart(2, "0");
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+              })()}
+              onChange={(e) => onChange({ content: { ...block.content, targetDateTime: e.target.value ? new Date(e.target.value).toISOString() : undefined } })}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Label (optional)</label>
+            <TextInput
+              value={block.content.label || ""}
+              onChange={(e) => onChange({ content: { ...block.content, label: e.target.value } })}
+              placeholder="Event starts in"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Style</label>
+            <SelectInput
+              value={block.content.style || "boxed"}
+              onChange={(e) => onChange({ content: { ...block.content, style: e.target.value } })}
+            >
+              <option value="boxed">Boxed (day / hr / min / sec cards)</option>
+              <option value="inline">Inline (single line)</option>
+            </SelectInput>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Alignment</label>
+            <SelectInput
+              value={block.content.alignment || "center"}
+              onChange={(e) => onChange({ content: { ...block.content, alignment: e.target.value } })}
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </SelectInput>
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Accent Color</span>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: "#e7ab10", label: "Gold (Accent)" },
+                { value: "#1e3f66", label: "Navy (Primary)" },
+                { value: "#1c6b8d", label: "Blue (Secondary)" },
+                { value: "#17201d", label: "Dark" },
+              ].map((color) => (
+                <button
+                  key={color.value}
+                  type="button"
+                  className={`w-7 h-7 rounded border transition-all ${
+                    (block.content.accentColor || "#e7ab10") === color.value
+                      ? "border-stonehill-accent ring-2 ring-stonehill-accent ring-offset-1 scale-110"
+                      : "border-slate-200 hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                  onClick={() => onChange({ content: { ...block.content, accentColor: color.value } })}
+                  title={color.label}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       {block.type === "cta" && (
         <>
           <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Subheading (optional)</label>
+            <TextInput
+              value={block.content.subheading || ""}
+              onChange={(e) => onChange({ content: { ...block.content, subheading: e.target.value } })}
+              placeholder="e.g. Don't miss it"
+            />
+          </div>
+          <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Title</label>
-            <TextInput 
-              value={block.content.title || ""} 
+            <TextInput
+              value={block.content.title || ""}
               onChange={(e) => onChange({ content: { ...block.content, title: e.target.value } })}
             />
             {(!block.content.title || block.content.title.trim() === "") && (
@@ -1044,8 +1346,8 @@ function BlockInspector({
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Description Text</label>
-            <TextArea 
-              value={block.content.text || ""} 
+            <TextArea
+              value={block.content.text || ""}
               onChange={(e) => onChange({ content: { ...block.content, text: e.target.value } })}
               rows={3}
             />
@@ -1080,6 +1382,37 @@ function BlockInspector({
               <option value="primary">Stonehill Navy (Primary)</option>
               <option value="accent">Stonehill Gold (Accent)</option>
               <option value="light">Stonehill Cream (Light)</option>
+            </SelectInput>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background Image (optional)</label>
+            <div className="flex gap-2">
+              <TextInput
+                value={block.content.backgroundImage || ""}
+                onChange={(e) => onChange({ content: { ...block.content, backgroundImage: e.target.value } })}
+                placeholder="Image URL"
+                className="flex-1"
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => onOpenMediaSelector("backgroundImage")} className="shrink-0">
+                Browse
+              </Button>
+            </div>
+            {block.content.backgroundImage && !isValidSafeUrl(block.content.backgroundImage) && (
+              <p className="text-xs text-red-600 font-medium mt-1">⚠️ Unsafe URL.</p>
+            )}
+            {block.content.backgroundImage && (
+              <p className="text-xs text-slate-500">A dark overlay is added automatically so text stays readable.</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Padding</label>
+            <SelectInput
+              value={block.content.padding || "medium"}
+              onChange={(e) => onChange({ content: { ...block.content, padding: e.target.value } })}
+            >
+              <option value="small">Small</option>
+              <option value="medium">Medium (default)</option>
+              <option value="large">Large</option>
             </SelectInput>
           </div>
         </>

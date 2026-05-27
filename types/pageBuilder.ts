@@ -10,6 +10,9 @@ export type BlockType =
   | "iconText"
   | "iconBox"
   | "googleMap"
+  | "gallery"
+  | "carousel"
+  | "countdown"
   | "cta";
 
 export type BlockStyle = {
