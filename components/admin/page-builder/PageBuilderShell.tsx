@@ -47,6 +47,7 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
   const { formData, setFormData } = usePageBuilder();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [serverError, setServerError] = React.useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
 
   const handleFieldChange = (name: keyof PageContent, value: any) => {
@@ -57,6 +58,7 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
     e.preventDefault();
     setIsSubmitting(true);
     setServerError(null);
+    setFieldErrors({});
 
     const sections = formData.builderData?.sections || [];
     
@@ -97,6 +99,10 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
         router.refresh();
       } else {
         setServerError(response.error.message || "Failed to save page.");
+        if (response.error.fieldErrors) {
+          setFieldErrors(response.error.fieldErrors);
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err: any) {
       setServerError(err.message || "An unexpected error occurred.");
@@ -151,9 +157,20 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
       </header>
 
       {serverError && (
-        <div className="m-4 flex items-start gap-2 p-4 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200 whitespace-pre-line">
+        <div className="m-4 flex items-start gap-2 p-4 bg-red-50 text-red-700 rounded-lg text-sm border border-red-200">
           <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-          <div>{serverError}</div>
+          <div className="space-y-1.5">
+            <div className="whitespace-pre-line">{serverError}</div>
+            {Object.keys(fieldErrors).length > 0 && (
+              <ul className="mt-1 list-disc list-inside space-y-0.5 text-red-700/90">
+                {Object.entries(fieldErrors).map(([field, messages]) => (
+                  <li key={field}>
+                    <span className="font-semibold">{field}</span>: {messages.join("; ")}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
 
@@ -188,10 +205,11 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-900">SEO Title</label>
-                  <TextInput 
-                    value={formData.seoTitle || ""} 
-                    onChange={(e) => handleFieldChange("seoTitle", e.target.value)} 
+                  <TextInput
+                    value={formData.seoTitle || ""}
+                    onChange={(e) => handleFieldChange("seoTitle", e.target.value)}
                   />
+                  <CharCounter value={formData.seoTitle || ""} limit={70} />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-semibold text-slate-900">Status</label>
@@ -206,11 +224,12 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
                 </div>
                 <div className="space-y-1.5 md:col-span-2">
                   <label className="text-sm font-semibold text-slate-900">SEO Description</label>
-                  <TextArea 
-                    value={formData.seoDescription || ""} 
-                    onChange={(e) => handleFieldChange("seoDescription", e.target.value)} 
+                  <TextArea
+                    value={formData.seoDescription || ""}
+                    onChange={(e) => handleFieldChange("seoDescription", e.target.value)}
                     rows={2}
                   />
+                  <CharCounter value={formData.seoDescription || ""} limit={160} />
                 </div>
               </div>
             </div>
@@ -250,3 +269,27 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
   );
 }
 
+/**
+ * Tiny inline counter that mirrors the SEO-description counter in the generic
+ * CmsModuleForm. Goes amber within 10 % of the limit, red when over — so the
+ * length cap is visible *before* the server rejects the save with a generic
+ * "CMS update data is invalid." message.
+ */
+function CharCounter({ value, limit }: { value: string; limit: number }) {
+  const length = value.length;
+  const remaining = limit - length;
+  const isOver = length > limit;
+  const isWarning = !isOver && length >= limit * 0.9;
+  const colorClass = isOver
+    ? "text-red-600 font-semibold"
+    : isWarning
+      ? "text-amber-600 font-semibold"
+      : "text-slate-500";
+  return (
+    <div className={`text-xs mt-1 transition-colors ${colorClass}`}>
+      {length} / {limit} characters used
+      {" "}
+      ({remaining >= 0 ? `${remaining} remaining` : `${Math.abs(remaining)} over limit`})
+    </div>
+  );
+}
