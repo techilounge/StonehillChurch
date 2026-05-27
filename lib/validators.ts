@@ -538,6 +538,12 @@ export const pageSchema = z.object({
   backLinkEnabled: z.boolean().optional(),
   backLinkHref: z.string().max(300).optional(),
   backLinkLabel: z.string().max(80).optional(),
+  // Optional dark-navy page-hero banner (matches /about, /our-beliefs, etc.).
+  // When enabled, renders <PageHero> with the page title plus an optional
+  // handwritten subtitle and background image.
+  heroEnabled: z.boolean().optional(),
+  heroSubtitle: z.string().max(200).optional(),
+  heroImageUrl: z.string().max(500).optional(),
 });
 
 // popups

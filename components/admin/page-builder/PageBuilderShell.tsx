@@ -235,6 +235,41 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
                   <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                     <input
                       type="checkbox"
+                      checked={!!formData.heroEnabled}
+                      onChange={(e) => handleFieldChange("heroEnabled", e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                    />
+                    Show page hero banner
+                  </label>
+                  <p className="text-xs text-slate-500 mt-1 ml-6">
+                    Adds the dark-navy banner with the Page Title in white, matching pages like <code>/our-beliefs</code> and <code>/about</code>.
+                  </p>
+                  {formData.heroEnabled && (
+                    <div className="mt-3 ml-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Subtitle (handwritten gold)</label>
+                        <TextInput
+                          value={formData.heroSubtitle || ""}
+                          onChange={(e) => handleFieldChange("heroSubtitle", e.target.value)}
+                          placeholder="e.g. What we believe about God, humanity, and salvation."
+                        />
+                      </div>
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background image URL (optional)</label>
+                        <TextInput
+                          value={formData.heroImageUrl || ""}
+                          onChange={(e) => handleFieldChange("heroImageUrl", e.target.value)}
+                          placeholder="https://… (a dark overlay is added automatically)"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <input
+                      type="checkbox"
                       checked={!!formData.backLinkEnabled}
                       onChange={(e) => handleFieldChange("backLinkEnabled", e.target.checked)}
                       className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"

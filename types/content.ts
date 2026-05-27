@@ -186,6 +186,11 @@ export type PageContent = {
   backLinkEnabled?: boolean;
   backLinkHref?: string;
   backLinkLabel?: string;
+  // Optional dark-navy hero banner at the very top of the page (matches the
+  // hardcoded /about, /our-beliefs, /resources pattern). Disabled by default.
+  heroEnabled?: boolean;
+  heroSubtitle?: string;
+  heroImageUrl?: string;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
 };

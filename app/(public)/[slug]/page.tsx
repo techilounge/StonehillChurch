@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPageBySlug } from "@/lib/data/pages";
 import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
+import { PageHero } from "@/components/public/PageHero";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 
 // Builder pages read per-request data from Firestore and render inside the
@@ -26,6 +27,19 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
   if (!page) {
     notFound();
   }
+
+  // Optional dark-navy hero banner at the very top of the page, matching the
+  // hardcoded /about and /our-beliefs pattern.
+  const safeHeroImage = page.heroImageUrl && isValidSafeUrl(page.heroImageUrl)
+    ? page.heroImageUrl
+    : undefined;
+  const hero = page.heroEnabled ? (
+    <PageHero
+      title={page.title}
+      subtitle={page.heroSubtitle || undefined}
+      imageUrl={safeHeroImage}
+    />
+  ) : null;
 
   // Optional "Back to ..." link rendered above the page content. The URL is
   // sanitized via isValidSafeUrl so a malicious value can never produce a
@@ -51,6 +65,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
   if (!page.builderData || !page.builderData.sections) {
     return (
       <>
+        {hero}
         {backLink}
         <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
           <h1 className="text-4xl font-bold mb-6 font-display text-stonehill-primary">{page.title}</h1>
@@ -62,6 +77,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
 
   return (
     <main>
+      {hero}
       {backLink}
       <PageBuilderRenderer document={page.builderData} />
     </main>
