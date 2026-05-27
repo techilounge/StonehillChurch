@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/shared/Button";
@@ -10,10 +10,11 @@ interface ConfirmDialogProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  description: string;
+  description: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  confirmDisabled?: boolean;
 }
 
 export function ConfirmDialog({
@@ -25,6 +26,7 @@ export function ConfirmDialog({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   destructive = true,
+  confirmDisabled = false,
 }: ConfirmDialogProps) {
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -61,17 +63,21 @@ export function ConfirmDialog({
                     <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-slate-900">
                       {title}
                     </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-slate-900/70">
-                        {description}
-                      </p>
+                    <div className="mt-2 text-sm text-slate-900/70">
+                      {typeof description === "string" ? (
+                        <p>{description}</p>
+                      ) : (
+                        description
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
                   <Button
                     variant={destructive ? "destructive" : "primary"}
+                    disabled={confirmDisabled}
                     onClick={() => {
+                      if (confirmDisabled) return;
                       onConfirm();
                       onClose();
                     }}
