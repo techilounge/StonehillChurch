@@ -111,6 +111,10 @@ export type Leader = {
   sortOrder: number;
   active: boolean;
   category?: string; // category id; empty/missing = Uncategorized
+  // When true, this leader is shown in the homepage Welcome section. Up to two
+  // flagged leaders render there, ordered by sortOrder. If none are flagged,
+  // the section falls back to the top two active leaders.
+  featuredOnHomepage?: boolean;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
 };

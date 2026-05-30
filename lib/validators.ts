@@ -201,6 +201,9 @@ export const leaderSchema = z.object({
   // Category is optional; empty string means "Uncategorized". The form sends
   // "" when nothing is selected, so we accept any short string.
   category: z.string().max(80).optional(),
+  // When true, this leader is featured in the homepage Welcome section
+  // (capped at the first two flagged leaders by sortOrder).
+  featuredOnHomepage: z.boolean().optional(),
 });
 
 // leaderCategories

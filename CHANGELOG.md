@@ -6,6 +6,10 @@ All notable changes to the Stonehill Church website will be documented in this f
 ## [0.5.3] - 2026-05-30
 
 ### Added
+- **Homepage Welcome — Featured Leaders Control**
+  - **CMS Field**: Added a "Featured on Homepage" toggle on the Leader admin form in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts), with a description explaining that the first two flagged leaders (by Sort Order) appear in the homepage Welcome section.
+  - **Schema & Type**: Added optional `featuredOnHomepage` to [leaderSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) and the `Leader` type in [content.ts](file:///c:/Users/techi/APPs/Stonehill/types/content.ts).
+  - **Renderer**: [WelcomeSection.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/WelcomeSection.tsx) now prefers leaders explicitly flagged for the homepage; if no leader is flagged it falls back to the previous behavior (top two active leaders by sort order) so existing sites keep rendering unchanged.
 - **Media Library Delete (Single + Bulk)**
   - **Per-card Delete**: Added a Delete button to the hover overlay of each media card in [MediaGrid.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/media/MediaGrid.tsx). Opens a confirmation dialog naming the file before destruction.
   - **Bulk Delete Mode**: New "Select" toolbar action in [MediaManager.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/media/MediaManager.tsx) toggles a multi-select mode with per-card checkboxes, a "Select all" shortcut, and a `Delete (N)` toolbar button. Cancel exits without changes.

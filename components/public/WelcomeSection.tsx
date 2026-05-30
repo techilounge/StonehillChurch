@@ -20,7 +20,11 @@ const WELCOME_DEFAULTS = {
 } as const;
 
 export function WelcomeSection({ settings = {}, leaders = [] }: WelcomeSectionProps) {
-  const topLeaders = leaders.slice(0, 2);
+  // Prefer leaders explicitly flagged "Featured on Homepage" in the CMS;
+  // ordered by sortOrder and capped at two. Fall back to the top two by
+  // sortOrder if no leader is flagged so existing sites keep rendering.
+  const flagged = leaders.filter((l) => l.featuredOnHomepage === true);
+  const topLeaders = (flagged.length > 0 ? flagged : leaders).slice(0, 2);
 
   const leftTitle = settings["welcome.left_title"] || WELCOME_DEFAULTS.left_title;
   const leftParagraph = settings["welcome.left_paragraph"] || WELCOME_DEFAULTS.left_paragraph;

@@ -169,6 +169,15 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       { name: "email", label: "Email", type: "email", required: true },
       { name: "sortOrder", label: "Sort Order", type: "number", required: true },
       { name: "active", label: "Active", type: "boolean", required: true, defaultValue: true },
+      {
+        name: "featuredOnHomepage",
+        label: "Featured on Homepage",
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+        description:
+          "Show this leader in the homepage Welcome section. The first two flagged leaders (by Sort Order) are displayed.",
+      },
       // Options are injected at runtime from the leaderCategories collection
       // by app/admin/leaders/[id]/page.tsx; an empty value means Uncategorized.
       { name: "category", label: "Category", type: "select", required: false, options: [] },
