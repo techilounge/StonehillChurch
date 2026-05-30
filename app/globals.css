@@ -77,3 +77,26 @@ a {
 .paragraph-content p + p {
   margin-top: 1em;
 }
+
+/* Soft, accessible "live now" pulse around the Watch Live Quick Link card.
+   Honors prefers-reduced-motion via the motion-safe Tailwind variant on the
+   element. The animation only changes the box-shadow, so it never causes
+   layout shifts. */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+}
+
+.motion-safe\:animate-pulse-glow {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion-safe\:animate-pulse-glow {
+    animation: pulse-glow 2s ease-out infinite;
+  }
+}

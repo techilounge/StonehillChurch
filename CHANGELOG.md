@@ -3,6 +3,23 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.3] - 2026-05-30
+
+### Added
+- **Media Library Delete (Single + Bulk)**
+  - **Per-card Delete**: Added a Delete button to the hover overlay of each media card in [MediaGrid.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/media/MediaGrid.tsx). Opens a confirmation dialog naming the file before destruction.
+  - **Bulk Delete Mode**: New "Select" toolbar action in [MediaManager.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/media/MediaManager.tsx) toggles a multi-select mode with per-card checkboxes, a "Select all" shortcut, and a `Delete (N)` toolbar button. Cancel exits without changes.
+  - **API + Data Layer**: Added a `DELETE` handler in [route.ts](file:///c:/Users/techi/APPs/Stonehill/app/api/admin/media/route.ts) gated on the `media:manage` permission, capped at 100 ids per request. New `deleteMediaAsset` / `deleteMediaAssets` helpers in [mediaAssets.ts](file:///c:/Users/techi/APPs/Stonehill/lib/data/mediaAssets.ts) remove both the Firestore metadata doc and the underlying Firebase Storage object, reporting partial failures per id.
+- **Active-Use Warning Before Media Delete**
+  - **Cross-Collection Usage Scanner**: New [mediaUsage.ts](file:///c:/Users/techi/APPs/Stonehill/lib/data/mediaUsage.ts) scans every content collection (site settings, pages including builder block content, homepage slides, sermons, events, ministries, leaders, announcements, resources, popups) for references to each asset's signed Firebase download URL. Detection is JSON-substring exact, so builder-block image URLs inside `content: any` are caught too.
+  - **Usage API Endpoint**: Added `POST /api/admin/media/usage` in [route.ts](file:///c:/Users/techi/APPs/Stonehill/app/api/admin/media/usage/route.ts), gated on `media:read`, returning a per-id list of usages with the area, doc id, and human-friendly label (page title, ministry name, etc.).
+  - **Warning Dialog UX**: When a delete is requested in [MediaManager.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/media/MediaManager.tsx), the dialog opens immediately with a "Checking where this file is used…" loader, then either upgrades to an amber "Warning: this file is in active use" banner listing each reference (with the confirm button switching to "Delete anyway") or falls back to the normal confirmation. Bulk delete shows a per-file breakdown of only the files that are actually in use.
+  - **ConfirmDialog Generalized**: [ConfirmDialog.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/shared/ConfirmDialog.tsx) now accepts a `ReactNode` description (to support the structured usage list) and a `confirmDisabled` prop (to block clicks while the usage check is in flight).
+- **Watch Live Quick Link — Live Stream Indicator**
+  - **Dynamic Card State**: When a YouTube broadcast is actually live (detected via `getLiveYoutubeBroadcast` and surfaced as `latestSermon.isLive` — the same signal the homepage "Watch Our Latest Sermon" section uses, independent of the admin's Show Live Banner toggle), the Watch Live card in [QuickActions.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/QuickActions.tsx) switches to a red gradient, replaces its description with "Streaming now," and shows a pulsing "LIVE" badge with a white radar dot (`animate-ping`) and an ARIA "Live stream currently active" status label.
+  - **Soft Glow Animation**: Added a `pulse-glow` keyframe in [globals.css](file:///c:/Users/techi/APPs/Stonehill/app/globals.css) that animates only `box-shadow` (zero layout shift) and is gated on `prefers-reduced-motion: no-preference`. All other animations use the existing `motion-safe:` Tailwind variant.
+  - **Default State Preserved**: When no broadcast is live, the card renders identically to its prior appearance — no badge, no animation, no color change.
+
 ## [0.5.2] - 2026-05-24
 
 ### Added

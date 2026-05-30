@@ -51,7 +51,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroCarousel slides={slides} />
-      <QuickActions />
+      <QuickActions isLive={!!latestSermon?.isLive} />
       <WelcomeSection settings={siteSettings} leaders={leaders} />
       <ThisSabbath settings={siteSettings} />
       <LatestSermonSection sermon={latestSermon} />
