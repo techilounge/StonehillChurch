@@ -6,10 +6,17 @@ All notable changes to the Stonehill Church website will be documented in this f
 ## [0.5.5] - 2026-05-31
 
 ### Added
+- **Events — Preset Recurrence Editor**
+  - **Visual Picker Replaces Raw RRULE**: Removed the free-text Recurrence Rule input from the Event editor. Admins now pick from Daily / Weekly / Bi-weekly / Monthly / Yearly / Custom, with contextual sub-controls (weekday checkboxes, monthly by-date vs by-relative-day, end conditions: never / on date / after N occurrences).
+  - **RRULE Library**: New [lib/recurrence.ts](file:///c:/Users/techi/APPs/Stonehill/lib/recurrence.ts) handles parse → state → build round-trips and classifies an existing RRULE into the matching preset (FREQ=WEEKLY;INTERVAL=2 → Bi-weekly, FREQ=MONTHLY with prefixed BYDAY → Monthly relative-day, etc.). Unmappable patterns fall through to Custom.
+  - **Editor Component**: New [RecurrenceEditor.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/RecurrenceEditor.tsx) renders the visual picker. Wired into the generic CMS form via a new `"recurrence"` field type in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts) (with `showWhen: data.recurring === true` so the editor only appears when the toggle is on). The generated RRULE is persisted to the same `recurrenceRule` field, so existing events load straight into the preset that matches.
 - **Announcements — Open Action URL in New Tab**
   - **CMS Toggle**: Added an "Open Action URL in New Tab" boolean directly under the Action URL field in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts), with helper text "Enable this to open the Action URL in a new browser tab." Defaults to off so existing announcements keep opening in the same tab.
   - **Schema & Type**: Added optional `openInNewTab` to [announcementSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) and the `Announcement` type in [content.ts](file:///c:/Users/techi/APPs/Stonehill/types/content.ts).
   - **Renderer**: Plumbed the flag through [TopAnnouncementBar.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/TopAnnouncementBar.tsx) → [AnnouncementBannerCarousel.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/AnnouncementBannerCarousel.tsx) → [AnnouncementBanner.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/AnnouncementBanner.tsx). When enabled, the action link renders with `target="_blank"` and `rel="noopener noreferrer"`; otherwise it stays in-tab.
+
+### Fixed
+- **CMS Date Picker Off-By-One**: `<input type="date">` emits `"YYYY-MM-DD"`, which `new Date(...)` parses as UTC midnight. When the value was read back through local-time getters in [CmsModuleForm.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsModuleForm.tsx) in any timezone west of UTC (e.g. CDT), the input flipped to the previous day on every render. Fixed by constructing the Date with the local-midnight constructor (`new Date(year, monthIndex, day)`) for `type: "date"` fields so the round-trip is stable. `datetime-local` was already correct.
 
 ## [0.5.4] - 2026-05-30
 

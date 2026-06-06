@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Globe, AlertCircle, Image as ImageIcon, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/shared/Button";
+import { RecurrenceEditor } from "@/components/admin/cms/RecurrenceEditor";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { SelectInput } from "@/components/forms/SelectInput";
@@ -312,6 +313,16 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                     }}
                     required={field.required}
                     hasError={hasError}
+                  />
+                ) : field.type === "recurrence" ? (
+                  <RecurrenceEditor
+                    value={typeof value === "string" ? value : null}
+                    onChange={(rule) => handleFieldChange(field.name, rule)}
+                    startDateTime={
+                      typeof formData.startDateTime === "string"
+                        ? formData.startDateTime
+                        : null
+                    }
                   />
                 ) : field.type === "videoUpload" ? (
                   <div className="flex flex-col gap-2">

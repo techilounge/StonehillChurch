@@ -14,7 +14,8 @@ export type FieldType =
   | "email"
   | "media"
   | "videoUpload"
-  | "richText";
+  | "richText"
+  | "recurrence";
 
 export interface FieldConfig {
   name: string;
@@ -118,7 +119,15 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         { label: "Service", value: "service" }, { label: "Special", value: "special" }
       ]},
       { name: "recurring", label: "Recurring Event", type: "boolean", required: true, hiddenOnList: true },
-      { name: "recurrenceRule", label: "Recurrence Rule", type: "text", required: false, hiddenOnList: true },
+      {
+        name: "recurrenceRule",
+        label: "Recurrence",
+        type: "recurrence",
+        required: false,
+        hiddenOnList: true,
+        description: "Pick a preset (Daily, Weekly, Monthly…) and the RRULE is generated for you.",
+        showWhen: (data) => data.recurring === true,
+      },
       { name: "featured", label: "Featured", type: "boolean", required: true },
       { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },
       { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true },
