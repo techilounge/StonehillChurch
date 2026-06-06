@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.7] - 2026-05-31
+
+### Added
+- **Events — "Event has no end date" toggle**: New `endsNever` boolean on the Event admin form in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts). When enabled, the End Date & Time field is hidden via `showWhen` and the schema in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) skips the `endDateTime >= startDateTime` cross-field refine. `endDateTime` is now nullable on the `ChurchEvent` type, and the existing EventCard / event detail / shift logic already handled null end dates so single + recurring ongoing events render with start time only. The recurrence editor's own end-condition controls (Never / On / After N) continue to drive the RRULE itself, so an event marked "no end date" with recurrence "Ends Never" produces a true infinite RRULE.
+
 ## [0.5.6] - 2026-05-31
 
 ### Fixed

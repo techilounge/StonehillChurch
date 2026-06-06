@@ -70,16 +70,15 @@ export async function getUpcomingEvents(limit?: number): Promise<Serialized<Chur
       if (raw.recurring === true && raw.recurrenceRule) {
         const next = nextOccurrence(raw.recurrenceRule, start, now);
         if (!next) continue;
-        const end = raw.endDateTime ? new Date(raw.endDateTime) : null;
-        const durationMs =
-          end && !Number.isNaN(end.getTime()) ? end.getTime() - start.getTime() : 0;
+        const end = raw.endDateTime ? new Date(raw.endDateTime as string) : null;
+        const hasValidEnd = end !== null && !Number.isNaN(end.getTime());
+        const durationMs = hasValidEnd ? end!.getTime() - start.getTime() : 0;
         const shifted: Serialized<ChurchEvent> = {
           ...raw,
           startDateTime: next.toISOString(),
-          endDateTime:
-            end && !Number.isNaN(end.getTime())
-              ? new Date(next.getTime() + durationMs).toISOString()
-              : raw.endDateTime,
+          endDateTime: hasValidEnd
+            ? new Date(next.getTime() + durationMs).toISOString()
+            : raw.endDateTime,
         };
         items.push({ event: shifted, effectiveStart: next.getTime() });
       }

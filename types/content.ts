@@ -54,7 +54,10 @@ export type ChurchEvent = AuditFields & {
   title: string;
   slug: string;
   startDateTime: FirestoreTimestampLike;
-  endDateTime: FirestoreTimestampLike;
+  // When `endsNever` is true the event is treated as ongoing and `endDateTime`
+  // may be null. Validators and renderers must guard against that.
+  endDateTime: FirestoreTimestampLike | null;
+  endsNever?: boolean;
   location: string;
   description: string;
   imageUrl: string;

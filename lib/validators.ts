@@ -147,7 +147,11 @@ export const eventSchema = z
     title: z.string().min(2).max(180),
     slug: slugSchema,
     startDateTime: isoOrDate,
-    endDateTime: isoOrDate,
+    // endDateTime is optional/nullable so events flagged "endsNever" can omit
+    // it. The cross-field refine below still enforces ordering when both are
+    // present.
+    endDateTime: isoOrDate.nullable().optional(),
+    endsNever: z.boolean().optional(),
     location: z.string().min(2).max(200),
     description: z.string().max(4000).optional(),
     imageUrl: urlSchema,
@@ -162,7 +166,14 @@ export const eventSchema = z
     seoDescription: z.string().max(160).optional(),
   })
   .refine(
-    (data) => new Date(data.endDateTime as string | Date) >= new Date(data.startDateTime as string | Date),
+    (data) => {
+      if (data.endsNever === true) return true;
+      if (data.endDateTime === null || data.endDateTime === undefined) return false;
+      return (
+        new Date(data.endDateTime as string | Date) >=
+        new Date(data.startDateTime as string | Date)
+      );
+    },
     { message: "endDateTime must be on or after startDateTime", path: ["endDateTime"] },
   );
 
