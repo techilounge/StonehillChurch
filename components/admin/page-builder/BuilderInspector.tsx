@@ -4,6 +4,7 @@ import { SelectInput } from "@/components/forms/SelectInput";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { Button } from "@/components/shared/Button";
+import { BackgroundPanel } from "./BackgroundPanel";
 import { InspectorLabel } from "./InspectorLabel";
 import { usePageBuilder } from "./PageBuilderContext";
 import { PageBlock, PageBuilderRow, PageBuilderSection } from "@/types/pageBuilder";
@@ -267,6 +268,11 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
           ))}
         </div>
       </div>
+
+      <BackgroundPanel
+        value={section.style}
+        onChange={(nextStyle) => onChange({ style: nextStyle })}
+      />
     </>
   );
 }
@@ -353,6 +359,11 @@ function RowInspector({ row, onChange, onLayoutChange }: {
           ))}
         </div>
       </div>
+
+      <BackgroundPanel
+        value={row.style}
+        onChange={(nextStyle) => onChange({ style: nextStyle })}
+      />
     </>
   );
 }

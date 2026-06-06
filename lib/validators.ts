@@ -499,6 +499,27 @@ export const sectionStyleSchema = z.object({
   margin: z.string().max(80).optional(),
   backgroundColor: z.string().max(40).optional(),
   backgroundImage: z.string().max(300).optional(),
+  backgroundPosition: z
+    .enum([
+      "center center",
+      "top center",
+      "bottom center",
+      "left center",
+      "right center",
+      "top left",
+      "top right",
+      "bottom left",
+      "bottom right",
+    ])
+    .optional(),
+  backgroundSize: z.enum(["cover", "contain", "auto"]).optional(),
+  backgroundRepeat: z.enum(["no-repeat", "repeat", "repeat-x", "repeat-y"]).optional(),
+  backgroundAttachment: z.enum(["scroll", "fixed"]).optional(),
+  overlayColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
+  overlayOpacity: z.number().min(0).max(1).optional(),
   textColor: z.string().max(40).optional(),
   layoutWidth: z.enum(["full", "content"]).optional(),
   verticalSpacing: z.string().max(40).optional(),

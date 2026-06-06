@@ -222,6 +222,48 @@ export function sanitizeStyle(style: any, isBlock = false): any {
     if (["start", "center", "end", "stretch"].includes(style.alignItems)) {
       clean.alignItems = style.alignItems;
     }
+    // Background image + rendering controls.
+    if (typeof style.backgroundImage === "string" && isValidSafeUrl(style.backgroundImage)) {
+      clean.backgroundImage = style.backgroundImage;
+    }
+    if (
+      [
+        "center center",
+        "top center",
+        "bottom center",
+        "left center",
+        "right center",
+        "top left",
+        "top right",
+        "bottom left",
+        "bottom right",
+      ].includes(style.backgroundPosition)
+    ) {
+      clean.backgroundPosition = style.backgroundPosition;
+    }
+    if (["cover", "contain", "auto"].includes(style.backgroundSize)) {
+      clean.backgroundSize = style.backgroundSize;
+    }
+    if (["no-repeat", "repeat", "repeat-x", "repeat-y"].includes(style.backgroundRepeat)) {
+      clean.backgroundRepeat = style.backgroundRepeat;
+    }
+    if (["scroll", "fixed"].includes(style.backgroundAttachment)) {
+      clean.backgroundAttachment = style.backgroundAttachment;
+    }
+    if (
+      typeof style.overlayColor === "string" &&
+      /^#[0-9a-fA-F]{6}$/.test(style.overlayColor)
+    ) {
+      clean.overlayColor = style.overlayColor;
+    }
+    if (
+      typeof style.overlayOpacity === "number" &&
+      Number.isFinite(style.overlayOpacity) &&
+      style.overlayOpacity >= 0 &&
+      style.overlayOpacity <= 1
+    ) {
+      clean.overlayOpacity = style.overlayOpacity;
+    }
   }
   return clean;
 }

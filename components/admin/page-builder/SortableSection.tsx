@@ -7,6 +7,28 @@ import { usePageBuilder } from "./PageBuilderContext";
 import { BlockRenderer } from "./BlockRenderer";
 import { ColumnResizeSeparator } from "./ColumnResizeSeparator";
 import { ChevronUp, ChevronDown, Copy, Trash2 } from "lucide-react";
+import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
+
+// Live admin preview helpers. Mirrors PageBuilderRenderer's rendering so the
+// editor canvas reflects background image + overlay configuration in real time.
+function previewBgImageStyle(style: PageBuilderSection["style"]): React.CSSProperties {
+  if (!style?.backgroundImage || !isValidSafeUrl(style.backgroundImage)) return {};
+  return {
+    backgroundImage: `url(${style.backgroundImage})`,
+    backgroundSize: style.backgroundSize ?? "cover",
+    backgroundPosition: style.backgroundPosition ?? "center center",
+    backgroundRepeat: style.backgroundRepeat ?? "no-repeat",
+    // `fixed` attachment is intentionally NOT mirrored in the editor canvas —
+    // it would attach to the viewport, not the section, and confuse the preview.
+    backgroundAttachment: "scroll",
+  };
+}
+function previewOverlayStyle(style: PageBuilderSection["style"]): React.CSSProperties | null {
+  if (!style?.backgroundImage || !isValidSafeUrl(style.backgroundImage)) return null;
+  const op = typeof style.overlayOpacity === "number" ? style.overlayOpacity : 0;
+  if (op <= 0) return null;
+  return { backgroundColor: style.overlayColor ?? "#000000", opacity: op };
+}
 
 /** Parse a column width string ("50%", "1/2", "auto", etc.) to a percentage number. */
 function parseColWidth(width: string | undefined, numCols: number): number {
@@ -164,13 +186,18 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
         </div>
         
         {/* Render Content */}
-        <div 
-          className={`space-y-4 ${section.style?.padding || 'py-12'} ${section.style?.backgroundColor ? '' : 'bg-slate-50 border border-slate-100 rounded-lg'} min-h-[120px] p-4`} 
-          style={{ 
+        <div
+          className={`relative overflow-hidden space-y-4 ${section.style?.padding || 'py-12'} ${section.style?.backgroundColor || section.style?.backgroundImage ? '' : 'bg-slate-50 border border-slate-100 rounded-lg'} min-h-[120px] p-4`}
+          style={{
             backgroundColor: section.style?.backgroundColor !== "#ffffff" ? section.style?.backgroundColor : undefined,
-            color: section.style?.textColor
+            color: section.style?.textColor,
+            ...previewBgImageStyle(section.style),
           }}
         >
+          {(() => {
+            const o = previewOverlayStyle(section.style);
+            return o ? <div aria-hidden="true" style={o} className="absolute inset-0 pointer-events-none" /> : null;
+          })()}
           {(section.rows ?? []).map((row, rowIndex) => {
             const totalRows = section.rows?.length ?? 0;
             const isRowSelected = selectedElementId === row.id;
@@ -184,7 +211,7 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                   e.stopPropagation();
                   setSelectedElementId(row.id);
                 }}
-                className={`relative group/row rounded-lg transition-colors ${
+                className={`relative group/row rounded-lg overflow-hidden transition-colors ${
                   isRowSelected ? "ring-1 ring-stonehill-accent" : ""
                 } ${row.style?.padding || "p-2"}`}
                 style={{
@@ -193,8 +220,13 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                       ? row.style.backgroundColor
                       : undefined,
                   color: row.style?.textColor,
+                  ...previewBgImageStyle(row.style),
                 }}
               >
+                {(() => {
+                  const o = previewOverlayStyle(row.style);
+                  return o ? <div aria-hidden="true" style={o} className="absolute inset-0 pointer-events-none" /> : null;
+                })()}
                 {/* Row toolbar */}
                 <div className="absolute top-1 right-1 z-10 flex items-center gap-1 opacity-0 group-hover/row:opacity-100 focus-within:opacity-100 transition-opacity">
                   <button

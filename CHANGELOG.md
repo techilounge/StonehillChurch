@@ -3,6 +3,16 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.4] - 2026-05-31
+
+### Added
+- **Page Builder — Section & Row Background Images (Phase 1)**
+  - **Schema**: Extended `SectionStyle` in [pageBuilder.ts](file:///c:/Users/techi/APPs/Stonehill/types/pageBuilder.ts) with `backgroundPosition`, `backgroundSize`, `backgroundRepeat`, `backgroundAttachment`, `overlayColor`, and `overlayOpacity`. Added enum constraints to [sectionStyleSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) and the corresponding pass-through (with `isValidSafeUrl` and `#RRGGBB`/`0..1` regex/range checks) in [sanitizeStyle](file:///c:/Users/techi/APPs/Stonehill/lib/pageBuilderSafety.ts). `backgroundImage` was previously declared in the type but stripped on save — now it round-trips through the sanitizer.
+  - **Inspector UI**: New shared [BackgroundPanel.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/BackgroundPanel.tsx) with image URL + Browse (opens the Media library), live preview thumbnail honoring position/size/repeat, dropdowns for Position (9 anchors) / Size (cover/contain/auto) / Repeat (4 modes) / Attachment (scroll/fixed parallax), and an Overlay block with color picker + opacity slider (live preview swatch). Wired into both the Section and Row inspectors. A Clear button resets every background field at once. Info icons explain each control.
+  - **Public Render**: [PageBuilderRenderer.tsx](file:///c:/Users/techi/APPs/Stonehill/components/shared/page-builder/PageBuilderRenderer.tsx) now applies all background-image fields and renders the overlay as an absolutely-positioned div layered above the image but below content (content is wrapped with `relative` so it stacks above the overlay).
+  - **Editor Canvas Preview**: [SortableSection.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/SortableSection.tsx) mirrors the same rendering so changes show up in real time. `attachment: fixed` is intentionally suppressed in the editor preview — it would anchor to the viewport instead of the section and confuse the WYSIWYG view.
+  - **Out of scope (planned follow-ups)**: page-level background, background-type selector (None / Color / Image / Gradient), responsive desktop/tablet/mobile image variants, IntersectionObserver lazy-load + JS parallax.
+
 ## [0.6.3] - 2026-05-31
 
 ### Added

@@ -44,11 +44,36 @@ export type PageColumn = {
 
 export type SectionType = "section" | "row" | "columns" | "group";
 
+export type BackgroundPosition =
+  | "center center"
+  | "top center"
+  | "bottom center"
+  | "left center"
+  | "right center"
+  | "top left"
+  | "top right"
+  | "bottom left"
+  | "bottom right";
+
+export type BackgroundSize = "cover" | "contain" | "auto";
+export type BackgroundRepeat = "no-repeat" | "repeat" | "repeat-x" | "repeat-y";
+export type BackgroundAttachment = "scroll" | "fixed";
+
 export type SectionStyle = {
   padding?: string;
   margin?: string;
   backgroundColor?: string;
   backgroundImage?: string;
+  // Background image rendering controls. All optional; sensible defaults
+  // (cover / center / no-repeat / scroll) are applied at render time.
+  backgroundPosition?: BackgroundPosition;
+  backgroundSize?: BackgroundSize;
+  backgroundRepeat?: BackgroundRepeat;
+  backgroundAttachment?: BackgroundAttachment;
+  // Optional solid color overlay rendered above the background image but
+  // below the section's content. overlayOpacity is a number from 0 to 1.
+  overlayColor?: string;
+  overlayOpacity?: number;
   textColor?: string;
   layoutWidth?: "full" | "content";
   verticalSpacing?: string;

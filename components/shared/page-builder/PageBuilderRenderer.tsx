@@ -47,17 +47,16 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   const cleanStyle = sanitizeStyle(section.style || {}, false) || {};
 
   const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
-  // Allow configured background image if present
-  const bgImage = section.style?.backgroundImage ? { backgroundImage: `url(${section.style.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {};
+  const bgImageStyle = backgroundImageStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
   const padding = cleanStyle.padding || "py-12";
   const margin = cleanStyle.margin || "";
   const layoutWidth = cleanStyle.layoutWidth === "full" ? "w-full" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8";
-  
+
   const verticalSpacing = cleanStyle.verticalSpacing || "gap-6";
   const alignItems = COLUMN_ALIGN_CLASS[section.style?.alignItems || "start"];
   const justifyContent = section.style?.justifyContent ? `justify-${section.style.justifyContent}` : "";
-  
+
   // Mobile stacking behavior
   let flexClass = "flex flex-col md:flex-row";
   if (section.style?.mobileStacking === "reverse") {
@@ -66,8 +65,9 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
     flexClass = "flex flex-row";
   }
 
-  const containerClasses = `relative ${padding} ${margin}`;
-  const inlineStyles = { ...bgStyle, ...bgImage, ...textColor };
+  const containerClasses = `relative overflow-hidden ${padding} ${margin}`;
+  const inlineStyles = { ...bgStyle, ...bgImageStyle, ...textColor };
+  const overlay = backgroundOverlayStyles(cleanStyle);
 
   // Preferred shape: render the section as a vertical stack of rows. Legacy
   // shapes (section.columns / section.blocks) still render via the original
@@ -76,7 +76,8 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
 
   return (
     <section className={containerClasses} style={inlineStyles}>
-      <div className={layoutWidth}>
+      {overlay && <div aria-hidden="true" style={overlay} className="absolute inset-0 pointer-events-none" />}
+      <div className={`${layoutWidth} relative`}>
         {hasRows ? (
           <div className={`flex flex-col ${verticalSpacing}`}>
             {section.rows!.map((row) => (
@@ -101,9 +102,31 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   );
 }
 
+function backgroundImageStyles(cleanStyle: any): React.CSSProperties {
+  if (!cleanStyle.backgroundImage) return {};
+  return {
+    backgroundImage: `url(${cleanStyle.backgroundImage})`,
+    backgroundSize: cleanStyle.backgroundSize ?? "cover",
+    backgroundPosition: cleanStyle.backgroundPosition ?? "center center",
+    backgroundRepeat: cleanStyle.backgroundRepeat ?? "no-repeat",
+    backgroundAttachment: cleanStyle.backgroundAttachment ?? "scroll",
+  };
+}
+
+function backgroundOverlayStyles(cleanStyle: any): React.CSSProperties | null {
+  if (!cleanStyle.backgroundImage) return null;
+  const opacity = typeof cleanStyle.overlayOpacity === "number" ? cleanStyle.overlayOpacity : 0;
+  if (opacity <= 0) return null;
+  return {
+    backgroundColor: cleanStyle.overlayColor ?? "#000000",
+    opacity,
+  };
+}
+
 function RowRenderer({ row }: { row: PageBuilderRow }) {
   const cleanStyle = sanitizeStyle(row.style || {}, false) || {};
   const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
+  const bgImageStyle = backgroundImageStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
   const padding = cleanStyle.padding || "";
   const margin = cleanStyle.margin || "";
@@ -115,9 +138,15 @@ function RowRenderer({ row }: { row: PageBuilderRow }) {
   if (row.style?.mobileStacking === "reverse") flexClass = "flex flex-col-reverse md:flex-row";
   else if (row.style?.mobileStacking === "keep") flexClass = "flex flex-row";
 
+  const overlay = backgroundOverlayStyles(cleanStyle);
+
   return (
-    <div className={`${padding} ${margin}`} style={{ ...bgStyle, ...textColor }}>
-      <div className={`w-full ${flexClass} ${verticalSpacing} ${alignItems} ${justifyContent}`}>
+    <div
+      className={`relative overflow-hidden ${padding} ${margin}`}
+      style={{ ...bgStyle, ...bgImageStyle, ...textColor }}
+    >
+      {overlay && <div aria-hidden="true" style={overlay} className="absolute inset-0 pointer-events-none" />}
+      <div className={`relative w-full ${flexClass} ${verticalSpacing} ${alignItems} ${justifyContent}`}>
         {row.columns.map((col) => (
           <ColumnRenderer key={col.id} column={col} />
         ))}
