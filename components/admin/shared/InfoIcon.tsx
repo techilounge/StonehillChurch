@@ -187,6 +187,9 @@ function PopoverIcon({ content, position, width, ariaLabel, className }: Popover
           style={{ width }}
           className={[
             "absolute z-50 rounded-md border border-slate-200 bg-white p-3 text-xs font-normal leading-snug text-slate-700 shadow-xl",
+            // Honor `\n` line breaks in string content so config-authored
+            // popovers can split into paragraphs/bullets without HTML.
+            typeof content === "string" ? "whitespace-pre-line" : "",
             "motion-safe:animate-in motion-safe:fade-in duration-150",
             positionClass(position),
           ].join(" ")}

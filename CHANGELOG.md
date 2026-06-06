@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.1] - 2026-05-31
+
+### Added
+- **CMS Info-Icon Popover Mode**: Wired the InfoIcon component's popover mode into the CMS form. Added a `popover?: string` field on `FieldConfig` in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts); when set it takes precedence over `tooltip` and renders a click-to-open popover (wider, multi-line) instead of a hover tooltip. The PopoverIcon in [InfoIcon.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/shared/InfoIcon.tsx) now applies `whitespace-pre-line` for string content so `\n` in config maps to paragraph breaks. Demoed on the Homepage Slides `focalPointZoom` and Popups `frequencyMode` fields — both had multi-sentence descriptions that read much better as bulleted popovers.
+
 ## [0.6.0] - 2026-05-31
 
 ### Added

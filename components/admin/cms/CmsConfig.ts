@@ -30,6 +30,12 @@ export interface FieldConfig {
    * below the label.
    */
   tooltip?: string;
+  /**
+   * Longer help text shown in a click-to-open popover next to the field label.
+   * Takes precedence over `tooltip` when both are set. Use for explanations
+   * that need multiple sentences or wouldn't read well as a hover tooltip.
+   */
+  popover?: string;
   options?: { label: string; value: string }[];
   placeholder?: string;
   hiddenOnList?: boolean;
@@ -71,7 +77,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         { label: "Top Center", value: "top center" },
         { label: "Bottom Center", value: "bottom center" }
       ]},
-      { name: "focalPointZoom", label: "Focal Zoom (%)", type: "number", required: false, hiddenOnList: true, description: "Negative (−40 to −1) zooms OUT to reveal more of the image. Positive (1 to 40) zooms IN to emphasize the focus area. 0 = default crop.", tooltip: "Fine-tune the crop. Positive zooms in; negative reveals more of the image." },
+      { name: "focalPointZoom", label: "Focal Zoom (%)", type: "number", required: false, hiddenOnList: true, popover: "Fine-tune the crop without re-uploading the image.\n\n• 0 = default crop\n• 1 to 40 zooms IN, emphasizing the focus area\n• −40 to −1 zooms OUT, revealing more of the image around the focus point" },
       { name: "primaryCtaLabel", label: "Primary Button Label", type: "text", required: true, tooltip: "Text on the main call-to-action button (e.g. \"Plan Your Visit\")." },
       { name: "primaryCtaHref", label: "Primary Button URL", type: "url", required: true, tooltip: "Where the primary button sends visitors." },
       { name: "secondaryCtaLabel", label: "Secondary Button Label", type: "text", required: false, hiddenOnList: true, tooltip: "Optional second button label. Leave blank to hide the secondary button." },
@@ -394,7 +400,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         ]},
       { name: "frequencyMode", label: "Popup Frequency", type: "select", required: true, hiddenOnList: true,
         defaultValue: "every",
-        description: "How often a visitor should see this popup. Frequency runs after the schedule window — popups outside their Start/End window never show, regardless of this setting.",
+        popover: "How often a returning visitor should see this popup.\n\n• Every Time — shows on every page load that matches the trigger\n• Once per Visitor — shows once, then never again for that browser\n• On Time Interval — re-shows after a cooldown you set below\n\nFrequency runs after the schedule window. Popups outside their Start/End window never show, regardless of this setting.",
         options: [
           { label: "Show Every Time", value: "every" },
           { label: "Show Once per visitor", value: "once" },

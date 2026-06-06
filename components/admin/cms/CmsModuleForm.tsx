@@ -208,9 +208,11 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                     {field.label}
                     {field.required && <span className="text-red-500">*</span>}
                   </span>
-                  {field.tooltip && (
+                  {(field.popover || field.tooltip) && (
                     <InfoIcon
-                      tooltip={field.tooltip}
+                      {...(field.popover
+                        ? { popover: field.popover, width: 320 }
+                        : { tooltip: field.tooltip })}
                       ariaLabel={`Help for ${field.label}`}
                     />
                   )}
