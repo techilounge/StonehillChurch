@@ -323,6 +323,25 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                         ? formData.startDateTime
                         : null
                     }
+                    endDateTime={
+                      typeof formData.endDateTime === "string"
+                        ? formData.endDateTime
+                        : null
+                    }
+                    startTime={
+                      typeof formData.recurrenceStartTime === "string"
+                        ? formData.recurrenceStartTime
+                        : null
+                    }
+                    endTime={
+                      typeof formData.recurrenceEndTime === "string"
+                        ? formData.recurrenceEndTime
+                        : null
+                    }
+                    onStartTimeChange={(t) =>
+                      handleFieldChange("recurrenceStartTime", t)
+                    }
+                    onEndTimeChange={(t) => handleFieldChange("recurrenceEndTime", t)}
                   />
                 ) : field.type === "videoUpload" ? (
                   <div className="flex flex-col gap-2">

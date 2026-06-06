@@ -9,6 +9,15 @@ import { logDataFallback, serializeData, withReadTimeout, type Serialized } from
 
 const SITEMAP_PAST_EVENT_GRACE_DAYS = 30;
 
+function applyTimeOverride(date: Date, timeOverride: string | null | undefined): Date {
+  if (!timeOverride) return date;
+  const m = timeOverride.match(/^(\d{2}):(\d{2})$/);
+  if (!m) return date;
+  const out = new Date(date);
+  out.setHours(Number(m[1]), Number(m[2]), 0, 0);
+  return out;
+}
+
 function dateFromValue(value: unknown): Date | null {
   if (!value) {
     return null;
@@ -73,14 +82,23 @@ export async function getUpcomingEvents(limit?: number): Promise<Serialized<Chur
         const end = raw.endDateTime ? new Date(raw.endDateTime as string) : null;
         const hasValidEnd = end !== null && !Number.isNaN(end.getTime());
         const durationMs = hasValidEnd ? end!.getTime() - start.getTime() : 0;
+
+        // Apply per-recurrence time overrides ("HH:MM") if set; otherwise the
+        // next occurrence keeps the anchor's time-of-day.
+        const shiftedStart = applyTimeOverride(next, raw.recurrenceStartTime);
+        let shiftedEnd: Date | null = hasValidEnd
+          ? new Date(shiftedStart.getTime() + durationMs)
+          : null;
+        if (shiftedEnd && raw.recurrenceEndTime) {
+          shiftedEnd = applyTimeOverride(shiftedEnd, raw.recurrenceEndTime);
+        }
+
         const shifted: Serialized<ChurchEvent> = {
           ...raw,
-          startDateTime: next.toISOString(),
-          endDateTime: hasValidEnd
-            ? new Date(next.getTime() + durationMs).toISOString()
-            : raw.endDateTime,
+          startDateTime: shiftedStart.toISOString(),
+          endDateTime: shiftedEnd ? shiftedEnd.toISOString() : raw.endDateTime,
         };
-        items.push({ event: shifted, effectiveStart: next.getTime() });
+        items.push({ event: shifted, effectiveStart: shiftedStart.getTime() });
       }
     }
 

@@ -20,6 +20,19 @@ interface RecurrenceEditorProps {
   value: string | null | undefined;
   onChange: (rule: string) => void;
   startDateTime?: string | null;
+  endDateTime?: string | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  onStartTimeChange?: (time: string | null) => void;
+  onEndTimeChange?: (time: string | null) => void;
+}
+
+function formatTimeOfDay(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 const PRESET_OPTIONS: { value: RecurrencePreset; label: string; description: string }[] = [
@@ -31,7 +44,20 @@ const PRESET_OPTIONS: { value: RecurrencePreset; label: string; description: str
   { value: "custom", label: "Custom", description: "Combine multiple weekdays and a custom interval" },
 ];
 
-export function RecurrenceEditor({ value, onChange, startDateTime }: RecurrenceEditorProps) {
+export function RecurrenceEditor({
+  value,
+  onChange,
+  startDateTime,
+  endDateTime,
+  startTime,
+  endTime,
+  onStartTimeChange,
+  onEndTimeChange,
+}: RecurrenceEditorProps) {
+  const defaultStartTime = formatTimeOfDay(startDateTime);
+  const defaultEndTime = formatTimeOfDay(endDateTime);
+  const effectiveStartTime = startTime ?? defaultStartTime;
+  const effectiveEndTime = endTime ?? defaultEndTime;
   const startDate = React.useMemo(() => {
     if (!startDateTime) return undefined;
     const d = new Date(startDateTime);
@@ -168,6 +194,36 @@ export function RecurrenceEditor({ value, onChange, startDateTime }: RecurrenceE
           ))}
         </div>
       </fieldset>
+
+      {(onStartTimeChange || onEndTimeChange) && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="text-sm font-semibold text-slate-900">Time</legend>
+          <p className="text-xs text-slate-600">
+            Defaults to the event's main Start/End time. Override here to use a different time for each
+            recurring instance.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-slate-800">
+              <span className="w-16">Start</span>
+              <TextInput
+                type="time"
+                value={effectiveStartTime}
+                onChange={(e) => onStartTimeChange?.(e.target.value || null)}
+                className="w-32"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-slate-800">
+              <span className="w-12">End</span>
+              <TextInput
+                type="time"
+                value={effectiveEndTime}
+                onChange={(e) => onEndTimeChange?.(e.target.value || null)}
+                className="w-32"
+              />
+            </label>
+          </div>
+        </fieldset>
+      )}
 
       {showInterval && (
         <div className="flex items-center gap-2">

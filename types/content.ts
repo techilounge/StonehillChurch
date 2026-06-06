@@ -65,6 +65,11 @@ export type ChurchEvent = AuditFields & {
   registrationUrl: string | null;
   recurring: boolean;
   recurrenceRule: string | null;
+  // Optional per-recurrence time overrides ("HH:MM" 24h). When set, computed
+  // future occurrences use these times instead of the main startDateTime /
+  // endDateTime time-of-day. Leave unset to inherit the main times.
+  recurrenceStartTime?: string | null;
+  recurrenceEndTime?: string | null;
   category: EventCategory;
   featured: boolean;
   status: ContentStatus;

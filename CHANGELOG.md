@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.8] - 2026-05-31
+
+### Added
+- **Events — Recurrence Time Overrides**: Added optional `recurrenceStartTime` / `recurrenceEndTime` (`"HH:MM"`) fields on the `ChurchEvent` type and [eventSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts). The [RecurrenceEditor](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/RecurrenceEditor.tsx) now renders two `time` inputs that default to the event's main Start/End time-of-day; admins can override to use a different time for every recurring instance without changing the event's first occurrence. When [getUpcomingEvents](file:///c:/Users/techi/APPs/Stonehill/lib/data/events.ts) shifts a recurring event to its next occurrence, the override times are applied before serializing, so EventCard renders the correct upcoming time.
+
 ## [0.5.7] - 2026-05-31
 
 ### Added

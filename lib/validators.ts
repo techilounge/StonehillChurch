@@ -159,6 +159,17 @@ export const eventSchema = z
     registrationUrl: urlSchema.nullable().optional(),
     recurring: z.boolean().optional(),
     recurrenceRule: z.string().max(500).nullable().optional(),
+    // "HH:MM" 24-hour strings; nullable so they can be cleared.
+    recurrenceStartTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/, "Expected HH:MM")
+      .nullable()
+      .optional(),
+    recurrenceEndTime: z
+      .string()
+      .regex(/^\d{2}:\d{2}$/, "Expected HH:MM")
+      .nullable()
+      .optional(),
     category: eventCategorySchema,
     featured: z.boolean().optional(),
     status: contentStatusSchema,
