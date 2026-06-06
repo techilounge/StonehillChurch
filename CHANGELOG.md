@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.3] - 2026-05-31
+
+### Added
+- **Page Builder Inspector — Info Icons**: Added a reusable [InspectorLabel](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/InspectorLabel.tsx) component that wraps the inspector's uppercase label style and accepts optional `tooltip` / `popover` props, plumbing straight into the same [InfoIcon](file:///c:/Users/techi/APPs/Stonehill/components/admin/shared/InfoIcon.tsx) (portal-positioned with auto-flip) used elsewhere in the CMS. Authored a curated set of ~15 tooltips/popovers across [BuilderInspector.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/BuilderInspector.tsx) on the controls that are easiest to misread — Section/Row Layout Structure, Column Vertical Alignment, Content Width, Image Source, Resize Behavior, Object Fit (popover with mode breakdown), Shadow, Corner Radius, Embed URL (popover with Google Maps source instructions), CTA Background Style / Background Image, Carousel Transition, IconBox Top Element / Title Level, and Label Padding. The remaining labels are intentionally untouched but trivial to extend later by swapping `<label>` for `<InspectorLabel tooltip="…">`.
+
 ## [0.6.2] - 2026-05-31
 
 ### Fixed

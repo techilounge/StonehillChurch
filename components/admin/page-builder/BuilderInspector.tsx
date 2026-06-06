@@ -4,6 +4,7 @@ import { SelectInput } from "@/components/forms/SelectInput";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { Button } from "@/components/shared/Button";
+import { InspectorLabel } from "./InspectorLabel";
 import { usePageBuilder } from "./PageBuilderContext";
 import { PageBlock, PageBuilderRow, PageBuilderSection } from "@/types/pageBuilder";
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
@@ -185,7 +186,7 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
     <>
       {!usesRows && (
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Layout Structure</label>
+          <InspectorLabel tooltip="How this section's content is split horizontally. Mobile stacks every column.">Layout Structure</InspectorLabel>
           <SelectInput
             value={section.layout || "1-col"}
             onChange={(e) => onLayoutChange(e.target.value as NonNullable<PageBuilderSection["layout"]>)}
@@ -202,7 +203,7 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
 
       {!usesRows && section.layout && section.layout !== "1-col" && (
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Column Vertical Alignment</label>
+          <InspectorLabel tooltip="How columns of different heights line up vertically. Stretch makes them equal height.">Column Vertical Alignment</InspectorLabel>
           <SelectInput
             value={section.style?.alignItems || "start"}
             onChange={(e) => onChange({ style: { ...section.style, alignItems: e.target.value as NonNullable<PageBuilderSection["style"]>["alignItems"] } })}
@@ -217,9 +218,9 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
       )}
 
       <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Content Width</label>
-        <SelectInput 
-          value={section.style?.layoutWidth || "content"} 
+        <InspectorLabel tooltip="Boxed keeps content inside the page's max width. Full Width breaks out to span the entire viewport (useful for hero strips and image bands).">Content Width</InspectorLabel>
+        <SelectInput
+          value={section.style?.layoutWidth || "content"}
           onChange={(e) => onChange({ style: { ...section.style, layoutWidth: e.target.value as any } })}
         >
           <option value="content">Boxed (Content Width)</option>
@@ -279,7 +280,7 @@ function RowInspector({ row, onChange, onLayoutChange }: {
   return (
     <>
       <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Row Layout</label>
+        <InspectorLabel tooltip="How this row's columns are split. Mobile always stacks them into a single column.">Row Layout</InspectorLabel>
         <SelectInput
           value={row.layout || "1-col"}
           onChange={(e) => onLayoutChange(e.target.value as NonNullable<PageBuilderRow["layout"]>)}
@@ -296,7 +297,7 @@ function RowInspector({ row, onChange, onLayoutChange }: {
 
       {isMultiCol && (
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Column Vertical Alignment</label>
+          <InspectorLabel tooltip="How columns of different heights line up vertically. Stretch makes them equal height.">Column Vertical Alignment</InspectorLabel>
           <SelectInput
             value={row.style?.alignItems || "start"}
             onChange={(e) => onChange({ style: { ...row.style, alignItems: e.target.value as NonNullable<PageBuilderRow["style"]>["alignItems"] } })}
@@ -471,10 +472,10 @@ function BlockInspector({
       {block.type === "image" && (
         <>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Image Source</label>
+            <InspectorLabel tooltip="Paste a URL (https://...) or click Browse to pick from the Media library. Internal paths like /images/foo.jpg also work.">Image Source</InspectorLabel>
             <div className="flex gap-2">
-              <TextInput 
-                value={block.content.url || ""} 
+              <TextInput
+                value={block.content.url || ""}
                 onChange={(e) => onChange({ content: { ...block.content, url: e.target.value } })}
                 placeholder="Image URL"
                 className="flex-1"
@@ -515,7 +516,7 @@ function BlockInspector({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Resize Behavior</label>
+            <InspectorLabel tooltip="Locked keeps the original proportions when you drag the corner handle. Free lets you set width and height independently (may stretch the image).">Resize Behavior</InspectorLabel>
             <SelectInput
               value={block.content.lockAspectRatio === false ? "free" : "locked"}
               onChange={(e) => onChange({ content: { ...block.content, lockAspectRatio: e.target.value !== "free", ...(e.target.value !== "free" ? { height: undefined } : {}) } })}
@@ -585,7 +586,7 @@ function BlockInspector({
             ) : null}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Resize Behavior</label>
+            <InspectorLabel tooltip="Locked keeps the original proportions when you drag the corner handle. Free lets you set width and height independently (may stretch the image).">Resize Behavior</InspectorLabel>
             <SelectInput
               value={block.content.lockAspectRatio === false ? "free" : "locked"}
               onChange={(e) => onChange({ content: { ...block.content, lockAspectRatio: e.target.value !== "free", ...(e.target.value !== "free" ? { height: undefined } : {}) } })}
@@ -744,7 +745,7 @@ function BlockInspector({
       {block.type === "iconBox" && (
         <>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Top Element</label>
+            <InspectorLabel tooltip="Switch between a simple icon/emoji and a full image at the top of the box. Image mode exposes size, border, and shadow controls below.">Top Element</InspectorLabel>
             <SelectInput
               value={block.content.variant || "icon"}
               onChange={(e) => onChange({ content: { ...block.content, variant: e.target.value } })}
@@ -818,7 +819,7 @@ function BlockInspector({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Title Level</label>
+            <InspectorLabel tooltip="Heading level (H1–H6). H1 is largest; use it once per page for SEO. H3 is a safe default for cards inside other content.">Title Level</InspectorLabel>
             <SelectInput
               value={block.content.level || "h3"}
               onChange={(e) => onChange({ content: { ...block.content, level: e.target.value } })}
@@ -914,7 +915,7 @@ function BlockInspector({
             </label>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Object Fit</label>
+              <InspectorLabel popover="How the image fills its box when its proportions don't match.\n\n• Cover — fills the box, crops the overflow (most common)\n• Contain — fits entirely inside, may leave empty space\n• Fill — stretches to fill exactly (can distort)\n• None — original size\n• Scale-down — smaller of None or Contain">Object Fit</InspectorLabel>
               <SelectInput
                 value={block.content.objectFit || "cover"}
                 onChange={(e) => onChange({ content: { ...block.content, objectFit: e.target.value } })}
@@ -934,7 +935,7 @@ function BlockInspector({
             />
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Shadow</label>
+              <InspectorLabel tooltip="Drop shadow beneath the image. Subtle shadows add depth; large shadows draw the eye.">Shadow</InspectorLabel>
               <SelectInput
                 value={block.content.shadowSize || "none"}
                 onChange={(e) => onChange({ content: { ...block.content, shadowSize: e.target.value } })}
@@ -1009,7 +1010,7 @@ function BlockInspector({
       {block.type === "googleMap" && (
         <>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Embed URL</label>
+            <InspectorLabel popover="Paste the `src` from Google Maps' Share → Embed a map → iframe code. The URL must start with `https://www.google.com/maps/embed?` — any other URL is rejected for safety.">Embed URL</InspectorLabel>
             <TextArea
               value={block.content.embedUrl || ""}
               onChange={(e) => onChange({ content: { ...block.content, embedUrl: e.target.value } })}
@@ -1181,7 +1182,7 @@ function BlockInspector({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Transition</label>
+              <InspectorLabel tooltip="How one slide gives way to the next. Fade is gentlest; Slide pushes the previous image off-screen.">Transition</InspectorLabel>
               <SelectInput
                 value={block.content.transition || "slide"}
                 onChange={(e) => onChange({ content: { ...block.content, transition: e.target.value } })}
@@ -1383,7 +1384,7 @@ function BlockInspector({
             )}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background Style</label>
+            <InspectorLabel tooltip="Color theme for the CTA. Light uses the soft brand background; the others use brand-dark or accent colors with white text. Overridden if you set a Background Image below.">Background Style</InspectorLabel>
             <SelectInput 
               value={block.content.background || block.content.backgroundStyle || "primary"} 
               onChange={(e) => onChange({ content: { ...block.content, background: e.target.value, backgroundStyle: e.target.value } })}
@@ -1394,7 +1395,7 @@ function BlockInspector({
             </SelectInput>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background Image (optional)</label>
+            <InspectorLabel tooltip="Optional photo behind the CTA. A dark overlay is added automatically so light text stays readable.">Background Image (optional)</InspectorLabel>
             <div className="flex gap-2">
               <TextInput
                 value={block.content.backgroundImage || ""}
@@ -1486,7 +1487,7 @@ function CornerRadiusControl({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Corner Radius</label>
+      <InspectorLabel tooltip="Rounds the corners. With Link all corners on, one value applies to all four; turn it off to set each corner separately. Use 50% on a square image for a perfect circle.">Corner Radius</InspectorLabel>
       <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
         <input
           type="checkbox"
@@ -1603,7 +1604,7 @@ function PaddingControl({
 
   return (
     <div className="space-y-2 border-t border-slate-100 pt-4">
-      <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Label Padding</label>
+      <InspectorLabel tooltip="Space inside the button between the text and its edges. Link all sides keeps top/bottom and left/right balanced.">Label Padding</InspectorLabel>
       <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
         <input
           type="checkbox"
