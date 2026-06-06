@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Globe, AlertCircle, Image as ImageIcon, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/shared/Button";
+import { InfoIcon } from "@/components/admin/shared/InfoIcon";
 import { RecurrenceEditor } from "@/components/admin/cms/RecurrenceEditor";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
@@ -202,9 +203,17 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
 
             return (
               <div key={field.name} className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-900 flex items-center gap-1">
-                  {field.label}
-                  {field.required && <span className="text-red-500">*</span>}
+                <label className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1">
+                    {field.label}
+                    {field.required && <span className="text-red-500">*</span>}
+                  </span>
+                  {field.tooltip && (
+                    <InfoIcon
+                      tooltip={field.tooltip}
+                      ariaLabel={`Help for ${field.label}`}
+                    />
+                  )}
                 </label>
                 {field.description && (
                   <p className="text-xs text-slate-900/60 mb-1">{field.description}</p>

@@ -23,6 +23,13 @@ export interface FieldConfig {
   type: FieldType;
   required?: boolean;
   description?: string;
+  /**
+   * Short help text shown in an info-icon tooltip next to the field label.
+   * Use for one-sentence hints (e.g. "Defaults to the start date if blank").
+   * Longer guidance still belongs in `description`, which renders inline
+   * below the label.
+   */
+  tooltip?: string;
   options?: { label: string; value: string }[];
   placeholder?: string;
   hiddenOnList?: boolean;
@@ -51,11 +58,11 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     singular: "Slide",
     description: "Manage the hero banner slides on the public homepage.",
     fields: [
-      { name: "title", label: "Title", type: "text", required: true },
-      { name: "subtitle", label: "Subtitle", type: "textarea", required: false, hiddenOnList: true },
-      { name: "imageUrl", label: "Background Image", type: "media", required: true },
-      { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true },
-      { name: "imageAlignment", label: "Image Focus Area", type: "select", required: true, hiddenOnList: true, options: [
+      { name: "title", label: "Title", type: "text", required: true, tooltip: "Large heading shown over the slide." },
+      { name: "subtitle", label: "Subtitle", type: "textarea", required: false, hiddenOnList: true, tooltip: "Smaller handwritten-style text shown above the title." },
+      { name: "imageUrl", label: "Background Image", type: "media", required: true, tooltip: "Full-bleed hero image. Landscape orientation works best." },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true, tooltip: "Describes the image for screen readers." },
+      { name: "imageAlignment", label: "Image Focus Area", type: "select", required: true, hiddenOnList: true, tooltip: "Which part of the image stays visible when the slide is cropped on smaller screens.", options: [
         { label: "Center", value: "center" },
         { label: "Top", value: "top" },
         { label: "Bottom", value: "bottom" },
@@ -64,14 +71,14 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         { label: "Top Center", value: "top center" },
         { label: "Bottom Center", value: "bottom center" }
       ]},
-      { name: "focalPointZoom", label: "Focal Zoom (%)", type: "number", required: false, hiddenOnList: true, description: "Negative (−40 to −1) zooms OUT to reveal more of the image. Positive (1 to 40) zooms IN to emphasize the focus area. 0 = default crop." },
-      { name: "primaryCtaLabel", label: "Primary Button Label", type: "text", required: true },
-      { name: "primaryCtaHref", label: "Primary Button URL", type: "url", required: true },
-      { name: "secondaryCtaLabel", label: "Secondary Button Label", type: "text", required: false, hiddenOnList: true },
-      { name: "secondaryCtaHref", label: "Secondary Button URL", type: "url", required: false, hiddenOnList: true },
-      { name: "overlayOpacity", label: "Overlay Opacity (0 to 1)", type: "number", required: true, hiddenOnList: true },
-      { name: "sortOrder", label: "Sort Order", type: "number", required: true },
-      { name: "active", label: "Active", type: "boolean", required: true },
+      { name: "focalPointZoom", label: "Focal Zoom (%)", type: "number", required: false, hiddenOnList: true, description: "Negative (−40 to −1) zooms OUT to reveal more of the image. Positive (1 to 40) zooms IN to emphasize the focus area. 0 = default crop.", tooltip: "Fine-tune the crop. Positive zooms in; negative reveals more of the image." },
+      { name: "primaryCtaLabel", label: "Primary Button Label", type: "text", required: true, tooltip: "Text on the main call-to-action button (e.g. \"Plan Your Visit\")." },
+      { name: "primaryCtaHref", label: "Primary Button URL", type: "url", required: true, tooltip: "Where the primary button sends visitors." },
+      { name: "secondaryCtaLabel", label: "Secondary Button Label", type: "text", required: false, hiddenOnList: true, tooltip: "Optional second button label. Leave blank to hide the secondary button." },
+      { name: "secondaryCtaHref", label: "Secondary Button URL", type: "url", required: false, hiddenOnList: true, tooltip: "Where the secondary button sends visitors." },
+      { name: "overlayOpacity", label: "Overlay Opacity (0 to 1)", type: "number", required: true, hiddenOnList: true, tooltip: "Darkens the image so light text stays readable. 0 = none, 1 = solid." },
+      { name: "sortOrder", label: "Sort Order", type: "number", required: true, tooltip: "Lower numbers show first in the hero carousel rotation." },
+      { name: "active", label: "Active", type: "boolean", required: true, tooltip: "Inactive slides are skipped without being deleted." },
     ],
   },
   sermons: {
@@ -81,19 +88,19 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     description: "Manage past and upcoming sermons and their YouTube links.",
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
-      { name: "slug", label: "URL Slug", type: "slug", required: true },
-      { name: "speaker", label: "Speaker", type: "text", required: true },
-      { name: "sermonDate", label: "Date", type: "date", required: true },
-      { name: "scripture", label: "Scripture Reference", type: "text", required: true, hiddenOnList: true },
-      { name: "series", label: "Series", type: "text", required: false },
-      { name: "description", label: "Description", type: "textarea", required: false, hiddenOnList: true },
-      { name: "youtubeUrl", label: "YouTube URL", type: "url", required: true },
-      { name: "youtubeVideoId", label: "YouTube Video ID", type: "text", required: true, hiddenOnList: true },
-      { name: "thumbnailUrl", label: "Thumbnail", type: "media", required: true },
-      { name: "thumbnailAlt", label: "Thumbnail Alt Text", type: "text", required: true, hiddenOnList: true },
-      { name: "featured", label: "Featured", type: "boolean", required: true },
-      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },
-      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true },
+      { name: "slug", label: "URL Slug", type: "slug", required: true, tooltip: "URL path on the public site, e.g. /sermons/your-slug." },
+      { name: "speaker", label: "Speaker", type: "text", required: true, tooltip: "Person who delivered the sermon." },
+      { name: "sermonDate", label: "Date", type: "date", required: true, tooltip: "Date the sermon was preached." },
+      { name: "scripture", label: "Scripture Reference", type: "text", required: true, hiddenOnList: true, tooltip: "Bible passage, e.g. \"Romans 8:1–11\"." },
+      { name: "series", label: "Series", type: "text", required: false, tooltip: "Optional sermon series name (e.g. \"Walk by Faith\")." },
+      { name: "description", label: "Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Short summary shown on the sermon card and detail page." },
+      { name: "youtubeUrl", label: "YouTube URL", type: "url", required: true, tooltip: "Full link to the YouTube video (e.g. https://youtu.be/...)." },
+      { name: "youtubeVideoId", label: "YouTube Video ID", type: "text", required: true, hiddenOnList: true, tooltip: "The 11-character ID from the YouTube URL. Used for embedding." },
+      { name: "thumbnailUrl", label: "Thumbnail", type: "media", required: true, tooltip: "Preview image for the sermon card. YouTube's auto-thumbnail is also acceptable." },
+      { name: "thumbnailAlt", label: "Thumbnail Alt Text", type: "text", required: true, hiddenOnList: true, tooltip: "Describes the thumbnail for screen readers." },
+      { name: "featured", label: "Featured", type: "boolean", required: true, tooltip: "Featured sermons are highlighted on the homepage Latest Sermon section." },
+      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true, tooltip: "Browser tab and search-result title. Falls back to the sermon title if blank." },
+      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Search-result snippet. Aim for 150–160 characters." },
     ],
   },
   events: {
@@ -104,7 +111,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
       { name: "slug", label: "URL Slug", type: "slug", required: true },
-      { name: "startDateTime", label: "Start Date & Time", type: "datetime", required: true },
+      { name: "startDateTime", label: "Start Date & Time", type: "datetime", required: true, tooltip: "When this event (or its first instance, if recurring) begins." },
       {
         name: "endsNever",
         label: "Event has no end date",
@@ -112,6 +119,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         required: false,
         defaultValue: false,
         description: "Enable for ongoing events that don't have a defined end. Hides the End Date & Time field.",
+        tooltip: "Use for ongoing events with no defined end (e.g. perpetual ministries).",
       },
       {
         name: "endDateTime",
@@ -119,12 +127,13 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         type: "datetime",
         required: true,
         showWhen: (data) => data.endsNever !== true,
+        tooltip: "When a single occurrence wraps up. Sets the duration shown on event cards.",
       },
-      { name: "location", label: "Location", type: "text", required: true },
-      { name: "description", label: "Description", type: "textarea", required: false, hiddenOnList: true },
-      { name: "imageUrl", label: "Event Image", type: "media", required: true },
-      { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true },
-      { name: "registrationUrl", label: "Registration URL", type: "url", required: false, hiddenOnList: true },
+      { name: "location", label: "Location", type: "text", required: true, tooltip: "Free-text address or venue, e.g. \"Stonehill Fellowship Hall\"." },
+      { name: "description", label: "Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Shown on the public event page below the title." },
+      { name: "imageUrl", label: "Event Image", type: "media", required: true, tooltip: "Hero image for the event card and detail page. Pick from the Media library or upload a new one." },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true, tooltip: "Describes the image for screen readers and when it fails to load." },
+      { name: "registrationUrl", label: "Registration URL", type: "url", required: false, hiddenOnList: true, tooltip: "Where the Register button on the event detail page sends visitors. Leave blank to hide the button." },
       {
         name: "registrationOpenInNewTab",
         label: "Open Registration Link in New Tab",
@@ -135,15 +144,16 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         description: "Enable this to open the Registration URL in a new browser tab.",
         showWhen: (data) =>
           typeof data.registrationUrl === "string" && data.registrationUrl.trim().length > 0,
+        tooltip: "On: registration opens in a new browser tab. Off: stays in the same tab.",
       },
-      { name: "category", label: "Category", type: "select", required: true, options: [
+      { name: "category", label: "Category", type: "select", required: true, tooltip: "Used to filter and color-code events on the public Events page.", options: [
         { label: "Worship", value: "worship" }, { label: "Fellowship", value: "fellowship" },
         { label: "Outreach", value: "outreach" }, { label: "Youth", value: "youth" },
         { label: "Children", value: "children" }, { label: "Prayer", value: "prayer" },
         { label: "Education", value: "education" }, { label: "Music", value: "music" },
         { label: "Service", value: "service" }, { label: "Special", value: "special" }
       ]},
-      { name: "recurring", label: "Recurring Event", type: "boolean", required: true, hiddenOnList: true },
+      { name: "recurring", label: "Recurring Event", type: "boolean", required: true, hiddenOnList: true, tooltip: "Turn on to repeat this event on a schedule (daily, weekly, etc.)." },
       {
         name: "recurrenceRule",
         label: "Recurrence",
@@ -152,10 +162,11 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         hiddenOnList: true,
         description: "Pick a preset (Daily, Weekly, Monthly…) and the RRULE is generated for you.",
         showWhen: (data) => data.recurring === true,
+        tooltip: "Choose a preset; the schedule rule is generated automatically.",
       },
-      { name: "featured", label: "Featured", type: "boolean", required: true },
-      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },
-      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true },
+      { name: "featured", label: "Featured", type: "boolean", required: true, tooltip: "Highlights this event in featured sections (e.g. priority placement on listings)." },
+      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true, tooltip: "Browser tab and search-result title. Falls back to the event title if blank. Aim for ≤ 70 chars." },
+      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Search-result snippet. Aim for 150–160 characters." },
     ],
   },
   ministries: {
@@ -165,28 +176,28 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     description: "Manage church ministries and small groups.",
     fields: [
       { name: "name", label: "Ministry Name", type: "text", required: true },
-      { name: "slug", label: "URL Slug", type: "slug", required: true },
-      { name: "category", label: "Category", type: "select", required: true, options: [
+      { name: "slug", label: "URL Slug", type: "slug", required: true, tooltip: "URL path on the public site, e.g. /ministries/your-slug." },
+      { name: "category", label: "Category", type: "select", required: true, tooltip: "Used to filter and group ministries on the public Ministries page.", options: [
         { label: "Children", value: "children" }, { label: "Youth", value: "youth" },
         { label: "Adults", value: "adults" }, { label: "Family", value: "family" },
         { label: "Outreach", value: "outreach" }, { label: "Worship", value: "worship" },
         { label: "Service", value: "service" }, { label: "Education", value: "education" },
         { label: "Health", value: "health" }
       ]},
-      { name: "shortDescription", label: "Short Description", type: "textarea", required: true },
-      { name: "longDescription", label: "Long Description", type: "richText", required: false, hiddenOnList: true },
-      { name: "leaderName", label: "Leader Name", type: "text", required: true },
-      { name: "leaderEmail", label: "Leader Email", type: "email", required: true, hiddenOnList: true },
-      { name: "meetingTime", label: "Meeting Time", type: "text", required: false, hiddenOnList: true },
-      { name: "imageUrl", label: "Image", type: "media", required: true },
-      { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true },
-      { name: "ctaLabel", label: "Button Label", type: "text", required: true, hiddenOnList: true },
-      { name: "ctaHref", label: "Button URL", type: "url", required: true, hiddenOnList: true },
-      { name: "openInNewTab", label: "Open in New Tab", type: "boolean", required: false, defaultValue: false, hiddenOnList: true },
-      { name: "featured", label: "Featured", type: "boolean", required: true },
-      { name: "sortOrder", label: "Sort Order", type: "number", required: true },
-      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },
-      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true },
+      { name: "shortDescription", label: "Short Description", type: "textarea", required: true, tooltip: "1–2 sentences shown on the ministry card." },
+      { name: "longDescription", label: "Long Description", type: "richText", required: false, hiddenOnList: true, tooltip: "Full description shown on the ministry detail page." },
+      { name: "leaderName", label: "Leader Name", type: "text", required: true, tooltip: "Person responsible for this ministry; displayed publicly." },
+      { name: "leaderEmail", label: "Leader Email", type: "email", required: true, hiddenOnList: true, tooltip: "Contact email for the ministry leader." },
+      { name: "meetingTime", label: "Meeting Time", type: "text", required: false, hiddenOnList: true, tooltip: "Free-text, e.g. \"Sabbaths at 9:30 AM\" or \"Every other Tuesday\"." },
+      { name: "imageUrl", label: "Image", type: "media", required: true, tooltip: "Hero image for the ministry card and detail page." },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true, tooltip: "Describes the image for screen readers." },
+      { name: "ctaLabel", label: "Button Label", type: "text", required: true, hiddenOnList: true, tooltip: "Text on the call-to-action button (e.g. \"Join us\")." },
+      { name: "ctaHref", label: "Button URL", type: "url", required: true, hiddenOnList: true, tooltip: "Where the call-to-action button sends visitors." },
+      { name: "openInNewTab", label: "Open in New Tab", type: "boolean", required: false, defaultValue: false, hiddenOnList: true, tooltip: "On: button opens in a new browser tab. Off: stays in the same tab." },
+      { name: "featured", label: "Featured", type: "boolean", required: true, tooltip: "Featured ministries appear in the homepage Ministries preview." },
+      { name: "sortOrder", label: "Sort Order", type: "number", required: true, tooltip: "Lower numbers appear first on the Ministries page." },
+      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true, tooltip: "Browser tab and search-result title. Falls back to the ministry name if blank." },
+      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Search-result snippet. Aim for 150–160 characters." },
     ],
   },
   leaders: {
@@ -197,12 +208,12 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     fields: [
       { name: "name", label: "Name", type: "text", required: true },
       { name: "title", label: "Job Title", type: "text", required: true },
-      { name: "photoUrl", label: "Photo", type: "media", required: true },
-      { name: "photoAlt", label: "Photo Alt Text", type: "text", required: true, hiddenOnList: true },
-      { name: "bio", label: "Biography", type: "textarea", required: true, hiddenOnList: true },
-      { name: "email", label: "Email", type: "email", required: true },
-      { name: "sortOrder", label: "Sort Order", type: "number", required: true },
-      { name: "active", label: "Active", type: "boolean", required: true, defaultValue: true },
+      { name: "photoUrl", label: "Photo", type: "media", required: true, tooltip: "Headshot shown on /our-leaders. Square images crop best inside the circular frame." },
+      { name: "photoAlt", label: "Photo Alt Text", type: "text", required: true, hiddenOnList: true, tooltip: "Describes the photo for screen readers (e.g. \"Pastor John Smith\")." },
+      { name: "bio", label: "Biography", type: "textarea", required: true, hiddenOnList: true, tooltip: "Short bio shown in the leader's details modal on the public site." },
+      { name: "email", label: "Email", type: "email", required: true, tooltip: "Contact email shown on the leader's card." },
+      { name: "sortOrder", label: "Sort Order", type: "number", required: true, tooltip: "Lower numbers appear first within the leader's category." },
+      { name: "active", label: "Active", type: "boolean", required: true, defaultValue: true, tooltip: "Inactive leaders are hidden from the public site but kept in the CMS." },
       {
         name: "featuredOnHomepage",
         label: "Featured on Homepage",
@@ -211,10 +222,11 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         defaultValue: false,
         description:
           "Show this leader in the homepage Welcome section. The first two flagged leaders (by Sort Order) are displayed.",
+        tooltip: "Pins this leader to the homepage Welcome section (max two, ordered by Sort Order).",
       },
       // Options are injected at runtime from the leaderCategories collection
       // by app/admin/leaders/[id]/page.tsx; an empty value means Uncategorized.
-      { name: "category", label: "Category", type: "select", required: false, options: [] },
+      { name: "category", label: "Category", type: "select", required: false, options: [], tooltip: "Group leaders under a section heading on /our-leaders. Leave blank for Uncategorized." },
     ],
   },
   leaderCategories: {
@@ -223,8 +235,8 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     singular: "Leader Category",
     description: "Group leaders into categories (e.g. Pastors, Elders) and order them on the public page.",
     fields: [
-      { name: "name", label: "Name", type: "text", required: true },
-      { name: "sortOrder", label: "Sort Order", type: "number", required: true },
+      { name: "name", label: "Name", type: "text", required: true, tooltip: "Heading shown above this group on the public Leaders page." },
+      { name: "sortOrder", label: "Sort Order", type: "number", required: true, tooltip: "Lower numbers appear first on the public page." },
     ],
   },
   announcements: {
@@ -235,14 +247,14 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
       { name: "body", label: "Content", type: "textarea", required: true },
-      { name: "startDate", label: "Start Date", type: "date", required: true },
-      { name: "endDate", label: "End Date", type: "date", required: true },
-      { name: "priority", label: "Priority", type: "select", required: true, options: [
+      { name: "startDate", label: "Start Date", type: "date", required: true, tooltip: "Date the announcement starts appearing site-wide." },
+      { name: "endDate", label: "End Date", type: "date", required: true, tooltip: "Date the announcement stops appearing." },
+      { name: "priority", label: "Priority", type: "select", required: true, tooltip: "Sets banner color and stacking order. Urgent shows first and in red.", options: [
         { label: "Low", value: "low" }, { label: "Normal", value: "normal" },
         { label: "High", value: "high" }, { label: "Urgent", value: "urgent" }
       ]},
-      { name: "ctaLabel", label: "Action Label", type: "text", required: false, hiddenOnList: true },
-      { name: "ctaHref", label: "Action URL", type: "url", required: false, hiddenOnList: true },
+      { name: "ctaLabel", label: "Action Label", type: "text", required: false, hiddenOnList: true, tooltip: "Text shown on the action button (e.g. \"Learn more\")." },
+      { name: "ctaHref", label: "Action URL", type: "url", required: false, hiddenOnList: true, tooltip: "Where the action button sends visitors." },
       {
         name: "openInNewTab",
         label: "Open Action URL in New Tab",
@@ -251,9 +263,10 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         defaultValue: false,
         hiddenOnList: true,
         description: "Enable this to open the Action URL in a new browser tab.",
+        tooltip: "On: action opens in a new browser tab. Off: stays in the same tab.",
       },
-      { name: "imageUrl", label: "Image", type: "media", required: false, hiddenOnList: true },
-      { name: "imageAlt", label: "Image Alt Text", type: "text", required: false, hiddenOnList: true, description: "Describe the image for screen readers (required when an image is attached)." },
+      { name: "imageUrl", label: "Image", type: "media", required: false, hiddenOnList: true, tooltip: "Optional thumbnail shown next to the announcement text." },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: false, hiddenOnList: true, description: "Describe the image for screen readers (required when an image is attached).", tooltip: "Required when an image is attached. Describes it for screen readers." },
     ],
   },
   resources: {
@@ -263,18 +276,18 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     description: "Manage downloadable files, forms, and external links.",
     fields: [
       { name: "title", label: "Title", type: "text", required: true },
-      { name: "slug", label: "URL Slug", type: "slug", required: true },
-      { name: "category", label: "Category", type: "select", required: true, options: [
+      { name: "slug", label: "URL Slug", type: "slug", required: true, tooltip: "URL path on the public site, e.g. /resources/your-slug." },
+      { name: "category", label: "Category", type: "select", required: true, tooltip: "Used to group and filter resources on the public Resources page.", options: [
         { label: "Bulletin", value: "bulletin" }, { label: "Study Guide", value: "study_guide" },
         { label: "Form", value: "form" }, { label: "Policy", value: "policy" },
         { label: "Newsletter", value: "newsletter" }, { label: "Audio", value: "audio" },
         { label: "Video", value: "video" }, { label: "Other", value: "other" }
       ]},
-      { name: "description", label: "Description", type: "textarea", required: false, hiddenOnList: true },
-      { name: "fileUrl", label: "File URL", type: "media", required: false },
-      { name: "externalUrl", label: "External URL", type: "url", required: false },
-      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true },
-      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true },
+      { name: "description", label: "Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Short blurb shown on the resource card." },
+      { name: "fileUrl", label: "File URL", type: "media", required: false, tooltip: "Upload the file (PDF, audio, etc.) or paste a hosted URL. Use this OR External URL." },
+      { name: "externalUrl", label: "External URL", type: "url", required: false, tooltip: "Link to an external page (e.g. Google Drive, Vimeo). Use this OR File URL." },
+      { name: "seoTitle", label: "SEO Title", type: "text", required: false, hiddenOnList: true, tooltip: "Browser tab and search-result title. Falls back to the resource title if blank." },
+      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, hiddenOnList: true, tooltip: "Search-result snippet. Aim for 150–160 characters." },
     ],
   },
   pages: {

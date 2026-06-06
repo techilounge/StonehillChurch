@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.0] - 2026-05-31
+
+### Added
+- **Global Info Icons in the CMS Form**
+  - **InfoIcon Component**: New [InfoIcon.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/shared/InfoIcon.tsx) supports two modes — a CSS-driven hover/focus tooltip (with tap-toggle + click-outside + ESC for touch) and a click-driven popover for longer explanations. Both modes are keyboard accessible (`<button>` trigger with ARIA label / `aria-describedby`/`aria-expanded`), respect `motion-safe` for the fade animation, and take a `position` (top / right / bottom / left) and `width` for layout control. Tooltip mode is purely CSS-based on hover/focus so there's zero JS cost when idle.
+  - **Form Integration**: Added an optional `tooltip?: string` field to `FieldConfig` in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts). [CmsModuleForm.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsModuleForm.tsx) now renders an InfoIcon next to the field label whenever `tooltip` is set. Existing inline `description` paragraphs are preserved — the two are additive so longer guidance still reads inline.
+  - **Initial Rollout**: Authored short tooltips across the standard CMS modules — Homepage Slides, Sermons, Events (including Recurring / End Conditions / Registration URL / Featured / Category), Announcements (priority, action URL, image), Leaders (photo, active, featured-on-homepage, category), Leader Categories, Resources (file vs external URL, category), and Ministries. Each tooltip is one short sentence; the Page Builder Inspector is intentionally out of scope for this PR (separate codepath, planned as a follow-up).
+
 ## [0.5.9] - 2026-05-31
 
 ### Added
