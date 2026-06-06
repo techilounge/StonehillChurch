@@ -222,6 +222,7 @@ export const announcementSchema = z
     priority: announcementPrioritySchema,
     ctaLabel: z.string().min(1).max(40).nullable(),
     ctaHref: z.string().min(1).max(300).nullable(),
+    openInNewTab: z.boolean().optional(),
     imageUrl: urlSchema.nullable(),
     imageAlt: z.string().min(2).max(200).nullable(),
     status: contentStatusSchema,

@@ -289,12 +289,27 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                           : isoToDatetimeLocal(value)
                         : ""
                     }
-                    onChange={(e) =>
-                      handleFieldChange(
-                        field.name,
-                        e.target.value ? new Date(e.target.value).toISOString() : null,
-                      )
-                    }
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      if (!raw) {
+                        handleFieldChange(field.name, null);
+                        return;
+                      }
+                      // `<input type="date">` emits "YYYY-MM-DD", which `new
+                      // Date(...)` parses as UTC midnight. Read back via local
+                      // getters in any TZ west of UTC and you get the previous
+                      // day. Construct local midnight instead so the round-trip
+                      // is stable.
+                      if (field.type === "date") {
+                        const [y, m, d] = raw.split("-").map(Number);
+                        handleFieldChange(
+                          field.name,
+                          new Date(y, m - 1, d).toISOString(),
+                        );
+                      } else {
+                        handleFieldChange(field.name, new Date(raw).toISOString());
+                      }
+                    }}
                     required={field.required}
                     hasError={hasError}
                   />

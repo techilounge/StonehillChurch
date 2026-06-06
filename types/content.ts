@@ -136,6 +136,8 @@ export type Announcement = {
   priority: AnnouncementPriority;
   ctaLabel: string | null;
   ctaHref: string | null;
+  // When true the Action URL opens in a new browser tab with safe rel attrs.
+  openInNewTab?: boolean;
   imageUrl: string | null;
   imageAlt: string | null;
   status: ContentStatus;

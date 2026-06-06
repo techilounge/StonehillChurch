@@ -44,6 +44,7 @@ export async function TopAnnouncementBar() {
       priority: announcement.priority,
       ctaLabel: announcement.ctaLabel,
       ctaHref: announcement.ctaHref,
+      openInNewTab: announcement.openInNewTab === true,
       imageUrl: announcement.imageUrl ?? null,
       imageAlt: announcement.imageAlt ?? null,
       dismissible: true,

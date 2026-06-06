@@ -12,6 +12,7 @@ interface AnnouncementBannerProps {
   priority: "low" | "normal" | "high" | "urgent";
   ctaLabel?: string | null;
   ctaHref?: string | null;
+  openInNewTab?: boolean;
   imageUrl?: string | null;
   imageAlt?: string | null;
   dismissible?: boolean;
@@ -24,6 +25,7 @@ export function AnnouncementBanner({
   priority,
   ctaLabel,
   ctaHref,
+  openInNewTab = false,
   imageUrl,
   imageAlt,
   dismissible = true,
@@ -66,6 +68,8 @@ export function AnnouncementBanner({
             {ctaLabel && ctaHref && (
               <Link
                 href={ctaHref}
+                target={openInNewTab ? "_blank" : undefined}
+                rel={openInNewTab ? "noopener noreferrer" : undefined}
                 className="ml-2 inline-flex whitespace-nowrap rounded-sm underline underline-offset-2 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               >
                 {ctaLabel}

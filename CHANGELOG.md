@@ -3,7 +3,15 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
-## [0.5.3] - 2026-05-30
+## [0.5.5] - 2026-05-31
+
+### Added
+- **Announcements — Open Action URL in New Tab**
+  - **CMS Toggle**: Added an "Open Action URL in New Tab" boolean directly under the Action URL field in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts), with helper text "Enable this to open the Action URL in a new browser tab." Defaults to off so existing announcements keep opening in the same tab.
+  - **Schema & Type**: Added optional `openInNewTab` to [announcementSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) and the `Announcement` type in [content.ts](file:///c:/Users/techi/APPs/Stonehill/types/content.ts).
+  - **Renderer**: Plumbed the flag through [TopAnnouncementBar.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/TopAnnouncementBar.tsx) → [AnnouncementBannerCarousel.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/AnnouncementBannerCarousel.tsx) → [AnnouncementBanner.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/AnnouncementBanner.tsx). When enabled, the action link renders with `target="_blank"` and `rel="noopener noreferrer"`; otherwise it stays in-tab.
+
+## [0.5.4] - 2026-05-30
 
 ### Added
 - **Homepage Welcome — Featured Leaders Control**
@@ -24,6 +32,31 @@ All notable changes to the Stonehill Church website will be documented in this f
   - **Soft Glow Animation**: Added a `pulse-glow` keyframe in [globals.css](file:///c:/Users/techi/APPs/Stonehill/app/globals.css) that animates only `box-shadow` (zero layout shift) and is gated on `prefers-reduced-motion: no-preference`. All other animations use the existing `motion-safe:` Tailwind variant.
   - **Default State Preserved**: When no broadcast is live, the card renders identically to its prior appearance — no badge, no animation, no color change.
 
+## [0.5.3] - 2026-05-26
+
+### Added
+- **Leader Categories & Grouped Public Directory**
+  - **CMS Management**: Added support for Leader Categories with dedicated CMS endpoints, custom drag-ordering, schema validation, and database helpers in [leaderCategories.ts](file:///c:/Users/techi/APPs/Stonehill/lib/data/leaderCategories.ts).
+  - **Public Grouping**: Updated the public Leaders page [/our-leaders](file:///c:/Users/techi/APPs/Stonehill/app/(public)/our-leaders/page.tsx) to query leaders grouped dynamically by their Category, displaying them section-by-section using the customized category order.
+- **Nested Rows Inside Sections (Page Builder)**
+  - **Grid Layout Enhancements**: Introduced nested rows inside page builder sections to support multi-column layouts with granular height, custom padding, and order controls.
+  - **Schema & Types**: Created validation logic and serialization utilities in [page-builder-rows.ts](file:///c:/Users/techi/APPs/Stonehill/lib/page-builder-rows.ts) and [pageBuilderSafety.ts](file:///c:/Users/techi/APPs/Stonehill/lib/pageBuilderSafety.ts).
+- **New Page Builder Blocks (Gallery, Carousel, Countdown, Map, Icon/Image Box)**
+  - **Media Gallery & Carousel**: Added configurable Gallery and Carousel blocks, including layout density, aspect ratio, image radius, border, and navigation styling.
+  - **Countdown Block**: Added a Countdown block with target date/time fields, labels, text styling, and live countdown timer logic.
+  - **Google Maps Integration**: Added a Google Map block to embed Google Maps using coordinates, address query, custom height, zoom, and border options.
+  - **Icon/Image Box Block**: Implemented an Icon/Image Box block featuring image/icon styling controls (size, radius, border, shadow, and object-fit) for landing page layouts.
+  - **H5/H6 Heading Levels**: Added support for H5 and H6 headings in heading/title blocks.
+- **Optional Back Link & Hero Banner on Builder Pages**
+  - **Navigation Header Controls**: Added configuration controls for builder-generated pages, allowing page authors to optionally show or hide a Back link or a Hero banner at the top of the page.
+- **Smart Paragraph Paste Formatting**
+  - **Preserved Line Breaks**: Configured paragraphs to preserve source line breaks (`white-space: pre-wrap`) when pasting text, avoiding merging multi-line copy into single blocks.
+
+### Fixed
+- **Page Builder Validation & SEO Counters**
+  - **Field-level Error Feedback**: Implemented inline validation warning badges/borders and field-level validation errors inside the builder inspector.
+  - **SEO Character Counters**: Added live character counters for page metadata title and description in the builder sidebar.
+
 ## [0.5.2] - 2026-05-24
 
 ### Added
@@ -32,6 +65,12 @@ All notable changes to the Stonehill Church website will be documented in this f
   - **Responsive Details Modal**: Implemented a responsive details modal using Headless UI `Dialog` and `Transition` with a backdrop blur overlay (`backdrop-blur-sm bg-slate-900/70`) and scale entrance animations.
   - **Preserved Circular Image Shape**: Styled the modal image container to perfectly match the card's circular frame and crop styling (`rounded-full overflow-hidden object-cover`) without stretching or distortion.
   - **A11y & Focus Control**: Configured full keyboard accessibility, including focus trapping inside the modal when open and focus restoration to the triggering card when closed.
+- **Leaders Drag-and-Drop Reordering**
+  - **CMS Panel ordering**: Enabled `@dnd-kit/sortable` row reordering for Leaders in the CMS admin panel list [CmsModuleList.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsModuleList.tsx).
+
+### Fixed
+- **Leader Creation Validation**
+  - **Missing Active Field**: Added the missing `active` field to the Leaders CMS schema configuration in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts) to resolve validation errors when creating new leaders.
 
 ## [0.5.1] - 2026-05-23
 

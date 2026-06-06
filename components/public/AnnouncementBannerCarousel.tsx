@@ -16,6 +16,7 @@ export type BannerItem = {
   priority: BannerPriority;
   ctaLabel?: string | null;
   ctaHref?: string | null;
+  openInNewTab?: boolean;
   imageUrl?: string | null;
   imageAlt?: string | null;
   dismissible?: boolean;
@@ -130,6 +131,7 @@ export function AnnouncementBannerCarousel({ items }: Props) {
           priority={current.priority}
           ctaLabel={current.ctaLabel ?? null}
           ctaHref={current.ctaHref ?? null}
+          openInNewTab={current.openInNewTab ?? false}
           imageUrl={current.imageUrl ?? null}
           imageAlt={current.imageAlt ?? null}
           dismissible={current.dismissible ?? true}
