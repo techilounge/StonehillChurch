@@ -63,6 +63,9 @@ export type ChurchEvent = AuditFields & {
   imageUrl: string;
   imageAlt: string;
   registrationUrl: string | null;
+  // Defaults to true (existing behavior) when undefined. Set false to keep
+  // the Register button in the same tab.
+  registrationOpenInNewTab?: boolean;
   recurring: boolean;
   recurrenceRule: string | null;
   // Optional per-recurrence time overrides ("HH:MM" 24h). When set, computed

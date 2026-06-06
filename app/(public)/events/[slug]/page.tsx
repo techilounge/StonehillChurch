@@ -151,19 +151,24 @@ export default async function EventDetailPage({ params }: EventPageProps) {
                 </div>
               )}
 
-              {event.registrationUrl && (
-                <div className="mt-4 pt-6 border-t border-slate-200">
-                  <a
-                    href={event.registrationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 bg-stonehill-accent hover:bg-stonehill-accent/90 text-slate-900 py-3.5 px-6 rounded-xl transition-all font-semibold shadow-sm hover:-translate-y-0.5"
-                  >
-                    Register Now
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-              )}
+              {event.registrationUrl && (() => {
+                // Treat undefined as true so existing events keep their current
+                // open-in-new-tab behavior; admins can opt out per event.
+                const openInNewTab = event.registrationOpenInNewTab !== false;
+                return (
+                  <div className="mt-4 pt-6 border-t border-slate-200">
+                    <a
+                      href={event.registrationUrl}
+                      target={openInNewTab ? "_blank" : undefined}
+                      rel={openInNewTab ? "noopener noreferrer" : undefined}
+                      className="w-full flex items-center justify-center gap-2 bg-stonehill-accent hover:bg-stonehill-accent/90 text-slate-900 py-3.5 px-6 rounded-xl transition-all font-semibold shadow-sm hover:-translate-y-0.5"
+                    >
+                      Register Now
+                      {openInNewTab && <ExternalLink className="w-4 h-4" />}
+                    </a>
+                  </div>
+                );
+              })()}
 
             </div>
 

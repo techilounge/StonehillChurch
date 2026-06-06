@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.9] - 2026-05-31
+
+### Added
+- **Events — "Open Registration Link in New Tab" toggle**: Added optional `registrationOpenInNewTab` boolean on the `ChurchEvent` type and [eventSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts). The Event admin form in [CmsConfig.ts](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsConfig.ts) renders the toggle directly under the Registration URL (with `showWhen` so it only appears once a URL is entered), defaulting to ON to match the previous behavior. The event detail page in [\[slug\]/page.tsx](file:///c:/Users/techi/APPs/Stonehill/app/(public)/events/[slug]/page.tsx) treats undefined as true and only sets `target="_blank"` + `rel="noopener noreferrer"` (and the external-link icon) when the toggle is on; flip it off per event to keep the registration link in the same tab.
+
 ## [0.5.8] - 2026-05-31
 
 ### Added

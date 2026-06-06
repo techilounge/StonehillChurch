@@ -125,6 +125,17 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
       { name: "imageUrl", label: "Event Image", type: "media", required: true },
       { name: "imageAlt", label: "Image Alt Text", type: "text", required: true, hiddenOnList: true },
       { name: "registrationUrl", label: "Registration URL", type: "url", required: false, hiddenOnList: true },
+      {
+        name: "registrationOpenInNewTab",
+        label: "Open Registration Link in New Tab",
+        type: "boolean",
+        required: false,
+        defaultValue: true,
+        hiddenOnList: true,
+        description: "Enable this to open the Registration URL in a new browser tab.",
+        showWhen: (data) =>
+          typeof data.registrationUrl === "string" && data.registrationUrl.trim().length > 0,
+      },
       { name: "category", label: "Category", type: "select", required: true, options: [
         { label: "Worship", value: "worship" }, { label: "Fellowship", value: "fellowship" },
         { label: "Outreach", value: "outreach" }, { label: "Youth", value: "youth" },

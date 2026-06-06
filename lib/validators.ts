@@ -157,6 +157,7 @@ export const eventSchema = z
     imageUrl: urlSchema,
     imageAlt: z.string().min(2).max(200),
     registrationUrl: urlSchema.nullable().optional(),
+    registrationOpenInNewTab: z.boolean().optional(),
     recurring: z.boolean().optional(),
     recurrenceRule: z.string().max(500).nullable().optional(),
     // "HH:MM" 24-hour strings; nullable so they can be cleared.
