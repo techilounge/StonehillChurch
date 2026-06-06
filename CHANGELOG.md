@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.2] - 2026-05-31
+
+### Fixed
+- **InfoIcon tooltips/popovers clipped near form edges**: When the trigger sat near the form's left edge (e.g. the Slide Title field), the floating panel was clipped by the form wrapper's `overflow-hidden` and could also overflow the viewport. Rewrote [InfoIcon.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/shared/InfoIcon.tsx) to render the panel through a `react-dom` portal into `document.body` with fixed positioning, plus an auto-flip placement algorithm that tries the preferred side first and falls back to whichever of top/bottom/right/left actually fits in the viewport (horizontal clamping handles the residual cases). Removed `overflow-hidden` from the form wrapper in [CmsModuleForm.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/cms/CmsModuleForm.tsx) since the corners are still rounded by the form border and nothing inside actually overflows. Tooltip mode now uses React `onMouseEnter`/`onFocus` handlers (instead of CSS hover) so it benefits from the same placement logic.
+
 ## [0.6.1] - 2026-05-31
 
 ### Added

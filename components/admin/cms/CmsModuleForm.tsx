@@ -193,7 +193,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
         </div>
       )}
 
-      <form className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden" onSubmit={(e) => handleSubmit(e)}>
+      <form className="bg-white border border-slate-200 shadow-sm rounded-xl" onSubmit={(e) => handleSubmit(e)}>
         <div className="p-6 sm:p-8 flex flex-col gap-6">
           {config.fields.map((field) => {
             if (field.showWhen && !field.showWhen(formData)) return null;
