@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.5.6] - 2026-05-31
+
+### Fixed
+- **Upcoming Events list excluded recurring events whose anchor was in the past.** The Firestore query in [events.ts](file:///c:/Users/techi/APPs/Stonehill/lib/data/events.ts) filtered by `startDateTime >= now`, so a weekly event created in the past (e.g. Wednesday Night Prayer Meeting) never resurfaced even though it had future instances. `getUpcomingEvents` now fetches all published events, evaluates each recurring event's next occurrence via the new [nextOccurrence](file:///c:/Users/techi/APPs/Stonehill/lib/recurrence.ts) helper, and shifts the returned `startDateTime` / `endDateTime` to that next instance so the EventCard renders the upcoming date. Non-recurring past events still drop out; nothing changes for events with future anchor dates.
+
+### Added
+- **lib/recurrence.ts — Occurrence Calculator**: New `nextOccurrence(rule, anchor, after?)` function that walks DAILY / WEEKLY (BYDAY) / MONTHLY (BYMONTHDAY or BYDAY with positional prefix) / YEARLY rules forward from the anchor and returns the first occurrence at or after `after`. Honors COUNT and UNTIL end conditions and bails after a safety cap so malformed rules can't infinite-loop.
+
 ## [0.5.5] - 2026-05-31
 
 ### Added

@@ -4,6 +4,7 @@ import { getAdminFirestore } from "@/lib/firebaseAdmin";
 import { collections } from "@/lib/constants/collections";
 import type { ChurchEvent } from "@/types/content";
 import { PUBLISHED } from "@/types/shared";
+import { nextOccurrence } from "@/lib/recurrence";
 import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 
 const SITEMAP_PAST_EVENT_GRACE_DAYS = 30;
@@ -34,20 +35,60 @@ export async function getUpcomingEvents(limit?: number): Promise<Serialized<Chur
   try {
     const db = getAdminFirestore();
     const now = new Date();
-    let query = db
-      .collection(collections.events)
-      .where("status", "==", PUBLISHED)
-      .where("startDateTime", ">=", now)
-      .orderBy("startDateTime", "asc");
 
-    if (limit) {
-      query = query.limit(limit);
+    // Fetch all published events ordered by original start. We need to consider
+    // recurring events whose original startDateTime is in the past but whose
+    // next occurrence is still upcoming, so we cannot rely on the Firestore
+    // `>= now` filter alone — we filter in memory below.
+    const snapshot = await withReadTimeout(
+      db
+        .collection(collections.events)
+        .where("status", "==", PUBLISHED)
+        .orderBy("startDateTime", "asc")
+        .get(),
+    );
+
+    const items: { event: Serialized<ChurchEvent>; effectiveStart: number }[] = [];
+
+    for (const doc of snapshot.docs) {
+      const raw = serializeData({
+        id: doc.id,
+        ...doc.data(),
+      } as unknown as ChurchEvent);
+
+      const start = raw.startDateTime ? new Date(raw.startDateTime) : null;
+      if (!start || Number.isNaN(start.getTime())) continue;
+
+      if (start >= now) {
+        items.push({ event: raw, effectiveStart: start.getTime() });
+        continue;
+      }
+
+      // Recurring event with a past anchor — find the next occurrence and
+      // shift start/end so the card surfaces the upcoming instance instead of
+      // the original one. Non-recurring past events drop out.
+      if (raw.recurring === true && raw.recurrenceRule) {
+        const next = nextOccurrence(raw.recurrenceRule, start, now);
+        if (!next) continue;
+        const end = raw.endDateTime ? new Date(raw.endDateTime) : null;
+        const durationMs =
+          end && !Number.isNaN(end.getTime()) ? end.getTime() - start.getTime() : 0;
+        const shifted: Serialized<ChurchEvent> = {
+          ...raw,
+          startDateTime: next.toISOString(),
+          endDateTime:
+            end && !Number.isNaN(end.getTime())
+              ? new Date(next.getTime() + durationMs).toISOString()
+              : raw.endDateTime,
+        };
+        items.push({ event: shifted, effectiveStart: next.getTime() });
+      }
     }
 
-    const snapshot = await withReadTimeout(query.get());
-    return snapshot.docs.map((doc) =>
-      serializeData({ id: doc.id, ...doc.data() } as unknown as ChurchEvent),
-    );
+    items.sort((a, b) => a.effectiveStart - b.effectiveStart);
+
+    const sliced = typeof limit === "number" ? items.slice(0, limit) : items;
+    return sliced.map((i) => i.event);
   } catch (error) {
     logDataFallback("getUpcomingEvents", error);
     return [];
