@@ -3,6 +3,15 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.5] - 2026-05-31
+
+### Changed
+- **Page Builder — Background Type Selector (Phase 2)**
+  - **Unified Type Picker**: Replaced the separate Background Color and Background Image controls in the Section + Row inspectors with a single Background panel headed by a `None / Color / Image / Gradient` chip selector. Switching types clears the inactive variants so the renderer + sanitizer never see conflicting data.
+  - **Gradient Builder**: Added a new linear-gradient background type. Pick a From color, a To color, and an angle (0–360°) via a range slider; the preview swatch updates live. Stored on the section/row style as a structured `backgroundGradient: { from, to, angle }` object.
+  - **Schema + Sanitization**: Extended `SectionStyle` in [pageBuilder.ts](file:///c:/Users/techi/APPs/Stonehill/types/pageBuilder.ts) with `backgroundType` and `backgroundGradient`, with matching enum/regex/range guards in [sectionStyleSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) and [sanitizeStyle](file:///c:/Users/techi/APPs/Stonehill/lib/pageBuilderSafety.ts) (gradient colors must be `#RRGGBB`; angle must be 0..360).
+  - **Renderer**: [PageBuilderRenderer.tsx](file:///c:/Users/techi/APPs/Stonehill/components/shared/page-builder/PageBuilderRenderer.tsx) and the [SortableSection.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/SortableSection.tsx) canvas now use a type-aware fill resolver. When `backgroundType` is unset (pre-Phase-2 documents), the type is inferred from whichever of image / gradient / color is populated, so existing pages render identically without a data migration. The overlay continues to render only on image backgrounds (gradients/colors can be authored at full opacity directly).
+
 ## [0.6.4] - 2026-05-31
 
 ### Added

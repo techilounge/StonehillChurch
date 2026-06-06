@@ -497,8 +497,16 @@ export const sectionTypeSchema = z.enum(["section", "row", "columns", "group"]);
 export const sectionStyleSchema = z.object({
   padding: z.string().max(80).optional(),
   margin: z.string().max(80).optional(),
+  backgroundType: z.enum(["none", "color", "image", "gradient"]).optional(),
   backgroundColor: z.string().max(40).optional(),
   backgroundImage: z.string().max(300).optional(),
+  backgroundGradient: z
+    .object({
+      from: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      to: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      angle: z.number().min(0).max(360),
+    })
+    .optional(),
   backgroundPosition: z
     .enum([
       "center center",

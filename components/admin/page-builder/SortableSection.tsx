@@ -10,24 +10,43 @@ import { ChevronUp, ChevronDown, Copy, Trash2 } from "lucide-react";
 import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
 
 // Live admin preview helpers. Mirrors PageBuilderRenderer's rendering so the
-// editor canvas reflects background image + overlay configuration in real time.
-function previewBgImageStyle(style: PageBuilderSection["style"]): React.CSSProperties {
-  if (!style?.backgroundImage || !isValidSafeUrl(style.backgroundImage)) return {};
-  return {
-    backgroundImage: `url(${style.backgroundImage})`,
-    backgroundSize: style.backgroundSize ?? "cover",
-    backgroundPosition: style.backgroundPosition ?? "center center",
-    backgroundRepeat: style.backgroundRepeat ?? "no-repeat",
-    // `fixed` attachment is intentionally NOT mirrored in the editor canvas —
-    // it would attach to the viewport, not the section, and confuse the preview.
-    backgroundAttachment: "scroll",
-  };
+// editor canvas reflects background image / gradient / overlay configuration
+// in real time. Backward-compat: when backgroundType is unset, infer from
+// whichever of image / gradient / color is populated.
+function previewBgType(style: PageBuilderSection["style"]): "none" | "color" | "image" | "gradient" {
+  if (style?.backgroundType) return style.backgroundType;
+  if (style?.backgroundGradient) return "gradient";
+  if (style?.backgroundImage) return "image";
+  if (style?.backgroundColor) return "color";
+  return "none";
+}
+function previewBgFillStyle(style: PageBuilderSection["style"]): React.CSSProperties {
+  const type = previewBgType(style);
+  if (type === "color" && style?.backgroundColor && style.backgroundColor !== "#ffffff") {
+    return { backgroundColor: style.backgroundColor };
+  }
+  if (type === "image" && style?.backgroundImage && isValidSafeUrl(style.backgroundImage)) {
+    return {
+      backgroundImage: `url(${style.backgroundImage})`,
+      backgroundSize: style.backgroundSize ?? "cover",
+      backgroundPosition: style.backgroundPosition ?? "center center",
+      backgroundRepeat: style.backgroundRepeat ?? "no-repeat",
+      // `fixed` attachment is intentionally NOT mirrored in the editor canvas —
+      // it would attach to the viewport, not the section, and confuse the preview.
+      backgroundAttachment: "scroll",
+    };
+  }
+  if (type === "gradient" && style?.backgroundGradient) {
+    const g = style.backgroundGradient;
+    return { backgroundImage: `linear-gradient(${g.angle}deg, ${g.from}, ${g.to})` };
+  }
+  return {};
 }
 function previewOverlayStyle(style: PageBuilderSection["style"]): React.CSSProperties | null {
-  if (!style?.backgroundImage || !isValidSafeUrl(style.backgroundImage)) return null;
-  const op = typeof style.overlayOpacity === "number" ? style.overlayOpacity : 0;
+  if (previewBgType(style) !== "image") return null;
+  const op = typeof style?.overlayOpacity === "number" ? style.overlayOpacity : 0;
   if (op <= 0) return null;
-  return { backgroundColor: style.overlayColor ?? "#000000", opacity: op };
+  return { backgroundColor: style?.overlayColor ?? "#000000", opacity: op };
 }
 
 /** Parse a column width string ("50%", "1/2", "auto", etc.) to a percentage number. */
@@ -187,11 +206,10 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
         
         {/* Render Content */}
         <div
-          className={`relative overflow-hidden space-y-4 ${section.style?.padding || 'py-12'} ${section.style?.backgroundColor || section.style?.backgroundImage ? '' : 'bg-slate-50 border border-slate-100 rounded-lg'} min-h-[120px] p-4`}
+          className={`relative overflow-hidden space-y-4 ${section.style?.padding || 'py-12'} ${previewBgType(section.style) !== "none" ? '' : 'bg-slate-50 border border-slate-100 rounded-lg'} min-h-[120px] p-4`}
           style={{
-            backgroundColor: section.style?.backgroundColor !== "#ffffff" ? section.style?.backgroundColor : undefined,
             color: section.style?.textColor,
-            ...previewBgImageStyle(section.style),
+            ...previewBgFillStyle(section.style),
           }}
         >
           {(() => {
@@ -215,12 +233,8 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                   isRowSelected ? "ring-1 ring-stonehill-accent" : ""
                 } ${row.style?.padding || "p-2"}`}
                 style={{
-                  backgroundColor:
-                    row.style?.backgroundColor && row.style.backgroundColor !== "#ffffff"
-                      ? row.style.backgroundColor
-                      : undefined,
                   color: row.style?.textColor,
-                  ...previewBgImageStyle(row.style),
+                  ...previewBgFillStyle(row.style),
                 }}
               >
                 {(() => {

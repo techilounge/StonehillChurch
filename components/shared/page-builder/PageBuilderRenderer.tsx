@@ -46,8 +46,7 @@ export function PageBuilderRenderer({ document }: PageBuilderRendererProps) {
 function SectionRenderer({ section }: { section: PageBuilderSection }) {
   const cleanStyle = sanitizeStyle(section.style || {}, false) || {};
 
-  const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
-  const bgImageStyle = backgroundImageStyles(cleanStyle);
+  const bgFill = backgroundFillStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
   const padding = cleanStyle.padding || "py-12";
   const margin = cleanStyle.margin || "";
@@ -66,7 +65,7 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   }
 
   const containerClasses = `relative overflow-hidden ${padding} ${margin}`;
-  const inlineStyles = { ...bgStyle, ...bgImageStyle, ...textColor };
+  const inlineStyles = { ...bgFill, ...textColor };
   const overlay = backgroundOverlayStyles(cleanStyle);
 
   // Preferred shape: render the section as a vertical stack of rows. Legacy
@@ -102,19 +101,41 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   );
 }
 
-function backgroundImageStyles(cleanStyle: any): React.CSSProperties {
-  if (!cleanStyle.backgroundImage) return {};
-  return {
-    backgroundImage: `url(${cleanStyle.backgroundImage})`,
-    backgroundSize: cleanStyle.backgroundSize ?? "cover",
-    backgroundPosition: cleanStyle.backgroundPosition ?? "center center",
-    backgroundRepeat: cleanStyle.backgroundRepeat ?? "no-repeat",
-    backgroundAttachment: cleanStyle.backgroundAttachment ?? "scroll",
-  };
+// Infer the active background type when the field isn't set, so documents
+// from before Phase 2 keep rendering the same way (image > gradient > color).
+function effectiveBackgroundType(cleanStyle: any): "none" | "color" | "image" | "gradient" {
+  if (cleanStyle.backgroundType) return cleanStyle.backgroundType;
+  if (cleanStyle.backgroundGradient) return "gradient";
+  if (cleanStyle.backgroundImage) return "image";
+  if (cleanStyle.backgroundColor) return "color";
+  return "none";
+}
+
+function backgroundFillStyles(cleanStyle: any): React.CSSProperties {
+  const type = effectiveBackgroundType(cleanStyle);
+  if (type === "color" && cleanStyle.backgroundColor) {
+    return { backgroundColor: cleanStyle.backgroundColor };
+  }
+  if (type === "image" && cleanStyle.backgroundImage) {
+    return {
+      backgroundImage: `url(${cleanStyle.backgroundImage})`,
+      backgroundSize: cleanStyle.backgroundSize ?? "cover",
+      backgroundPosition: cleanStyle.backgroundPosition ?? "center center",
+      backgroundRepeat: cleanStyle.backgroundRepeat ?? "no-repeat",
+      backgroundAttachment: cleanStyle.backgroundAttachment ?? "scroll",
+    };
+  }
+  if (type === "gradient" && cleanStyle.backgroundGradient) {
+    const g = cleanStyle.backgroundGradient;
+    return { backgroundImage: `linear-gradient(${g.angle}deg, ${g.from}, ${g.to})` };
+  }
+  return {};
 }
 
 function backgroundOverlayStyles(cleanStyle: any): React.CSSProperties | null {
-  if (!cleanStyle.backgroundImage) return null;
+  // Overlay is only meaningful on top of an image background — color/gradient
+  // can be authored at full opacity directly via the type's own controls.
+  if (effectiveBackgroundType(cleanStyle) !== "image") return null;
   const opacity = typeof cleanStyle.overlayOpacity === "number" ? cleanStyle.overlayOpacity : 0;
   if (opacity <= 0) return null;
   return {
@@ -125,8 +146,7 @@ function backgroundOverlayStyles(cleanStyle: any): React.CSSProperties | null {
 
 function RowRenderer({ row }: { row: PageBuilderRow }) {
   const cleanStyle = sanitizeStyle(row.style || {}, false) || {};
-  const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
-  const bgImageStyle = backgroundImageStyles(cleanStyle);
+  const bgFill = backgroundFillStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
   const padding = cleanStyle.padding || "";
   const margin = cleanStyle.margin || "";
@@ -143,7 +163,7 @@ function RowRenderer({ row }: { row: PageBuilderRow }) {
   return (
     <div
       className={`relative overflow-hidden ${padding} ${margin}`}
-      style={{ ...bgStyle, ...bgImageStyle, ...textColor }}
+      style={{ ...bgFill, ...textColor }}
     >
       {overlay && <div aria-hidden="true" style={overlay} className="absolute inset-0 pointer-events-none" />}
       <div className={`relative w-full ${flexClass} ${verticalSpacing} ${alignItems} ${justifyContent}`}>

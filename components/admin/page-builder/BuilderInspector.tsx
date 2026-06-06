@@ -242,33 +242,6 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
         </SelectInput>
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background Color</label>
-        <div className="flex flex-wrap gap-2">
-          {[
-            { value: "#ffffff", label: "White" },
-            { value: "#fbfaf6", label: "Cream (Stonehill Bg)" },
-            { value: "#1e3f66", label: "Navy (Primary)" },
-            { value: "#1c6b8d", label: "Blue (Secondary)" },
-            { value: "#8eb5c7", label: "Light Blue" },
-            { value: "#e7ab10", label: "Gold (Accent)" },
-          ].map(color => (
-            <button
-              key={color.value}
-              className={`w-8 h-8 rounded border transition-all ${
-                section.style?.backgroundColor === color.value 
-                  ? "border-stonehill-accent ring-2 ring-stonehill-accent ring-offset-1 scale-110" 
-                  : "border-slate-200 hover:scale-105"
-              }`}
-              style={{ backgroundColor: color.value }}
-              onClick={() => onChange({ style: { ...section.style, backgroundColor: color.value } })}
-              title={color.label}
-              type="button"
-            />
-          ))}
-        </div>
-      </div>
-
       <BackgroundPanel
         value={section.style}
         onChange={(nextStyle) => onChange({ style: nextStyle })}
@@ -331,33 +304,6 @@ function RowInspector({ row, onChange, onLayoutChange }: {
           <option value="py-12">Vertical only — Medium</option>
           <option value="py-24">Vertical only — Large</option>
         </SelectInput>
-      </div>
-
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background Color</label>
-        <div className="flex flex-wrap gap-2">
-          {[
-            { value: "#ffffff", label: "White" },
-            { value: "#fbfaf6", label: "Cream (Stonehill Bg)" },
-            { value: "#1e3f66", label: "Navy (Primary)" },
-            { value: "#1c6b8d", label: "Blue (Secondary)" },
-            { value: "#8eb5c7", label: "Light Blue" },
-            { value: "#e7ab10", label: "Gold (Accent)" },
-          ].map((color) => (
-            <button
-              key={color.value}
-              type="button"
-              className={`w-8 h-8 rounded border transition-all ${
-                row.style?.backgroundColor === color.value
-                  ? "border-stonehill-accent ring-2 ring-stonehill-accent ring-offset-1 scale-110"
-                  : "border-slate-200 hover:scale-105"
-              }`}
-              style={{ backgroundColor: color.value }}
-              onClick={() => onChange({ style: { ...row.style, backgroundColor: color.value } })}
-              title={color.label}
-            />
-          ))}
-        </div>
       </div>
 
       <BackgroundPanel

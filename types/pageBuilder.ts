@@ -58,12 +58,24 @@ export type BackgroundPosition =
 export type BackgroundSize = "cover" | "contain" | "auto";
 export type BackgroundRepeat = "no-repeat" | "repeat" | "repeat-x" | "repeat-y";
 export type BackgroundAttachment = "scroll" | "fixed";
+export type BackgroundType = "none" | "color" | "image" | "gradient";
+
+export type BackgroundGradient = {
+  from: string; // "#RRGGBB"
+  to: string; // "#RRGGBB"
+  angle: number; // 0..360
+};
 
 export type SectionStyle = {
   padding?: string;
   margin?: string;
+  // Selects which background variant is active. When undefined, the renderer
+  // infers a sensible type from whichever of backgroundImage / backgroundColor
+  // is set so pre-existing documents keep rendering as they did before.
+  backgroundType?: BackgroundType;
   backgroundColor?: string;
   backgroundImage?: string;
+  backgroundGradient?: BackgroundGradient;
   // Background image rendering controls. All optional; sensible defaults
   // (cover / center / no-repeat / scroll) are applied at render time.
   backgroundPosition?: BackgroundPosition;

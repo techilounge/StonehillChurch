@@ -222,9 +222,29 @@ export function sanitizeStyle(style: any, isBlock = false): any {
     if (["start", "center", "end", "stretch"].includes(style.alignItems)) {
       clean.alignItems = style.alignItems;
     }
+    if (["none", "color", "image", "gradient"].includes(style.backgroundType)) {
+      clean.backgroundType = style.backgroundType;
+    }
     // Background image + rendering controls.
     if (typeof style.backgroundImage === "string" && isValidSafeUrl(style.backgroundImage)) {
       clean.backgroundImage = style.backgroundImage;
+    }
+    if (
+      style.backgroundGradient &&
+      typeof style.backgroundGradient.from === "string" &&
+      /^#[0-9a-fA-F]{6}$/.test(style.backgroundGradient.from) &&
+      typeof style.backgroundGradient.to === "string" &&
+      /^#[0-9a-fA-F]{6}$/.test(style.backgroundGradient.to) &&
+      typeof style.backgroundGradient.angle === "number" &&
+      Number.isFinite(style.backgroundGradient.angle) &&
+      style.backgroundGradient.angle >= 0 &&
+      style.backgroundGradient.angle <= 360
+    ) {
+      clean.backgroundGradient = {
+        from: style.backgroundGradient.from,
+        to: style.backgroundGradient.to,
+        angle: style.backgroundGradient.angle,
+      };
     }
     if (
       [
