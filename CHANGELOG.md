@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.7] - 2026-05-31
+
+### Fixed
+- **/about and /our-beliefs ignored Page Builder content.** Both routes called `getPageBySlug()` and rendered the page's title + legacy HTML `content` field, but never checked the document's `builderData`. As a result, admins who composed an `about` or `our-beliefs` page in the Page Builder saw a fully-built page in the editor and a hardcoded fallback (or stale HTML) on the live site. [app/(public)/about/page.tsx](app/(public)/about/page.tsx) and [app/(public)/our-beliefs/page.tsx](app/(public)/our-beliefs/page.tsx) now follow the same priority order as the dynamic `/[slug]` route: render the builder when `builderData.sections` is populated, fall back to legacy HTML content when not, and finally to the hardcoded curated layout. Each route's `<PageHero>` and bottom CTAs stay in place either way; on `/about` the "Back to Home" link also still renders above the builder content.
+
 ## [0.6.6] - 2026-05-31
 
 ### Added

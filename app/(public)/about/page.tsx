@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
+import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import { getPageBySlug } from "@/lib/data/pages";
 import { getSiteSettings } from "@/lib/data/siteSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
@@ -27,6 +28,9 @@ export default async function AboutPage() {
     getSiteSettings()
   ]);
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
+  // Prefer the Page Builder document when the admin has authored one; fall
+  // back to legacy HTML content, then to the hardcoded layout.
+  const hasBuilder = !!pageContent?.builderData?.sections?.length;
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
@@ -45,13 +49,27 @@ export default async function AboutPage() {
         hasOverlap
       />
 
-      <section className="py-16 md:py-24 bg-white overflow-hidden -mt-16 md:-mt-24 relative z-20">
+      {hasBuilder ? (
+        <div className="-mt-16 md:-mt-24 relative z-20 bg-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-slate-900/60 hover:text-stonehill-accent font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </Link>
+          </div>
+          <PageBuilderRenderer document={pageContent!.builderData!} />
+        </div>
+      ) : (
+        <section className="py-16 md:py-24 bg-white overflow-hidden -mt-16 md:-mt-24 relative z-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          
+
           {/* Back Link */}
           <div className="mb-6">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="inline-flex items-center gap-2 text-slate-900/60 hover:text-stonehill-accent font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -60,7 +78,7 @@ export default async function AboutPage() {
           </div>
           {pageContent ? (
             <div className="bg-white rounded-3xl shadow-sm p-8 md:p-12 border border-slate-200">
-              <div 
+              <div
                 className="prose prose-lg max-w-none prose-headings:text-stonehill-primary prose-h2:text-3xl prose-p:text-slate-900/80 prose-a:text-stonehill-accent hover:prose-a:text-stonehill-accent/80 leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: formatPageContent(pageContent.content) }}
               />
@@ -117,6 +135,7 @@ export default async function AboutPage() {
           )}
         </div>
       </section>
+      )}
 
       {/* CTAs */}
       <section className="py-16 bg-slate-50 overflow-hidden">

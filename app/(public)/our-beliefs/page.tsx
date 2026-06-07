@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
+import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import { getPageBySlug } from "@/lib/data/pages";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Book, Cross, RefreshCcw, HeartHandshake } from "lucide-react";
@@ -20,6 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function OurBeliefsPage() {
   const pageContent = await getPageBySlug("our-beliefs");
+  // Prefer the Page Builder document when the admin has authored one; fall
+  // back to legacy HTML content, then to the hardcoded layout.
+  const hasBuilder = !!pageContent?.builderData?.sections?.length;
 
   return (
     <main className="flex min-h-screen flex-col bg-slate-50">
@@ -28,7 +32,10 @@ export default async function OurBeliefsPage() {
         subtitle="What we believe about God, humanity, and salvation."
       />
 
-      <section className="py-16 md:py-24 bg-white overflow-hidden">
+      {hasBuilder ? (
+        <PageBuilderRenderer document={pageContent!.builderData!} />
+      ) : (
+        <section className="py-16 md:py-24 bg-white overflow-hidden">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           {pageContent ? (
             <div className="bg-white rounded-3xl shadow-sm p-8 md:p-12 border border-slate-200">
@@ -106,6 +113,7 @@ export default async function OurBeliefsPage() {
           )}
         </div>
       </section>
+      )}
 
       {/* CTAs */}
       <section className="py-16 bg-slate-50 overflow-hidden">
