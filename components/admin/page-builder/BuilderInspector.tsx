@@ -6,6 +6,7 @@ import { TextArea } from "@/components/forms/TextArea";
 import { Button } from "@/components/shared/Button";
 import { BackgroundPanel } from "./BackgroundPanel";
 import { InspectorLabel } from "./InspectorLabel";
+import { PaddingControl } from "./PaddingControl";
 import { usePageBuilder } from "./PageBuilderContext";
 import { PageBlock, PageBuilderRow, PageBuilderSection } from "@/types/pageBuilder";
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
@@ -289,22 +290,11 @@ function RowInspector({ row, onChange, onLayoutChange }: {
         </div>
       )}
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Padding</label>
-        <SelectInput
-          value={row.style?.padding || ""}
-          onChange={(e) => onChange({ style: { ...row.style, padding: e.target.value } })}
-        >
-          <option value="">None</option>
-          <option value="p-2">XS (8px)</option>
-          <option value="p-4">Small (16px)</option>
-          <option value="p-6">Medium (24px)</option>
-          <option value="p-8">Large (32px)</option>
-          <option value="py-6">Vertical only — Small</option>
-          <option value="py-12">Vertical only — Medium</option>
-          <option value="py-24">Vertical only — Large</option>
-        </SelectInput>
-      </div>
+      <PaddingControl
+        value={row.style?.paddingValues}
+        onChange={(next) => onChange({ style: { ...row.style, paddingValues: next } })}
+        tooltip="Set padding for each side independently. Link the sides to apply one value to all four. The unit selector switches between px / rem / %."
+      />
 
       <BackgroundPanel
         value={row.style}
@@ -419,7 +409,7 @@ function BlockInspector({
             />
             Open in new tab
           </label>
-          <PaddingControl
+          <ButtonPaddingControl
             content={block.content}
             onContentChange={(u) => onChange({ content: { ...block.content, ...u } })}
           />
@@ -1478,7 +1468,7 @@ function CornerRadiusControl({
   );
 }
 
-function PaddingControl({
+function ButtonPaddingControl({
   content,
   onContentChange,
 }: {

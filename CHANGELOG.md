@@ -3,6 +3,16 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.9] - 2026-05-31
+
+### Added
+- **Page Builder — Independent Row Padding Controls**
+  - **Schema**: Added a `StructuredPadding` type (`{ top, right, bottom, left, unit?, linked? }`) to [pageBuilder.ts](types/pageBuilder.ts) and a new optional `paddingValues` field on `SectionStyle`. Matching enum/range guards in [sectionStyleSchema](lib/validators.ts) and pass-through (with 0..500 clamping and `px`/`rem`/`%` unit enum) in [sanitizeStyle](lib/pageBuilderSafety.ts).
+  - **Reusable PaddingControl Component**: New [PaddingControl.tsx](components/admin/page-builder/PaddingControl.tsx) renders four numeric inputs (T / R / B / L) with a link toggle (`Link2`/`Unlink2` icons) that snaps all four sides together, a reset button, and a unit selector (px / rem / %). Self-clears the field when all four sides are 0 and the link is off, so a docs don't accumulate empty objects.
+  - **Wired into Row Inspector**: The Row Settings panel's old "Padding" preset dropdown is replaced with the new control. The legacy `padding` Tailwind-class field stays in the schema (still used by Section settings and pre-existing rows), but `paddingValues` takes precedence whenever it's set.
+  - **Rendering**: [PageBuilderRenderer.tsx](components/shared/page-builder/PageBuilderRenderer.tsx) and the editor canvas in [SortableSection.tsx](components/admin/page-builder/SortableSection.tsx) generate the CSS `padding: T R B L` shorthand inline when `paddingValues` is set and drop the legacy class so the two don't compose. Real-time preview is automatic — every change in the inspector flows through the same state the canvas reads.
+  - **Backward compatibility**: Existing rows authored with the preset dropdown continue to render with their `p-*`/`py-*` class unchanged; the new structured form is purely opt-in per row.
+
 ## [0.6.8] - 2026-05-31
 
 ### Fixed

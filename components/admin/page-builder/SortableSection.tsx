@@ -231,10 +231,15 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                 }}
                 className={`relative group/row rounded-lg overflow-hidden transition-colors ${
                   isRowSelected ? "ring-1 ring-stonehill-accent" : ""
-                } ${row.style?.padding || "p-2"}`}
+                } ${row.style?.paddingValues ? "" : (row.style?.padding || "p-2")}`}
                 style={{
                   color: row.style?.textColor,
                   ...previewBgFillStyle(row.style),
+                  ...(row.style?.paddingValues
+                    ? {
+                        padding: `${row.style.paddingValues.top}${row.style.paddingValues.unit ?? "px"} ${row.style.paddingValues.right}${row.style.paddingValues.unit ?? "px"} ${row.style.paddingValues.bottom}${row.style.paddingValues.unit ?? "px"} ${row.style.paddingValues.left}${row.style.paddingValues.unit ?? "px"}`,
+                      }
+                    : {}),
                 }}
               >
                 {(() => {

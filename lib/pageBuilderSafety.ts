@@ -185,6 +185,34 @@ export function sanitizeStyle(style: any, isBlock = false): any {
   if (style.padding && APPROVED_PADDING.includes(style.padding)) {
     clean.padding = style.padding;
   }
+  if (style.paddingValues && typeof style.paddingValues === "object") {
+    const pv = style.paddingValues;
+    const clamp = (n: unknown): number | undefined => {
+      if (typeof n !== "number" || !Number.isFinite(n)) return undefined;
+      return Math.max(0, Math.min(500, n));
+    };
+    const top = clamp(pv.top);
+    const right = clamp(pv.right);
+    const bottom = clamp(pv.bottom);
+    const left = clamp(pv.left);
+    if (
+      top !== undefined &&
+      right !== undefined &&
+      bottom !== undefined &&
+      left !== undefined
+    ) {
+      const unit = ["px", "rem", "%"].includes(pv.unit) ? pv.unit : "px";
+      const next: { top: number; right: number; bottom: number; left: number; unit: string; linked?: boolean } = {
+        top,
+        right,
+        bottom,
+        left,
+        unit,
+      };
+      if (pv.linked === true) next.linked = true;
+      clean.paddingValues = next;
+    }
+  }
   if (style.margin && APPROVED_MARGIN.includes(style.margin)) {
     clean.margin = style.margin;
   }

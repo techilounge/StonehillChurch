@@ -66,8 +66,25 @@ export type BackgroundGradient = {
   angle: number; // 0..360
 };
 
+export type PaddingUnit = "px" | "rem" | "%";
+
+// Structured per-side padding. When set on a section/row style, takes
+// precedence over the legacy `padding` Tailwind-class string and is rendered
+// inline as a CSS shorthand. `linked` is UI-only — the renderer ignores it.
+export type StructuredPadding = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+  unit?: PaddingUnit;
+  linked?: boolean;
+};
+
 export type SectionStyle = {
   padding?: string;
+  // Per-side padding override. When set, takes precedence over the legacy
+  // `padding` class-name string.
+  paddingValues?: StructuredPadding;
   margin?: string;
   // Selects which background variant is active. When undefined, the renderer
   // infers a sensible type from whichever of backgroundImage / backgroundColor

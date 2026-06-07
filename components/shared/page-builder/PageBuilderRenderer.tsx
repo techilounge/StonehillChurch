@@ -132,6 +132,14 @@ function backgroundFillStyles(cleanStyle: any): React.CSSProperties {
   return {};
 }
 
+function paddingShorthandFromValues(
+  pv: { top: number; right: number; bottom: number; left: number; unit?: string } | undefined,
+): string | null {
+  if (!pv) return null;
+  const u = pv.unit ?? "px";
+  return `${pv.top}${u} ${pv.right}${u} ${pv.bottom}${u} ${pv.left}${u}`;
+}
+
 function backgroundOverlayStyles(cleanStyle: any): React.CSSProperties | null {
   // Overlay is only meaningful on top of an image background — color/gradient
   // can be authored at full opacity directly via the type's own controls.
@@ -148,7 +156,11 @@ function RowRenderer({ row }: { row: PageBuilderRow }) {
   const cleanStyle = sanitizeStyle(row.style || {}, false) || {};
   const bgFill = backgroundFillStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
-  const padding = cleanStyle.padding || "";
+  const paddingShorthand = paddingShorthandFromValues(cleanStyle.paddingValues);
+  // When the new structured paddingValues is set we render the CSS shorthand
+  // inline and intentionally drop the legacy Tailwind padding class so the
+  // two don't compose unexpectedly.
+  const padding = paddingShorthand ? "" : (cleanStyle.padding || "");
   const margin = cleanStyle.margin || "";
   const verticalSpacing = cleanStyle.verticalSpacing || "gap-6";
   const alignItems = COLUMN_ALIGN_CLASS[row.style?.alignItems || "start"];
@@ -159,11 +171,12 @@ function RowRenderer({ row }: { row: PageBuilderRow }) {
   else if (row.style?.mobileStacking === "keep") flexClass = "flex flex-row";
 
   const overlay = backgroundOverlayStyles(cleanStyle);
+  const paddingStyle: React.CSSProperties = paddingShorthand ? { padding: paddingShorthand } : {};
 
   return (
     <div
       className={`relative overflow-hidden ${padding} ${margin}`}
-      style={{ ...bgFill, ...textColor }}
+      style={{ ...bgFill, ...textColor, ...paddingStyle }}
     >
       {overlay && <div aria-hidden="true" style={overlay} className="absolute inset-0 pointer-events-none" />}
       <div className={`relative w-full ${flexClass} ${verticalSpacing} ${alignItems} ${justifyContent}`}>
