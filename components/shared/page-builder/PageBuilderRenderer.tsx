@@ -203,7 +203,10 @@ function ColumnRenderer({ column }: { column: PageColumn }) {
   }
 
   const cleanStyle = sanitizeStyle(column.style || {}, false) || {};
-  const padding = cleanStyle.padding || "";
+  const colPaddingShorthand = paddingShorthandFromValues(cleanStyle.paddingValues);
+  // Drop the legacy Tailwind padding class when the structured shorthand is
+  // set, same rule the row renderer uses.
+  const padding = colPaddingShorthand ? "" : (cleanStyle.padding || "");
   const margin = cleanStyle.margin || "";
   const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
@@ -217,6 +220,7 @@ function ColumnRenderer({ column }: { column: PageColumn }) {
   const colInlineStyle: React.CSSProperties = {
     ...bgStyle,
     ...textColor,
+    ...(colPaddingShorthand ? { padding: colPaddingShorthand } : {}),
     ...(isCustomPct ? { "--col-width": column.width } as React.CSSProperties : {}),
   };
   

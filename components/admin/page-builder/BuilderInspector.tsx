@@ -8,7 +8,7 @@ import { BackgroundPanel } from "./BackgroundPanel";
 import { InspectorLabel } from "./InspectorLabel";
 import { PaddingControl } from "./PaddingControl";
 import { usePageBuilder } from "./PageBuilderContext";
-import { PageBlock, PageBuilderRow, PageBuilderSection } from "@/types/pageBuilder";
+import { PageBlock, PageBuilderRow, PageBuilderSection, PageColumn } from "@/types/pageBuilder";
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
 import { isValidSafeUrl, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId } from "@/lib/youtube";
@@ -22,6 +22,7 @@ export function BuilderInspector() {
     handleUpdateBlock,
     handleUpdateRow,
     handleChangeRowLayout,
+    handleUpdateColumn,
   } = usePageBuilder();
   const builderData = formData.builderData || { version: "1.0", sections: [] };
 
@@ -39,6 +40,7 @@ export function BuilderInspector() {
   let selectedSection: PageBuilderSection | undefined;
   let selectedRow: PageBuilderRow | undefined;
   let selectedBlock: PageBlock | undefined;
+  let selectedColumn: PageColumn | undefined;
   let selectedColumnId: string | undefined;
 
   outer: for (const section of builderData.sections) {
@@ -56,6 +58,12 @@ export function BuilderInspector() {
 
     if (section.columns) {
       for (const col of section.columns) {
+        if (col.id === selectedElementId) {
+          selectedSection = section;
+          selectedColumn = col;
+          selectedColumnId = col.id;
+          break outer;
+        }
         const cb = col.blocks?.find((b) => b.id === selectedElementId);
         if (cb) {
           selectedSection = section;
@@ -74,6 +82,13 @@ export function BuilderInspector() {
           break outer;
         }
         for (const col of row.columns) {
+          if (col.id === selectedElementId) {
+            selectedSection = section;
+            selectedRow = row;
+            selectedColumn = col;
+            selectedColumnId = col.id;
+            break outer;
+          }
           const cb = col.blocks?.find((b) => b.id === selectedElementId);
           if (cb) {
             selectedSection = section;
@@ -125,7 +140,13 @@ export function BuilderInspector() {
     <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-slate-200 bg-white flex flex-col flex-none overflow-y-auto">
       <div className="p-4 border-b border-slate-200 bg-slate-50/50 sticky top-0">
         <h3 className="font-semibold text-slate-900 text-sm">
-          {selectedBlock ? "Block Settings" : selectedRow ? "Row Settings" : "Section Settings"}
+          {selectedBlock
+            ? "Block Settings"
+            : selectedColumn
+              ? "Column Settings"
+              : selectedRow
+                ? "Row Settings"
+                : "Section Settings"}
         </h3>
       </div>
       <div className="p-4 space-y-6">
@@ -147,6 +168,18 @@ export function BuilderInspector() {
               });
               setIsMediaOpen(true);
             }}
+          />
+        ) : selectedColumn ? (
+          <ColumnInspector
+            column={selectedColumn}
+            onChange={(updates) =>
+              handleUpdateColumn(
+                selectedSection!.id,
+                selectedColumn!.id,
+                updates,
+                selectedRow?.id,
+              )
+            }
           />
         ) : selectedRow ? (
           <RowInspector
@@ -299,6 +332,24 @@ function RowInspector({ row, onChange, onLayoutChange }: {
       <BackgroundPanel
         value={row.style}
         onChange={(nextStyle) => onChange({ style: nextStyle })}
+      />
+    </>
+  );
+}
+
+function ColumnInspector({
+  column,
+  onChange,
+}: {
+  column: PageColumn;
+  onChange: (updates: Partial<PageColumn>) => void;
+}) {
+  return (
+    <>
+      <PaddingControl
+        value={column.style?.paddingValues}
+        onChange={(next) => onChange({ style: { ...column.style, paddingValues: next } })}
+        tooltip="Set padding for each side of this column independently. Link the sides to apply one value to all four. The unit selector switches between px / rem / %."
       />
     </>
   );

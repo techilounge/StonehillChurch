@@ -18,6 +18,9 @@ export type BlockType =
 export type BlockStyle = {
   // Common styling props
   padding?: string;
+  // Per-side padding override (used primarily by columns). When set, takes
+  // precedence over the legacy `padding` class-name string on the renderer.
+  paddingValues?: StructuredPadding;
   margin?: string;
   textAlign?: "left" | "center" | "right" | "justify";
   textColor?: string;

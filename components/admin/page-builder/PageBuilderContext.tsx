@@ -7,6 +7,7 @@ import {
   PageBuilderDocument,
   PageBuilderRow,
   PageBuilderSection,
+  PageColumn,
   PatternTemplate,
   RowLayout,
 } from "@/types/pageBuilder";
@@ -37,6 +38,14 @@ interface PageBuilderContextType {
   handleReorderRows: (sectionId: string, oldIndex: number, newIndex: number) => void;
   handleUpdateRow: (sectionId: string, rowId: string, updates: Partial<PageBuilderRow>) => void;
   handleChangeRowLayout: (sectionId: string, rowId: string, newLayout: RowLayout) => void;
+
+  // Column actions
+  handleUpdateColumn: (
+    sectionId: string,
+    columnId: string,
+    updates: Partial<PageColumn>,
+    rowId?: string,
+  ) => void;
 
   // Block actions
   handleAddBlock: (sectionId: string, blockType: PageBlock["type"], columnId?: string) => void;
@@ -304,6 +313,36 @@ export function PageBuilderProvider({
     );
   };
 
+  // Column actions ──────────────────────────────────────────────────────────
+  // Mutates the matching column wherever it lives — inside section.rows[]
+  // (modern shape) or section.columns (legacy). `rowId` is only used as a
+  // hint to disambiguate when a section uses rows; the lookup tolerates a
+  // missing rowId and finds the column anywhere it appears under the section.
+  const handleUpdateColumn = (
+    sectionId: string,
+    columnId: string,
+    updates: Partial<PageColumn>,
+    _rowId?: string,
+  ) => {
+    void _rowId; // accepted for callsite clarity; lookup walks both shapes
+    setFormData((prev) =>
+      withSection(prev, sectionId, (s) => {
+        const mapCol = (c: PageColumn): PageColumn =>
+          c.id === columnId ? { ...c, ...updates } : c;
+        if (s.rows && s.rows.length > 0) {
+          return {
+            ...s,
+            rows: s.rows.map((r) => ({ ...r, columns: r.columns.map(mapCol) })),
+          };
+        }
+        if (s.columns) {
+          return { ...s, columns: s.columns.map(mapCol) };
+        }
+        return s;
+      }),
+    );
+  };
+
   // Block actions ───────────────────────────────────────────────────────────
   const handleAddBlock = (sectionId: string, blockType: PageBlock["type"], columnId?: string) => {
     const newBlock: PageBlock = {
@@ -417,6 +456,7 @@ export function PageBuilderProvider({
         handleReorderRows,
         handleUpdateRow,
         handleChangeRowLayout,
+        handleUpdateColumn,
         handleAddBlock,
         handleRemoveBlock,
         handleUpdateBlock,

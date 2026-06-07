@@ -3,6 +3,16 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.0] - 2026-05-31
+
+### Added
+- **Page Builder — Independent Column Padding Controls (+ columns are now selectable)**
+  - **Selectable columns**: Clicking a column on the canvas in [SortableSection.tsx](components/admin/page-builder/SortableSection.tsx) now selects it (stop-propagated so it doesn't bubble to the row/section) and draws an accent-colored ring. The cursor is now `cursor-pointer` to communicate that columns are interactive.
+  - **ColumnInspector**: [BuilderInspector.tsx](components/admin/page-builder/BuilderInspector.tsx) gained a column branch in its element resolver and a new `ColumnInspector` panel that uses the same reusable `PaddingControl` from the row work. Inspector header now shows "Column Settings".
+  - **Context action**: [PageBuilderContext.tsx](components/admin/page-builder/PageBuilderContext.tsx) gets a new `handleUpdateColumn(sectionId, columnId, updates, rowId?)` that walks both the modern `section.rows[].columns` shape and the legacy `section.columns` shape so it works whether or not the section has been migrated.
+  - **Schema**: `BlockStyle` (the type columns use) gained the same `paddingValues?: StructuredPadding` field that was added to `SectionStyle` in 0.6.9. Matching guards added to [blockStyleSchema](lib/validators.ts); sanitization already accepted the field for both `isBlock` branches, so no sanitizer change was needed.
+  - **Rendering**: `ColumnRenderer` in [PageBuilderRenderer.tsx](components/shared/page-builder/PageBuilderRenderer.tsx) now applies the CSS `padding: T R B L` shorthand inline when `paddingValues` is set and drops the legacy Tailwind padding class. The editor canvas in `SortableSection` mirrors the same behavior for real-time WYSIWYG.
+
 ## [0.6.9] - 2026-05-31
 
 ### Added

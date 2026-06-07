@@ -312,8 +312,23 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                         )}
                         <div
                           data-column-id={column.id}
-                          className="responsive-col flex flex-col min-h-[100px] border border-dashed border-slate-300/50 rounded-lg p-3 bg-white/10"
-                          style={{ "--col-width": `${colPct}%` } as React.CSSProperties}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedElementId(column.id);
+                          }}
+                          className={`responsive-col flex flex-col min-h-[100px] border border-dashed rounded-lg p-3 bg-white/10 transition-colors cursor-pointer ${
+                            selectedElementId === column.id
+                              ? "border-stonehill-accent ring-1 ring-stonehill-accent"
+                              : "border-slate-300/50 hover:border-slate-400"
+                          }`}
+                          style={{
+                            "--col-width": `${colPct}%`,
+                            ...(column.style?.paddingValues
+                              ? {
+                                  padding: `${column.style.paddingValues.top}${column.style.paddingValues.unit ?? "px"} ${column.style.paddingValues.right}${column.style.paddingValues.unit ?? "px"} ${column.style.paddingValues.bottom}${column.style.paddingValues.unit ?? "px"} ${column.style.paddingValues.left}${column.style.paddingValues.unit ?? "px"}`,
+                                }
+                              : {}),
+                          } as React.CSSProperties}
                         >
                           <div className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider flex justify-between items-center">
                             <span className="opacity-70">Column {colIndex + 1}</span>

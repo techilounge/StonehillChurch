@@ -470,6 +470,16 @@ export const blockTypeSchema = z.enum([
 
 export const blockStyleSchema = z.object({
   padding: z.string().max(80).optional(),
+  paddingValues: z
+    .object({
+      top: z.number().min(0).max(500),
+      right: z.number().min(0).max(500),
+      bottom: z.number().min(0).max(500),
+      left: z.number().min(0).max(500),
+      unit: z.enum(["px", "rem", "%"]).optional(),
+      linked: z.boolean().optional(),
+    })
+    .optional(),
   margin: z.string().max(80).optional(),
   textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
   textColor: z.string().max(40).optional(),
