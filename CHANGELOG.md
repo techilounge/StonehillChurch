@@ -3,6 +3,11 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.8] - 2026-05-31
+
+### Fixed
+- **Hydration error from nested `<main>` elements on every public page.** The (public) layout wrapped its children in `<main id="main-content" tabIndex={-1}>`, and every page file inside the group (including /about, /our-beliefs, /[slug], /sermons, /events, /ministries, etc.) wrapped its own content in another `<main>`. Browsers auto-close the outer `<main>` when they parse a nested one, which made React 19/Turbopack flag a hydration mismatch (the SSR/CSR DOMs disagreed about where `id="main-content"` lived). The mismatch surfaced first on `/about` after the builder-render branch landed but was latent across every public route. Changed the layout's wrapper to a `<div id="main-content" tabIndex={-1}>` in [layout.tsx](app/(public)/layout.tsx) — the skip-to-content anchor still works (the id is preserved, tabIndex still allows programmatic focus), and each page's own `<main>` is now the actual semantic landmark.
+
 ## [0.6.7] - 2026-05-31
 
 ### Fixed

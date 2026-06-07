@@ -26,9 +26,16 @@ export default async function PublicLayout({
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <TopAnnouncementBar />
       <PublicHeader settings={siteSettings} headerMenu={menus.header} />
-      <main id="main-content" tabIndex={-1}>
+      {/*
+       * Skip-to-content anchor. NOT a <main> element — each (public) page
+       * already wraps its content in its own <main> for proper landmark
+       * semantics. Nesting <main> here caused React 19/Turbopack to flag a
+       * hydration mismatch because browsers auto-close the outer <main> when
+       * they parse a nested one, breaking the SSR/CSR DOM agreement.
+       */}
+      <div id="main-content" tabIndex={-1}>
         {children}
-      </main>
+      </div>
       <PublicFooter settings={siteSettings} footerMenu={menus.footer} />
       {/*
        * JSON-LD lives at the bottom of the layout as the last child of the
