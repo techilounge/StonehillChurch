@@ -185,36 +185,46 @@ export function sanitizeStyle(style: any, isBlock = false): any {
   if (style.padding && APPROVED_PADDING.includes(style.padding)) {
     clean.padding = style.padding;
   }
-  if (style.paddingValues && typeof style.paddingValues === "object") {
-    const pv = style.paddingValues;
+  // Per-side padding (clamped 0..500) and margin (clamped -500..500). Same
+  // shape applies for the desktop + tablet + mobile variants.
+  const cleanPaddingObject = (raw: unknown, allowNegative: boolean): Record<string, unknown> | undefined => {
+    if (!raw || typeof raw !== "object") return undefined;
+    const obj = raw as Record<string, unknown>;
+    const lo = allowNegative ? -500 : 0;
     const clamp = (n: unknown): number | undefined => {
       if (typeof n !== "number" || !Number.isFinite(n)) return undefined;
-      return Math.max(0, Math.min(500, n));
+      return Math.max(lo, Math.min(500, n));
     };
-    const top = clamp(pv.top);
-    const right = clamp(pv.right);
-    const bottom = clamp(pv.bottom);
-    const left = clamp(pv.left);
-    if (
-      top !== undefined &&
-      right !== undefined &&
-      bottom !== undefined &&
-      left !== undefined
-    ) {
-      const unit = ["px", "rem", "%"].includes(pv.unit) ? pv.unit : "px";
-      const next: { top: number; right: number; bottom: number; left: number; unit: string; linked?: boolean } = {
-        top,
-        right,
-        bottom,
-        left,
-        unit,
-      };
-      if (pv.linked === true) next.linked = true;
-      clean.paddingValues = next;
+    const top = clamp(obj.top);
+    const right = clamp(obj.right);
+    const bottom = clamp(obj.bottom);
+    const left = clamp(obj.left);
+    if (top === undefined || right === undefined || bottom === undefined || left === undefined) {
+      return undefined;
     }
+    const unit = ["px", "rem", "%"].includes(obj.unit as string) ? (obj.unit as string) : "px";
+    const next: Record<string, unknown> = { top, right, bottom, left, unit };
+    if (obj.linked === true) next.linked = true;
+    return next;
+  };
+  for (const field of [
+    "paddingValues",
+    "paddingValuesTablet",
+    "paddingValuesMobile",
+  ] as const) {
+    const v = cleanPaddingObject(style[field], false);
+    if (v) clean[field] = v;
   }
   if (style.margin && APPROVED_MARGIN.includes(style.margin)) {
     clean.margin = style.margin;
+  }
+  for (const field of [
+    "marginValues",
+    "marginValuesTablet",
+    "marginValuesMobile",
+  ] as const) {
+    const v = cleanPaddingObject(style[field], true);
+    if (v) clean[field] = v;
   }
   if (style.backgroundColor && APPROVED_BG_COLORS.includes(style.backgroundColor)) {
     clean.backgroundColor = style.backgroundColor;

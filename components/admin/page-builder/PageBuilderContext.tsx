@@ -3,6 +3,7 @@
 import * as React from "react";
 import { PageContent } from "@/types/content";
 import {
+  DevicePreview,
   PageBlock,
   PageBuilderDocument,
   PageBuilderRow,
@@ -22,6 +23,11 @@ interface PageBuilderContextType {
   setFormData: React.Dispatch<React.SetStateAction<Partial<PageContent>>>;
   selectedElementId: string | null;
   setSelectedElementId: (id: string | null) => void;
+
+  // Active device for the responsive padding/margin controls and the canvas
+  // preview width. Drives which value-field the spacing controls read/write.
+  devicePreview: DevicePreview;
+  setDevicePreview: (device: DevicePreview) => void;
 
   // Section actions
   handleAddSection: () => void;
@@ -174,6 +180,7 @@ export function PageBuilderProvider({
     builderData: migrateDocument(initialData?.builderData),
   }));
   const [selectedElementId, setSelectedElementId] = React.useState<string | null>(null);
+  const [devicePreview, setDevicePreview] = React.useState<DevicePreview>("desktop");
 
   // Section actions ─────────────────────────────────────────────────────────
   const handleAddSection = () => {
@@ -444,6 +451,8 @@ export function PageBuilderProvider({
         setFormData,
         selectedElementId,
         setSelectedElementId,
+        devicePreview,
+        setDevicePreview,
         handleAddSection,
         handleRemoveSection,
         handleReorderSections,

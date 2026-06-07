@@ -16,14 +16,31 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { Layout, Plus } from "lucide-react";
+import { Layout, Plus, Monitor, Tablet, Smartphone } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { usePageBuilder } from "./PageBuilderContext";
 import { SortableSection } from "./SortableSection";
 import { PatternPickerModal } from "./PatternPickerModal";
 
+// Approximate breakpoints for the canvas device preview. Match the public
+// renderer's media-query breakpoints so what you see in the editor at each
+// device width matches the live site.
+const DEVICE_MAX_WIDTH: Record<"desktop" | "tablet" | "mobile", string | undefined> = {
+  desktop: undefined,
+  tablet: "1024px",
+  mobile: "640px",
+};
+
 export function BuilderCanvas() {
-  const { formData, handleAddSection, handleReorderSections, handleReorderBlocks, handleInsertTemplate } = usePageBuilder();
+  const {
+    formData,
+    handleAddSection,
+    handleReorderSections,
+    handleReorderBlocks,
+    handleInsertTemplate,
+    devicePreview,
+    setDevicePreview,
+  } = usePageBuilder();
   const builderData = formData.builderData || { version: "1.0", sections: [] };
   const [activeDragType, setActiveDragType] = React.useState<"section" | "block" | null>(null);
   const [isPatternPickerOpen, setIsPatternPickerOpen] = React.useState(false);
@@ -75,15 +92,56 @@ export function BuilderCanvas() {
     }
   }
 
+  const canvasMaxWidth = DEVICE_MAX_WIDTH[devicePreview];
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
           <Layout className="h-5 w-5 text-stonehill-accent" />
           Page Builder
         </h2>
+        <div
+          role="tablist"
+          aria-label="Canvas device preview"
+          className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white p-0.5"
+        >
+          {[
+            { value: "desktop" as const, label: "Desktop", Icon: Monitor },
+            { value: "tablet" as const, label: "Tablet", Icon: Tablet },
+            { value: "mobile" as const, label: "Mobile", Icon: Smartphone },
+          ].map(({ value, label, Icon }) => {
+            const active = devicePreview === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setDevicePreview(value)}
+                title={label}
+                className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs transition-colors ${
+                  active
+                    ? "bg-stonehill-accent/10 text-stonehill-accent font-semibold"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
+      <div
+        className={
+          canvasMaxWidth
+            ? "mx-auto motion-safe:transition-[max-width] duration-200 rounded-lg ring-1 ring-slate-200 bg-slate-50/40 p-2"
+            : "motion-safe:transition-[max-width] duration-200"
+        }
+        style={canvasMaxWidth ? { maxWidth: canvasMaxWidth } : undefined}
+      >
       {builderData.sections.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-slate-200 rounded-xl p-12 flex flex-col items-center text-center">
           <div className="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center mb-4">
@@ -142,6 +200,7 @@ export function BuilderCanvas() {
           </SortableContext>
         </DndContext>
       )}
+      </div>
 
       <PatternPickerModal
         isOpen={isPatternPickerOpen}

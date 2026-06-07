@@ -34,8 +34,20 @@ export function PageBuilderRenderer({ document }: PageBuilderRendererProps) {
     return null;
   }
 
+  const responsiveCss = buildResponsiveCss(document);
+
   return (
     <div className="page-builder-content">
+      {responsiveCss && (
+        // One <style> block per page collects every section/row/column's
+        // tablet + mobile padding/margin overrides. Selectors use the
+        // [data-pb-id] attribute applied below so we never collide with
+        // user-authored class names.
+        <style
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: responsiveCss }}
+        />
+      )}
       {document.sections.map((section) => (
         <SectionRenderer key={section.id} section={section} />
       ))}
@@ -43,13 +55,82 @@ export function PageBuilderRenderer({ document }: PageBuilderRendererProps) {
   );
 }
 
+// Responsive breakpoints. Match the canvas DEVICE_MAX_WIDTH in BuilderCanvas
+// so the editor preview matches what visitors see.
+const BREAKPOINT_TABLET_MAX = 1024;
+const BREAKPOINT_MOBILE_MAX = 640;
+
+function spacingShorthand(
+  v: { top: number; right: number; bottom: number; left: number; unit?: string } | undefined,
+): string | null {
+  if (!v) return null;
+  const u = v.unit ?? "px";
+  return `${v.top}${u} ${v.right}${u} ${v.bottom}${u} ${v.left}${u}`;
+}
+
+function buildResponsiveCss(document: PageBuilderDocument): string {
+  type Rule = { id: string; padding?: string; margin?: string };
+  const tablet: Rule[] = [];
+  const mobile: Rule[] = [];
+
+  const visit = (id: string, style: any) => {
+    if (!style) return;
+    const s = sanitizeStyle(style, false) || {};
+    const pT = spacingShorthand(s.paddingValuesTablet);
+    const pM = spacingShorthand(s.paddingValuesMobile);
+    const mT = spacingShorthand(s.marginValuesTablet);
+    const mM = spacingShorthand(s.marginValuesMobile);
+    if (pT || mT) tablet.push({ id, padding: pT ?? undefined, margin: mT ?? undefined });
+    if (pM || mM) mobile.push({ id, padding: pM ?? undefined, margin: mM ?? undefined });
+  };
+
+  for (const section of document.sections) {
+    visit(section.id, section.style);
+    if (section.rows) {
+      for (const row of section.rows) {
+        visit(row.id, row.style);
+        for (const col of row.columns) visit(col.id, col.style);
+      }
+    }
+    if (section.columns) {
+      for (const col of section.columns) visit(col.id, col.style);
+    }
+  }
+
+  if (tablet.length === 0 && mobile.length === 0) return "";
+
+  const ruleToCss = ({ id, padding, margin }: Rule) => {
+    const decls: string[] = [];
+    if (padding) decls.push(`padding:${padding}`);
+    if (margin) decls.push(`margin:${margin}`);
+    return `[data-pb-id="${cssEscape(id)}"]{${decls.join(";")}}`;
+  };
+
+  const blocks: string[] = [];
+  if (tablet.length > 0) {
+    blocks.push(`@media (max-width:${BREAKPOINT_TABLET_MAX}px){${tablet.map(ruleToCss).join("")}}`);
+  }
+  if (mobile.length > 0) {
+    blocks.push(`@media (max-width:${BREAKPOINT_MOBILE_MAX}px){${mobile.map(ruleToCss).join("")}}`);
+  }
+  return blocks.join("");
+}
+
+// Element ids are admin-generated and already pass the `pageBuilderRowSchema`
+// regex, but we still strip anything that would break out of the CSS string.
+function cssEscape(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
 function SectionRenderer({ section }: { section: PageBuilderSection }) {
   const cleanStyle = sanitizeStyle(section.style || {}, false) || {};
 
   const bgFill = backgroundFillStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
-  const padding = cleanStyle.padding || "py-12";
-  const margin = cleanStyle.margin || "";
+  const sectionPaddingShorthand = spacingShorthand(cleanStyle.paddingValues);
+  const sectionMarginShorthand = spacingShorthand(cleanStyle.marginValues);
+  const padding = sectionPaddingShorthand ? "" : (cleanStyle.padding || "py-12");
+  const margin = sectionMarginShorthand ? "" : (cleanStyle.margin || "");
   const layoutWidth = cleanStyle.layoutWidth === "full" ? "w-full" : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8";
 
   const verticalSpacing = cleanStyle.verticalSpacing || "gap-6";
@@ -65,7 +146,12 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   }
 
   const containerClasses = `relative overflow-hidden ${padding} ${margin}`;
-  const inlineStyles = { ...bgFill, ...textColor };
+  const inlineStyles: React.CSSProperties = {
+    ...bgFill,
+    ...textColor,
+    ...(sectionPaddingShorthand ? { padding: sectionPaddingShorthand } : {}),
+    ...(sectionMarginShorthand ? { margin: sectionMarginShorthand } : {}),
+  };
   const overlay = backgroundOverlayStyles(cleanStyle);
 
   // Preferred shape: render the section as a vertical stack of rows. Legacy
@@ -74,7 +160,7 @@ function SectionRenderer({ section }: { section: PageBuilderSection }) {
   const hasRows = !!section.rows && section.rows.length > 0;
 
   return (
-    <section className={containerClasses} style={inlineStyles}>
+    <section data-pb-id={section.id} className={containerClasses} style={inlineStyles}>
       {overlay && <div aria-hidden="true" style={overlay} className="absolute inset-0 pointer-events-none" />}
       <div className={`${layoutWidth} relative`}>
         {hasRows ? (
@@ -157,11 +243,12 @@ function RowRenderer({ row }: { row: PageBuilderRow }) {
   const bgFill = backgroundFillStyles(cleanStyle);
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
   const paddingShorthand = paddingShorthandFromValues(cleanStyle.paddingValues);
-  // When the new structured paddingValues is set we render the CSS shorthand
-  // inline and intentionally drop the legacy Tailwind padding class so the
-  // two don't compose unexpectedly.
+  const rowMarginShorthand = spacingShorthand(cleanStyle.marginValues);
+  // When the new structured paddingValues/marginValues are set we render the
+  // CSS shorthand inline and intentionally drop the legacy Tailwind class so
+  // the two don't compose unexpectedly.
   const padding = paddingShorthand ? "" : (cleanStyle.padding || "");
-  const margin = cleanStyle.margin || "";
+  const margin = rowMarginShorthand ? "" : (cleanStyle.margin || "");
   const verticalSpacing = cleanStyle.verticalSpacing || "gap-6";
   const alignItems = COLUMN_ALIGN_CLASS[row.style?.alignItems || "start"];
   const justifyContent = row.style?.justifyContent ? `justify-${row.style.justifyContent}` : "";
@@ -171,12 +258,16 @@ function RowRenderer({ row }: { row: PageBuilderRow }) {
   else if (row.style?.mobileStacking === "keep") flexClass = "flex flex-row";
 
   const overlay = backgroundOverlayStyles(cleanStyle);
-  const paddingStyle: React.CSSProperties = paddingShorthand ? { padding: paddingShorthand } : {};
+  const inlineSpacing: React.CSSProperties = {
+    ...(paddingShorthand ? { padding: paddingShorthand } : {}),
+    ...(rowMarginShorthand ? { margin: rowMarginShorthand } : {}),
+  };
 
   return (
     <div
+      data-pb-id={row.id}
       className={`relative overflow-hidden ${padding} ${margin}`}
-      style={{ ...bgFill, ...textColor, ...paddingStyle }}
+      style={{ ...bgFill, ...textColor, ...inlineSpacing }}
     >
       {overlay && <div aria-hidden="true" style={overlay} className="absolute inset-0 pointer-events-none" />}
       <div className={`relative w-full ${flexClass} ${verticalSpacing} ${alignItems} ${justifyContent}`}>
@@ -204,10 +295,11 @@ function ColumnRenderer({ column }: { column: PageColumn }) {
 
   const cleanStyle = sanitizeStyle(column.style || {}, false) || {};
   const colPaddingShorthand = paddingShorthandFromValues(cleanStyle.paddingValues);
-  // Drop the legacy Tailwind padding class when the structured shorthand is
-  // set, same rule the row renderer uses.
+  const colMarginShorthand = spacingShorthand(cleanStyle.marginValues);
+  // Drop the legacy Tailwind padding/margin class when the structured
+  // shorthand is set, same rule the row renderer uses.
   const padding = colPaddingShorthand ? "" : (cleanStyle.padding || "");
-  const margin = cleanStyle.margin || "";
+  const margin = colMarginShorthand ? "" : (cleanStyle.margin || "");
   const bgStyle = cleanStyle.backgroundColor ? { backgroundColor: cleanStyle.backgroundColor } : {};
   const textColor = cleanStyle.textColor ? { color: cleanStyle.textColor } : {};
   const textAlign = cleanStyle.textAlign ? `text-${cleanStyle.textAlign}` : "";
@@ -221,11 +313,13 @@ function ColumnRenderer({ column }: { column: PageColumn }) {
     ...bgStyle,
     ...textColor,
     ...(colPaddingShorthand ? { padding: colPaddingShorthand } : {}),
+    ...(colMarginShorthand ? { margin: colMarginShorthand } : {}),
     ...(isCustomPct ? { "--col-width": column.width } as React.CSSProperties : {}),
   };
-  
+
   return (
-    <div 
+    <div
+      data-pb-id={column.id}
       className={colClassName}
       style={colInlineStyle}
     >

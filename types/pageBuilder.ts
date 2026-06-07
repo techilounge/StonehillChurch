@@ -20,8 +20,15 @@ export type BlockStyle = {
   padding?: string;
   // Per-side padding override (used primarily by columns). When set, takes
   // precedence over the legacy `padding` class-name string on the renderer.
+  // Tablet/Mobile variants are applied via media queries and fall back to
+  // desktop when not set.
   paddingValues?: StructuredPadding;
+  paddingValuesTablet?: StructuredPadding;
+  paddingValuesMobile?: StructuredPadding;
   margin?: string;
+  marginValues?: StructuredMargin;
+  marginValuesTablet?: StructuredMargin;
+  marginValuesMobile?: StructuredMargin;
   textAlign?: "left" | "center" | "right" | "justify";
   textColor?: string;
   backgroundColor?: string;
@@ -71,9 +78,9 @@ export type BackgroundGradient = {
 
 export type PaddingUnit = "px" | "rem" | "%";
 
-// Structured per-side padding. When set on a section/row style, takes
-// precedence over the legacy `padding` Tailwind-class string and is rendered
-// inline as a CSS shorthand. `linked` is UI-only — the renderer ignores it.
+// Structured per-side spacing. Used for both padding (clamped 0..500) and
+// margin (negative values allowed for hero overlap effects). `linked` is
+// UI-only — the renderer ignores it.
 export type StructuredPadding = {
   top: number;
   right: number;
@@ -82,13 +89,24 @@ export type StructuredPadding = {
   unit?: PaddingUnit;
   linked?: boolean;
 };
+export type StructuredMargin = StructuredPadding;
+
+export type DevicePreview = "desktop" | "tablet" | "mobile";
 
 export type SectionStyle = {
   padding?: string;
   // Per-side padding override. When set, takes precedence over the legacy
-  // `padding` class-name string.
+  // `padding` class-name string. The Tablet/Mobile variants are applied via
+  // CSS media queries at render time and fall back to the desktop value
+  // when not set.
   paddingValues?: StructuredPadding;
+  paddingValuesTablet?: StructuredPadding;
+  paddingValuesMobile?: StructuredPadding;
   margin?: string;
+  // Structured per-side margin (allows negative values for overlap effects).
+  marginValues?: StructuredMargin;
+  marginValuesTablet?: StructuredMargin;
+  marginValuesMobile?: StructuredMargin;
   // Selects which background variant is active. When undefined, the renderer
   // infers a sensible type from whichever of backgroundImage / backgroundColor
   // is set so pre-existing documents keep rendering as they did before.

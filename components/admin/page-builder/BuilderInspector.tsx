@@ -6,7 +6,7 @@ import { TextArea } from "@/components/forms/TextArea";
 import { Button } from "@/components/shared/Button";
 import { BackgroundPanel } from "./BackgroundPanel";
 import { InspectorLabel } from "./InspectorLabel";
-import { PaddingControl } from "./PaddingControl";
+import { MarginControl, PaddingControlV2 } from "./SpacingControl";
 import { usePageBuilder } from "./PageBuilderContext";
 import { PageBlock, PageBuilderRow, PageBuilderSection, PageColumn } from "@/types/pageBuilder";
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
@@ -263,18 +263,43 @@ function SectionInspector({ section, onChange, onLayoutChange }: {
         </SelectInput>
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Padding</label>
-        <SelectInput 
-          value={section.style?.padding || "py-12"} 
-          onChange={(e) => onChange({ style: { ...section.style, padding: e.target.value } })}
-        >
-          <option value="py-0">None (0px)</option>
-          <option value="py-6">Small (24px)</option>
-          <option value="py-12">Medium (48px)</option>
-          <option value="py-24">Large (96px)</option>
-        </SelectInput>
-      </div>
+      <PaddingControlV2
+        desktop={section.style?.paddingValues}
+        tablet={section.style?.paddingValuesTablet}
+        mobile={section.style?.paddingValuesMobile}
+        onChange={(device, next) =>
+          onChange({
+            style: {
+              ...section.style,
+              ...(device === "desktop"
+                ? { paddingValues: next }
+                : device === "tablet"
+                  ? { paddingValuesTablet: next }
+                  : { paddingValuesMobile: next }),
+            },
+          })
+        }
+        tooltip="Per-side padding for the section. Switch the device tabs to set tablet/mobile overrides — they inherit from desktop until you set them."
+      />
+
+      <MarginControl
+        desktop={section.style?.marginValues}
+        tablet={section.style?.marginValuesTablet}
+        mobile={section.style?.marginValuesMobile}
+        onChange={(device, next) =>
+          onChange({
+            style: {
+              ...section.style,
+              ...(device === "desktop"
+                ? { marginValues: next }
+                : device === "tablet"
+                  ? { marginValuesTablet: next }
+                  : { marginValuesMobile: next }),
+            },
+          })
+        }
+        tooltip="Per-side margin for the section (negative values allowed). Tablet/mobile inherit from desktop until overridden."
+      />
 
       <BackgroundPanel
         value={section.style}
@@ -323,10 +348,42 @@ function RowInspector({ row, onChange, onLayoutChange }: {
         </div>
       )}
 
-      <PaddingControl
-        value={row.style?.paddingValues}
-        onChange={(next) => onChange({ style: { ...row.style, paddingValues: next } })}
-        tooltip="Set padding for each side independently. Link the sides to apply one value to all four. The unit selector switches between px / rem / %."
+      <PaddingControlV2
+        desktop={row.style?.paddingValues}
+        tablet={row.style?.paddingValuesTablet}
+        mobile={row.style?.paddingValuesMobile}
+        onChange={(device, next) =>
+          onChange({
+            style: {
+              ...row.style,
+              ...(device === "desktop"
+                ? { paddingValues: next }
+                : device === "tablet"
+                  ? { paddingValuesTablet: next }
+                  : { paddingValuesMobile: next }),
+            },
+          })
+        }
+        tooltip="Per-side padding. Switch the device tabs to set tablet/mobile overrides — they inherit from desktop until you set them."
+      />
+
+      <MarginControl
+        desktop={row.style?.marginValues}
+        tablet={row.style?.marginValuesTablet}
+        mobile={row.style?.marginValuesMobile}
+        onChange={(device, next) =>
+          onChange({
+            style: {
+              ...row.style,
+              ...(device === "desktop"
+                ? { marginValues: next }
+                : device === "tablet"
+                  ? { marginValuesTablet: next }
+                  : { marginValuesMobile: next }),
+            },
+          })
+        }
+        tooltip="Per-side margin (negative values allowed). Tablet/mobile inherit from desktop until overridden."
       />
 
       <BackgroundPanel
@@ -346,10 +403,42 @@ function ColumnInspector({
 }) {
   return (
     <>
-      <PaddingControl
-        value={column.style?.paddingValues}
-        onChange={(next) => onChange({ style: { ...column.style, paddingValues: next } })}
-        tooltip="Set padding for each side of this column independently. Link the sides to apply one value to all four. The unit selector switches between px / rem / %."
+      <PaddingControlV2
+        desktop={column.style?.paddingValues}
+        tablet={column.style?.paddingValuesTablet}
+        mobile={column.style?.paddingValuesMobile}
+        onChange={(device, next) =>
+          onChange({
+            style: {
+              ...column.style,
+              ...(device === "desktop"
+                ? { paddingValues: next }
+                : device === "tablet"
+                  ? { paddingValuesTablet: next }
+                  : { paddingValuesMobile: next }),
+            },
+          })
+        }
+        tooltip="Per-side padding for this column. Switch the device tabs to set tablet/mobile overrides."
+      />
+
+      <MarginControl
+        desktop={column.style?.marginValues}
+        tablet={column.style?.marginValuesTablet}
+        mobile={column.style?.marginValuesMobile}
+        onChange={(device, next) =>
+          onChange({
+            style: {
+              ...column.style,
+              ...(device === "desktop"
+                ? { marginValues: next }
+                : device === "tablet"
+                  ? { marginValuesTablet: next }
+                  : { marginValuesMobile: next }),
+            },
+          })
+        }
+        tooltip="Per-side margin for this column (negative values allowed)."
       />
     </>
   );

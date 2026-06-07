@@ -3,6 +3,18 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.1] - 2026-06-07
+
+### Added
+- **Page Builder — Responsive Padding & Margin (Desktop / Tablet / Mobile) + Margin Control**
+  - **Per-device spacing**: Both padding and margin can now be authored independently per device. `SectionStyle` and `BlockStyle` in [pageBuilder.ts](types/pageBuilder.ts) gained `paddingValuesTablet` / `paddingValuesMobile` / `marginValues` / `marginValuesTablet` / `marginValuesMobile` sibling fields (additive — pre-existing pages with only `paddingValues` continue to render unchanged). Matching enum / hex / range guards in [validators.ts](lib/validators.ts) (padding 0..500, margin −500..500 for hero-overlap effects) and clamping pass-through in [pageBuilderSafety.ts](lib/pageBuilderSafety.ts).
+  - **Unified SpacingControl**: New [SpacingControl.tsx](components/admin/page-builder/SpacingControl.tsx) exports `PaddingControlV2` and `MarginControl` (thin wrappers). Renders the four-side numeric inputs, link toggle, unit selector, and a `Desktop / Tablet / Mobile` device-tab strip. The tab strip is synced with `devicePreview` in `PageBuilderContext`, so switching device tabs anywhere — inspector or canvas toolbar — updates everything at once. Tablet/mobile values cascade from desktop until explicitly set; an "Inherit" link clears the active-device override.
+  - **Section now uses the structured control**: Replaced Section Inspector's preset "Padding" `<SelectInput>` (None / Small / Medium / Large) with the new responsive PaddingControl. The legacy `padding` Tailwind class is still honored for documents that haven't migrated; it's dropped only when `paddingValues` is set.
+  - **MarginControl added to Section + Row + Column inspectors** alongside PaddingControl.
+  - **Canvas device preview**: [BuilderCanvas.tsx](components/admin/page-builder/BuilderCanvas.tsx) gets a toolbar device picker (`Monitor` / `Tablet` / `Smartphone` icons) that constrains the canvas `max-width` to 1024px (tablet) or 640px (mobile). When active, the canvas content is wrapped in a centered, ring-bordered preview frame.
+  - **Real-time canvas preview**: [SortableSection.tsx](components/admin/page-builder/SortableSection.tsx) now resolves and applies the effective per-device padding/margin on every section / row / column, so what you see in the editor at each device tab matches what the live site renders at that width.
+  - **Public renderer**: [PageBuilderRenderer.tsx](components/shared/page-builder/PageBuilderRenderer.tsx) tags each section / row / column with `data-pb-id={id}` and walks the document once at render time to emit a single `<style>` block per page with `@media (max-width:1024px)` and `@media (max-width:640px)` rules. Desktop values render inline; the media-query rules override at smaller widths.
+
 ## [0.7.0] - 2026-05-31
 
 ### Added

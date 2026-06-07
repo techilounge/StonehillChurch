@@ -42,6 +42,38 @@ function previewBgFillStyle(style: PageBuilderSection["style"]): React.CSSProper
   }
   return {};
 }
+function spacingShorthand(v: { top: number; right: number; bottom: number; left: number; unit?: string } | undefined): string | null {
+  if (!v) return null;
+  const u = v.unit ?? "px";
+  return `${v.top}${u} ${v.right}${u} ${v.bottom}${u} ${v.left}${u}`;
+}
+type DeviceTab = "desktop" | "tablet" | "mobile";
+function effectiveSpacing(
+  device: DeviceTab,
+  desktop: any,
+  tablet: any,
+  mobile: any,
+): { top: number; right: number; bottom: number; left: number; unit?: string } | undefined {
+  if (device === "mobile") return mobile ?? tablet ?? desktop;
+  if (device === "tablet") return tablet ?? desktop;
+  return desktop;
+}
+function previewSpacingStyle(
+  device: DeviceTab,
+  style: { paddingValues?: any; paddingValuesTablet?: any; paddingValuesMobile?: any; marginValues?: any; marginValuesTablet?: any; marginValuesMobile?: any } | undefined,
+): React.CSSProperties {
+  if (!style) return {};
+  const p = spacingShorthand(
+    effectiveSpacing(device, style.paddingValues, style.paddingValuesTablet, style.paddingValuesMobile),
+  );
+  const m = spacingShorthand(
+    effectiveSpacing(device, style.marginValues, style.marginValuesTablet, style.marginValuesMobile),
+  );
+  return {
+    ...(p ? { padding: p } : {}),
+    ...(m ? { margin: m } : {}),
+  };
+}
 function previewOverlayStyle(style: PageBuilderSection["style"]): React.CSSProperties | null {
   if (previewBgType(style) !== "image") return null;
   const op = typeof style?.overlayOpacity === "number" ? style.overlayOpacity : 0;
@@ -95,6 +127,7 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
     handleRemoveRow,
     handleDuplicateRow,
     handleReorderRows,
+    devicePreview,
   } = usePageBuilder();
   
   const {
@@ -206,10 +239,12 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
         
         {/* Render Content */}
         <div
-          className={`relative overflow-hidden space-y-4 ${section.style?.padding || 'py-12'} ${previewBgType(section.style) !== "none" ? '' : 'bg-slate-50 border border-slate-100 rounded-lg'} min-h-[120px] p-4`}
+          data-pb-id={section.id}
+          className={`relative overflow-hidden space-y-4 ${section.style?.paddingValues ? '' : (section.style?.padding || 'py-12')} ${previewBgType(section.style) !== "none" ? '' : 'bg-slate-50 border border-slate-100 rounded-lg'} min-h-[120px] p-4`}
           style={{
             color: section.style?.textColor,
             ...previewBgFillStyle(section.style),
+            ...previewSpacingStyle(devicePreview, section.style),
           }}
         >
           {(() => {
@@ -229,17 +264,14 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                   e.stopPropagation();
                   setSelectedElementId(row.id);
                 }}
+                data-pb-id={row.id}
                 className={`relative group/row rounded-lg overflow-hidden transition-colors ${
                   isRowSelected ? "ring-1 ring-stonehill-accent" : ""
                 } ${row.style?.paddingValues ? "" : (row.style?.padding || "p-2")}`}
                 style={{
                   color: row.style?.textColor,
                   ...previewBgFillStyle(row.style),
-                  ...(row.style?.paddingValues
-                    ? {
-                        padding: `${row.style.paddingValues.top}${row.style.paddingValues.unit ?? "px"} ${row.style.paddingValues.right}${row.style.paddingValues.unit ?? "px"} ${row.style.paddingValues.bottom}${row.style.paddingValues.unit ?? "px"} ${row.style.paddingValues.left}${row.style.paddingValues.unit ?? "px"}`,
-                      }
-                    : {}),
+                  ...previewSpacingStyle(devicePreview, row.style),
                 }}
               >
                 {(() => {
@@ -311,6 +343,7 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                           />
                         )}
                         <div
+                          data-pb-id={column.id}
                           data-column-id={column.id}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -323,11 +356,7 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                           }`}
                           style={{
                             "--col-width": `${colPct}%`,
-                            ...(column.style?.paddingValues
-                              ? {
-                                  padding: `${column.style.paddingValues.top}${column.style.paddingValues.unit ?? "px"} ${column.style.paddingValues.right}${column.style.paddingValues.unit ?? "px"} ${column.style.paddingValues.bottom}${column.style.paddingValues.unit ?? "px"} ${column.style.paddingValues.left}${column.style.paddingValues.unit ?? "px"}`,
-                                }
-                              : {}),
+                            ...previewSpacingStyle(devicePreview, column.style),
                           } as React.CSSProperties}
                         >
                           <div className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider flex justify-between items-center">
