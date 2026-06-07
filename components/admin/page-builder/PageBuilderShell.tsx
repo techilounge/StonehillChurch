@@ -11,6 +11,7 @@ import { createDocumentAction, updateDocumentAction } from "@/app/admin/cms/acti
 import { PageContent } from "@/types/content";
 import { PUBLISHED } from "@/types/shared";
 import { PageBuilderProvider, usePageBuilder } from "./PageBuilderContext";
+import { BackgroundPanel } from "./BackgroundPanel";
 import { BuilderCanvas } from "./BuilderCanvas";
 import { BuilderInspector } from "./BuilderInspector";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
@@ -299,6 +300,19 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
                       </div>
                     </div>
                   )}
+                </div>
+
+                <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                  <label className="block text-sm font-semibold text-slate-900 mb-1">Page background</label>
+                  <p className="text-xs text-slate-500 mb-3">
+                    Fills the entire page behind the hero and builder sections. Section-level backgrounds layer on top.
+                  </p>
+                  <BackgroundPanel
+                    value={formData.pageBackground as any}
+                    onChange={(nextStyle) =>
+                      handleFieldChange("pageBackground", Object.keys(nextStyle ?? {}).length > 0 ? nextStyle : undefined)
+                    }
+                  />
                 </div>
               </div>
             </div>

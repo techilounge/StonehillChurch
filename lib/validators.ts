@@ -600,6 +600,43 @@ export const pageSchema = z.object({
   heroEnabled: z.boolean().optional(),
   heroSubtitle: z.string().max(200).optional(),
   heroImageUrl: z.string().max(500).optional(),
+  // Optional page-level background — same field shape as the section background
+  // panel so the inspector can drive both.
+  pageBackground: z
+    .object({
+      backgroundType: z.enum(["none", "color", "image", "gradient"]).optional(),
+      backgroundColor: z.string().max(40).optional(),
+      backgroundImage: z.string().max(300).optional(),
+      backgroundGradient: z
+        .object({
+          from: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+          to: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+          angle: z.number().min(0).max(360),
+        })
+        .optional(),
+      backgroundPosition: z
+        .enum([
+          "center center",
+          "top center",
+          "bottom center",
+          "left center",
+          "right center",
+          "top left",
+          "top right",
+          "bottom left",
+          "bottom right",
+        ])
+        .optional(),
+      backgroundSize: z.enum(["cover", "contain", "auto"]).optional(),
+      backgroundRepeat: z.enum(["no-repeat", "repeat", "repeat-x", "repeat-y"]).optional(),
+      backgroundAttachment: z.enum(["scroll", "fixed"]).optional(),
+      overlayColor: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}$/)
+        .optional(),
+      overlayOpacity: z.number().min(0).max(1).optional(),
+    })
+    .optional(),
 });
 
 // popups

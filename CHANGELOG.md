@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.6.6] - 2026-05-31
+
+### Added
+- **Page Builder — Page-Level Background (Phase 3)**
+  - **Schema**: Added a `PageBackground` type to [content.ts](file:///c:/Users/techi/APPs/Stonehill/types/content.ts) (a strict subset of `SectionStyle`'s background fields) and an optional `pageBackground` property on `PageContent`. Matching `pageBackground` validator added to [pageSchema](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) with the same enum / hex / range guards used for sections.
+  - **Inspector**: Added a new "Page background" block to the page settings panel in [PageBuilderShell.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/PageBuilderShell.tsx). Reuses the [BackgroundPanel](file:///c:/Users/techi/APPs/Stonehill/components/admin/page-builder/BackgroundPanel.tsx) component verbatim, so admins get the same `None / Color / Image / Gradient` type chips plus position/size/repeat/attachment + overlay (image) or two-stop gradient builder.
+  - **Public Render**: [\[slug\]/page.tsx](file:///c:/Users/techi/APPs/Stonehill/app/(public)/[slug]/page.tsx) wraps the page (hero + back-link + builder sections) in a relative container that applies the page-level fill, with an absolutely-positioned overlay div between the background and the content. Section-level backgrounds layer on top of the page background unchanged.
+
 ## [0.6.5] - 2026-05-31
 
 ### Changed

@@ -1,5 +1,28 @@
 import type { AuditFields, ContentStatus, FirestoreTimestampLike } from "./shared";
-import type { PageBuilderDocument } from "./pageBuilder";
+import type {
+  BackgroundAttachment,
+  BackgroundGradient,
+  BackgroundPosition,
+  BackgroundRepeat,
+  BackgroundSize,
+  BackgroundType,
+  PageBuilderDocument,
+} from "./pageBuilder";
+
+// Page-level background configuration. A strict subset of SectionStyle's
+// background controls so the same BackgroundPanel component can drive both.
+export type PageBackground = {
+  backgroundType?: BackgroundType;
+  backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundGradient?: BackgroundGradient;
+  backgroundPosition?: BackgroundPosition;
+  backgroundSize?: BackgroundSize;
+  backgroundRepeat?: BackgroundRepeat;
+  backgroundAttachment?: BackgroundAttachment;
+  overlayColor?: string;
+  overlayOpacity?: number;
+};
 
 export type HomepageSlide = AuditFields & {
   title: string;
@@ -208,6 +231,9 @@ export type PageContent = {
   heroEnabled?: boolean;
   heroSubtitle?: string;
   heroImageUrl?: string;
+  // Optional page-level background. Renders behind the entire page, including
+  // the hero banner and any builder sections.
+  pageBackground?: PageBackground;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
 };
