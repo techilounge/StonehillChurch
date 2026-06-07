@@ -356,6 +356,60 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
         )}
       </section>
 
+      {/* Design Tokens — Page Builder spacing scale */}
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Design Tokens · Spacing</h3>
+          <p className="text-sm text-slate-500">
+            Global spacing scale used by the Page Builder. Pick a token in any Padding or Margin
+            control to reference these values; updating a token here updates every page that uses it.
+            All values are pixels.
+          </p>
+        </div>
+        <div className="p-6 grid grid-cols-2 md:grid-cols-5 gap-4">
+          {(["xs", "sm", "md", "lg", "xl"] as const).map((name) => {
+            const tokens = (settings["design"]?.spacing_tokens || {}) as Record<string, unknown>;
+            const fallback: Record<string, number> = { xs: 4, sm: 8, md: 16, lg: 32, xl: 64 };
+            const value = typeof tokens[name] === "number" ? (tokens[name] as number) : Number(tokens[name]);
+            const shown = Number.isFinite(value) ? value : fallback[name];
+            return (
+              <div key={name} className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-slate-900 uppercase">{name}</label>
+                <TextInput
+                  type="number"
+                  min={0}
+                  max={500}
+                  value={String(shown)}
+                  onChange={(e) => {
+                    const next = Math.max(0, Math.min(500, Number(e.target.value) || 0));
+                    setSettings((prev) => ({
+                      ...prev,
+                      design: {
+                        ...(prev["design"] || {}),
+                        spacing_tokens: {
+                          ...((prev["design"]?.spacing_tokens as Record<string, unknown>) || {}),
+                          [name]: next,
+                        },
+                      },
+                    }));
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+        {canEdit && (
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
+            <Button
+              disabled={isSubmitting}
+              onClick={() => handleSave("design", "design", settings["design"] || {})}
+            >
+              <Save className="h-4 w-4 mr-2" /> Save Spacing Tokens
+            </Button>
+          </div>
+        )}
+      </section>
+
       <div className="text-sm text-slate-500 p-4 border border-dashed border-slate-200 rounded-lg text-center">
         Note: More settings groups (SEO, Giving) can be added here following the same pattern.
       </div>

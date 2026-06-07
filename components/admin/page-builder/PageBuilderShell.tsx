@@ -17,12 +17,16 @@ import { BuilderInspector } from "./BuilderInspector";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import { getUnsafeUrlsInDocument, sanitizeDocumentStyles } from "@/lib/pageBuilderSafety";
 
+import type { SpacingTokens } from "@/types/settings";
+
 interface PageBuilderShellProps {
   initialData: (PageContent & { id?: string }) | null;
   canPublish: boolean;
+  /** Server-fetched spacing tokens used by Page Builder spacing controls. */
+  spacingTokens?: SpacingTokens;
 }
 
-export function PageBuilderShell({ initialData, canPublish }: PageBuilderShellProps) {
+export function PageBuilderShell({ initialData, canPublish, spacingTokens }: PageBuilderShellProps) {
   const defaultData: Partial<PageContent> = {
     title: "",
     slug: "",
@@ -37,7 +41,7 @@ export function PageBuilderShell({ initialData, canPublish }: PageBuilderShellPr
   };
 
   return (
-    <PageBuilderProvider initialData={initialData || defaultData}>
+    <PageBuilderProvider initialData={initialData || defaultData} spacingTokens={spacingTokens}>
       <PageBuilderEditor isNew={!initialData} canPublish={canPublish} initialData={initialData} />
     </PageBuilderProvider>
   );

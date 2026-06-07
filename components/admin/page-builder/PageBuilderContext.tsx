@@ -12,6 +12,7 @@ import {
   PatternTemplate,
   RowLayout,
 } from "@/types/pageBuilder";
+import { DEFAULT_SPACING_TOKENS, type SpacingTokens } from "@/types/settings";
 import {
   convertRowLayout,
   ensureSectionUsesRows,
@@ -28,6 +29,10 @@ interface PageBuilderContextType {
   // preview width. Drives which value-field the spacing controls read/write.
   devicePreview: DevicePreview;
   setDevicePreview: (device: DevicePreview) => void;
+
+  // Global spacing tokens (XS/SM/MD/LG/XL) used to render token-mode spacing
+  // values. Provided by PageBuilderShell from server-side site settings.
+  spacingTokens: SpacingTokens;
 
   // Section actions
   handleAddSection: () => void;
@@ -171,10 +176,13 @@ function regenerateRowIds(row: PageBuilderRow): PageBuilderRow {
 export function PageBuilderProvider({
   children,
   initialData,
+  spacingTokens,
 }: {
   children: React.ReactNode;
   initialData: Partial<PageContent>;
+  spacingTokens?: SpacingTokens;
 }) {
+  const resolvedSpacingTokens = spacingTokens ?? DEFAULT_SPACING_TOKENS;
   const [formData, setFormData] = React.useState<Partial<PageContent>>(() => ({
     ...initialData,
     builderData: migrateDocument(initialData?.builderData),
@@ -453,6 +461,7 @@ export function PageBuilderProvider({
         setSelectedElementId,
         devicePreview,
         setDevicePreview,
+        spacingTokens: resolvedSpacingTokens,
         handleAddSection,
         handleRemoveSection,
         handleReorderSections,

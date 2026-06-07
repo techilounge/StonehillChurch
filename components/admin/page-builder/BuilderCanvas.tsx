@@ -40,6 +40,7 @@ export function BuilderCanvas() {
     handleInsertTemplate,
     devicePreview,
     setDevicePreview,
+    spacingTokens,
   } = usePageBuilder();
   const builderData = formData.builderData || { version: "1.0", sections: [] };
   const [activeDragType, setActiveDragType] = React.useState<"section" | "block" | null>(null);
@@ -140,7 +141,18 @@ export function BuilderCanvas() {
             ? "mx-auto motion-safe:transition-[max-width] duration-200 rounded-lg ring-1 ring-slate-200 bg-slate-50/40 p-2"
             : "motion-safe:transition-[max-width] duration-200"
         }
-        style={canvasMaxWidth ? { maxWidth: canvasMaxWidth } : undefined}
+        style={{
+          ...(canvasMaxWidth ? { maxWidth: canvasMaxWidth } : {}),
+          // Expose the same CSS custom properties as the public renderer so
+          // token-mode spacing (`var(--pb-space-md)`) resolves on the canvas
+          // too. Changing tokens in Settings updates the canvas preview live
+          // because spacingTokens flows in from the server-side prop.
+          ["--pb-space-xs" as any]: `${spacingTokens.xs}px`,
+          ["--pb-space-sm" as any]: `${spacingTokens.sm}px`,
+          ["--pb-space-md" as any]: `${spacingTokens.md}px`,
+          ["--pb-space-lg" as any]: `${spacingTokens.lg}px`,
+          ["--pb-space-xl" as any]: `${spacingTokens.xl}px`,
+        }}
       >
       {builderData.sections.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-slate-200 rounded-xl p-12 flex flex-col items-center text-center">

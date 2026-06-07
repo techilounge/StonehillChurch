@@ -6,7 +6,26 @@ export type SiteSettingsGroup =
   | "social"
   | "giving"
   | "service_times"
-  | "seo";
+  | "seo"
+  | "design";
+
+// Global spacing scale exposed to the Page Builder via CSS custom properties
+// (`--pb-space-${name}`). Admins edit these in Site Settings → Design Tokens;
+// updating a value flows through every section/row/column that references the
+// token.
+export type SpacingTokenName = "xs" | "sm" | "md" | "lg" | "xl";
+
+export type SpacingTokens = Record<SpacingTokenName, number>;
+
+export const DEFAULT_SPACING_TOKENS: SpacingTokens = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 32,
+  xl: 64,
+};
+
+export const SPACING_TOKEN_NAMES: SpacingTokenName[] = ["xs", "sm", "md", "lg", "xl"];
 
 export type SiteSettingValue =
   | string

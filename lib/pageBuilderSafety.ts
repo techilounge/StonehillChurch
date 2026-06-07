@@ -205,6 +205,9 @@ export function sanitizeStyle(style: any, isBlock = false): any {
     const unit = ["px", "rem", "%"].includes(obj.unit as string) ? (obj.unit as string) : "px";
     const next: Record<string, unknown> = { top, right, bottom, left, unit };
     if (obj.linked === true) next.linked = true;
+    if (["xs", "sm", "md", "lg", "xl"].includes(obj.token as string)) {
+      next.token = obj.token;
+    }
     return next;
   };
   for (const field of [

@@ -6,7 +6,15 @@ import { TextInput } from "@/components/forms/TextInput";
 import { SelectInput } from "@/components/forms/SelectInput";
 import { InspectorLabel } from "./InspectorLabel";
 import { usePageBuilder } from "./PageBuilderContext";
-import type { DevicePreview, PaddingUnit, StructuredPadding, StructuredMargin } from "@/types/pageBuilder";
+import type {
+  DevicePreview,
+  PaddingUnit,
+  SpacingTokenRef,
+  StructuredMargin,
+  StructuredPadding,
+} from "@/types/pageBuilder";
+
+const TOKEN_NAMES: SpacingTokenRef[] = ["xs", "sm", "md", "lg", "xl"];
 
 type Side = "top" | "right" | "bottom" | "left";
 
@@ -64,6 +72,7 @@ export function SpacingControl({
 
   const linked = effective.linked === true;
   const unit: PaddingUnit = effective.unit ?? "px";
+  const activeToken: SpacingTokenRef | undefined = effective.token;
 
   const emit = (next: StructuredPadding | undefined) => {
     if (!next) {
@@ -84,12 +93,22 @@ export function SpacingControl({
     const parsed = raw === "" ? 0 : Number(raw);
     if (!Number.isFinite(parsed)) return;
     const n = Math.max(min, Math.min(max, parsed));
-    // Start from the effective values so the first edit on tablet/mobile
-    // inherits desktop's other-side values instead of zeroing them.
+    // Editing any side automatically drops the active token — the user is
+    // moving back to custom values.
+    const baseEffective = { ...effective, token: undefined };
     if (linked) {
       emit({ top: n, right: n, bottom: n, left: n, unit, linked: true });
     } else {
-      emit({ ...effective, [side]: n, unit, linked: false });
+      emit({ ...baseEffective, [side]: n, unit, linked: false });
+    }
+  };
+
+  const setToken = (next: SpacingTokenRef | undefined) => {
+    if (next) {
+      // Token applies to all four sides — implies linked.
+      emit({ ...effective, unit, linked: true, token: next });
+    } else {
+      emit({ ...effective, unit, token: undefined });
     }
   };
 
@@ -121,7 +140,8 @@ export function SpacingControl({
         max={max}
         value={String(effective[side])}
         onChange={(e) => setSide(side, e.target.value)}
-        className={`w-full text-center ${isInheriting ? "text-slate-400" : ""}`}
+        disabled={!!activeToken}
+        className={`w-full text-center ${activeToken || isInheriting ? "text-slate-400" : ""}`}
       />
     </label>
   );
@@ -182,6 +202,44 @@ export function SpacingControl({
         })}
       </div>
 
+      {/* Token chip row — clicking a token applies it to all four sides; click
+          "Custom" to drop the token and edit numbers directly. */}
+      <div role="radiogroup" aria-label="Spacing token" className="flex flex-wrap items-center gap-1">
+        <button
+          type="button"
+          role="radio"
+          aria-checked={!activeToken}
+          onClick={() => setToken(undefined)}
+          className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-colors ${
+            !activeToken
+              ? "bg-stonehill-accent/10 text-stonehill-accent border-stonehill-accent"
+              : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+          }`}
+        >
+          Custom
+        </button>
+        {TOKEN_NAMES.map((name) => {
+          const active = activeToken === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => setToken(name)}
+              title={`Spacing token: ${name.toUpperCase()}`}
+              className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase border transition-colors ${
+                active
+                  ? "bg-stonehill-accent/10 text-stonehill-accent border-stonehill-accent"
+                  : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              {name}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-4 gap-1.5">
         {sideInput("top", "Top")}
         {sideInput("right", "Right")}
@@ -191,11 +249,13 @@ export function SpacingControl({
 
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] text-slate-500">
-          {isInheriting
-            ? `Inheriting from ${devicePreview === "mobile" && tablet ? "tablet" : "desktop"}`
-            : linked
-              ? "All sides change together"
-              : "T / R / B / L"}
+          {activeToken
+            ? `Using token "${activeToken.toUpperCase()}" — edit in Settings → Design Tokens`
+            : isInheriting
+              ? `Inheriting from ${devicePreview === "mobile" && tablet ? "tablet" : "desktop"}`
+              : linked
+                ? "All sides change together"
+                : "T / R / B / L"}
         </span>
         <div className="flex items-center gap-1">
           {!isInheriting && devicePreview !== "desktop" && (

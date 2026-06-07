@@ -476,6 +476,7 @@ const paddingValuesValidator = z
     left: z.number().min(0).max(500),
     unit: z.enum(["px", "rem", "%"]).optional(),
     linked: z.boolean().optional(),
+    token: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
   })
   .optional();
 
@@ -487,6 +488,7 @@ const marginValuesValidator = z
     left: z.number().min(-500).max(500),
     unit: z.enum(["px", "rem", "%"]).optional(),
     linked: z.boolean().optional(),
+    token: z.enum(["xs", "sm", "md", "lg", "xl"]).optional(),
   })
   .optional();
 

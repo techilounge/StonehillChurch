@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCmsDocument } from "@/lib/data/adminCms";
 import { PageBuilderShell } from "@/components/admin/page-builder/PageBuilderShell";
 import { PageContent } from "@/types/content";
+import { getSpacingTokens } from "@/lib/data/siteSettings";
 
 export const metadata = {
   title: "Edit pages | Admin",
@@ -26,11 +27,14 @@ export default async function PagesEditPage({ params }: { params: Promise<{ id: 
     }
   }
 
+  const spacingTokens = await getSpacingTokens();
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <PageBuilderShell 
-        initialData={initialData} 
+      <PageBuilderShell
+        initialData={initialData}
         canPublish={canPublish}
+        spacingTokens={spacingTokens}
       />
     </div>
   );

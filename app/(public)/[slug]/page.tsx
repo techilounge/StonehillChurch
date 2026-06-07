@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPageBySlug } from "@/lib/data/pages";
+import { getCachedSpacingTokens } from "@/lib/data/siteSettings";
 import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
 import { PageHero } from "@/components/public/PageHero";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
@@ -58,7 +59,10 @@ export function generateStaticParams() {
 
 export default async function DynamicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const page = await getPageBySlug(slug);
+  const [page, spacingTokens] = await Promise.all([
+    getPageBySlug(slug),
+    getCachedSpacingTokens(),
+  ]);
 
   if (!page) {
     notFound();
@@ -128,7 +132,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
       <div className={hasPageBg ? "relative" : undefined}>
         {hero}
         {backLink}
-        <PageBuilderRenderer document={page.builderData} />
+        <PageBuilderRenderer document={page.builderData} spacingTokens={spacingTokens} />
       </div>
     </main>
   );

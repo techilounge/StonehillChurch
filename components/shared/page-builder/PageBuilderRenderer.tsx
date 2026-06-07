@@ -8,6 +8,7 @@ import {
   PageColumn,
   PageBlock,
 } from "@/types/pageBuilder";
+import { DEFAULT_SPACING_TOKENS, type SpacingTokens } from "@/types/settings";
 import { Button } from "@/components/shared/Button";
 import { Card } from "@/components/shared/Card";
 import { isValidSafeUrl, sanitizeHtml, sanitizeStyle, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
@@ -15,6 +16,13 @@ import { extractYouTubeVideoId, getYouTubeEmbedUrl, getYouTubeThumbnailUrl } fro
 
 interface PageBuilderRendererProps {
   document: PageBuilderDocument;
+  /**
+   * Global spacing scale. Emitted as CSS custom properties on the page-builder
+   * root so any spacing value with `token` set resolves via `var(--pb-space-*)`.
+   * Falls back to the system defaults when omitted, so existing call sites
+   * keep working without a code change.
+   */
+  spacingTokens?: SpacingTokens;
 }
 
 /**
@@ -29,15 +37,26 @@ const COLUMN_ALIGN_CLASS: Record<string, string> = {
   stretch: "md:items-stretch",
 };
 
-export function PageBuilderRenderer({ document }: PageBuilderRendererProps) {
+export function PageBuilderRenderer({ document, spacingTokens }: PageBuilderRendererProps) {
   if (!document || !document.sections || !Array.isArray(document.sections)) {
     return null;
   }
 
+  const tokens = spacingTokens ?? DEFAULT_SPACING_TOKENS;
   const responsiveCss = buildResponsiveCss(document);
+  // Spacing token CSS variables — scoped to the page-builder-content root so
+  // they don't leak into the rest of the site. Any spacing value with a
+  // `token` set resolves via `var(--pb-space-${token})`.
+  const tokenVars: React.CSSProperties = {
+    ["--pb-space-xs" as any]: `${tokens.xs}px`,
+    ["--pb-space-sm" as any]: `${tokens.sm}px`,
+    ["--pb-space-md" as any]: `${tokens.md}px`,
+    ["--pb-space-lg" as any]: `${tokens.lg}px`,
+    ["--pb-space-xl" as any]: `${tokens.xl}px`,
+  };
 
   return (
-    <div className="page-builder-content">
+    <div className="page-builder-content" style={tokenVars}>
       {responsiveCss && (
         // One <style> block per page collects every section/row/column's
         // tablet + mobile padding/margin overrides. Selectors use the
@@ -61,9 +80,17 @@ const BREAKPOINT_TABLET_MAX = 1024;
 const BREAKPOINT_MOBILE_MAX = 640;
 
 function spacingShorthand(
-  v: { top: number; right: number; bottom: number; left: number; unit?: string } | undefined,
+  v:
+    | { top: number; right: number; bottom: number; left: number; unit?: string; token?: string }
+    | undefined,
 ): string | null {
   if (!v) return null;
+  // When a global spacing token is referenced, render the CSS variable so an
+  // edit in Settings → Design Tokens flows through every page automatically.
+  if (v.token && ["xs", "sm", "md", "lg", "xl"].includes(v.token)) {
+    const ref = `var(--pb-space-${v.token})`;
+    return `${ref} ${ref} ${ref} ${ref}`;
+  }
   const u = v.unit ?? "px";
   return `${v.top}${u} ${v.right}${u} ${v.bottom}${u} ${v.left}${u}`;
 }
@@ -219,11 +246,11 @@ function backgroundFillStyles(cleanStyle: any): React.CSSProperties {
 }
 
 function paddingShorthandFromValues(
-  pv: { top: number; right: number; bottom: number; left: number; unit?: string } | undefined,
+  pv:
+    | { top: number; right: number; bottom: number; left: number; unit?: string; token?: string }
+    | undefined,
 ): string | null {
-  if (!pv) return null;
-  const u = pv.unit ?? "px";
-  return `${pv.top}${u} ${pv.right}${u} ${pv.bottom}${u} ${pv.left}${u}`;
+  return spacingShorthand(pv);
 }
 
 function backgroundOverlayStyles(cleanStyle: any): React.CSSProperties | null {

@@ -80,7 +80,11 @@ export type PaddingUnit = "px" | "rem" | "%";
 
 // Structured per-side spacing. Used for both padding (clamped 0..500) and
 // margin (negative values allowed for hero overlap effects). `linked` is
-// UI-only — the renderer ignores it.
+// UI-only — the renderer ignores it. When `token` is set, all four sides
+// resolve to the matching global spacing token (CSS `var(--pb-space-${token})`)
+// and the numeric `top/right/bottom/left` values are kept as fallback only.
+export type SpacingTokenRef = "xs" | "sm" | "md" | "lg" | "xl";
+
 export type StructuredPadding = {
   top: number;
   right: number;
@@ -88,6 +92,7 @@ export type StructuredPadding = {
   left: number;
   unit?: PaddingUnit;
   linked?: boolean;
+  token?: SpacingTokenRef;
 };
 export type StructuredMargin = StructuredPadding;
 

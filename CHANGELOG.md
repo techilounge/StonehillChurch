@@ -3,6 +3,18 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.2] - 2026-06-07
+
+### Added
+- **Global Spacing Tokens (XS / SM / MD / LG / XL)**
+  - **Settings UI**: New "Design Tokens · Spacing" section in [SettingsEditor.tsx](app/admin/settings/SettingsEditor.tsx) with five numeric inputs (XS / SM / MD / LG / XL) stored under a new `design` settings group as `spacing_tokens: { xs, sm, md, lg, xl }`. Defaults to a Tailwind-ish scale (4 / 8 / 16 / 32 / 64 px).
+  - **Typed data layer**: Added `SpacingTokens` + `DEFAULT_SPACING_TOKENS` to [types/settings.ts](types/settings.ts), plus `getSpacingTokens()` and a 300-second-cached `getCachedSpacingTokens()` in [siteSettings.ts](lib/data/siteSettings.ts) that returns a fully-defaulted token set (any missing or invalid field falls back to the system value).
+  - **Schema**: `StructuredPadding` (and therefore `StructuredMargin`) gained an optional `token?: "xs"|"sm"|"md"|"lg"|"xl"` field. When set, it overrides the per-side numeric values for that device and renders as the matching CSS variable. Validators in [validators.ts](lib/validators.ts) accept the new field for both block- and section-style schemas; sanitization in [pageBuilderSafety.ts](lib/pageBuilderSafety.ts) passes through with an enum check.
+  - **Inspector UX**: The shared [SpacingControl](components/admin/page-builder/SpacingControl.tsx) now shows a token chip row above the four-side inputs. Picking a token (XS/SM/MD/LG/XL) applies it to all four sides at once; the four numeric inputs are disabled while a token is active. Clicking "Custom" or editing any side number drops the token automatically. A footer hint reads "Using token MD — edit in Settings → Design Tokens" so admins know where the value comes from.
+  - **Rendering**: [PageBuilderRenderer.tsx](components/shared/page-builder/PageBuilderRenderer.tsx) emits CSS custom properties (`--pb-space-xs` … `--pb-space-xl`) scoped to the `.page-builder-content` root. The spacing shorthand resolves token values as `var(--pb-space-${name})` so an edit in Settings flows through every page without a republish. Accepts a new optional `spacingTokens` prop; defaults to the system tokens when omitted so existing call sites keep working.
+  - **Canvas preview**: [BuilderCanvas.tsx](components/admin/page-builder/BuilderCanvas.tsx) exposes the same CSS variables on its wrapper, and the canvas spacing helper in [SortableSection.tsx](components/admin/page-builder/SortableSection.tsx) resolves tokens through `var(--pb-space-*)` too — so the editor preview updates live when token values change in Settings.
+  - **Wiring**: The named-route renderers ([/about](app/(public)/about/page.tsx), [/our-beliefs](app/(public)/our-beliefs/page.tsx), [/[slug]](app/(public)/[slug]/page.tsx)) and [admin/pages/[id]](app/admin/pages/[id]/page.tsx) all fetch tokens server-side and pass them through. Cache key is `["site-settings", "spacing-tokens"]` with a 300-second revalidate, sharing the `"site-settings"` cache tag so saving in the admin invalidates the public reads on the next request.
+
 ## [0.7.1] - 2026-06-07
 
 ### Added

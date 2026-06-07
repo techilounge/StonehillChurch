@@ -42,8 +42,16 @@ function previewBgFillStyle(style: PageBuilderSection["style"]): React.CSSProper
   }
   return {};
 }
-function spacingShorthand(v: { top: number; right: number; bottom: number; left: number; unit?: string } | undefined): string | null {
+function spacingShorthand(
+  v: { top: number; right: number; bottom: number; left: number; unit?: string; token?: string } | undefined,
+): string | null {
   if (!v) return null;
+  // Token mode resolves to a CSS variable so the canvas preview tracks
+  // updates from Settings → Design Tokens automatically.
+  if (v.token && ["xs", "sm", "md", "lg", "xl"].includes(v.token)) {
+    const ref = `var(--pb-space-${v.token})`;
+    return `${ref} ${ref} ${ref} ${ref}`;
+  }
   const u = v.unit ?? "px";
   return `${v.top}${u} ${v.right}${u} ${v.bottom}${u} ${v.left}${u}`;
 }

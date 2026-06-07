@@ -3,7 +3,12 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { getAdminFirestore } from "@/lib/firebaseAdmin";
 import { collections } from "@/lib/constants/collections";
-import type { SiteSettingDoc } from "@/types/settings";
+import {
+  DEFAULT_SPACING_TOKENS,
+  SPACING_TOKEN_NAMES,
+  type SiteSettingDoc,
+  type SpacingTokens,
+} from "@/types/settings";
 import { logDataFallback, withReadTimeout } from "./utils";
 
 export type SiteSettingsMap = Record<string, string>;
@@ -59,4 +64,40 @@ export const getCachedSiteSettings = unstable_cache(
     revalidate: 300,
     tags: ["site-settings"],
   },
+);
+
+/**
+ * Reads the configured global Page Builder spacing tokens (XS/SM/MD/LG/XL).
+ * Returns the defaults when nothing has been saved or any field is invalid,
+ * so callers always get a complete token set. Values are integer pixel sizes.
+ */
+export async function getSpacingTokens(): Promise<SpacingTokens> {
+  try {
+    const db = getAdminFirestore();
+    const snapshot = await withReadTimeout(
+      db.collection(collections.siteSettings).where("key", "==", "design").limit(1).get(),
+    );
+    if (snapshot.empty) return { ...DEFAULT_SPACING_TOKENS };
+    const data = snapshot.docs[0].data() as SiteSettingDoc;
+    const value = isPlainObject(data.value) ? (data.value as Record<string, unknown>) : null;
+    const raw = value && isPlainObject(value.spacing_tokens) ? (value.spacing_tokens as Record<string, unknown>) : null;
+    if (!raw) return { ...DEFAULT_SPACING_TOKENS };
+
+    const tokens: SpacingTokens = { ...DEFAULT_SPACING_TOKENS };
+    for (const name of SPACING_TOKEN_NAMES) {
+      const v = raw[name];
+      const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+      if (Number.isFinite(n) && n >= 0 && n <= 500) tokens[name] = Math.round(n);
+    }
+    return tokens;
+  } catch (error) {
+    logDataFallback("getSpacingTokens", error);
+    return { ...DEFAULT_SPACING_TOKENS };
+  }
+}
+
+export const getCachedSpacingTokens = unstable_cache(
+  getSpacingTokens,
+  ["site-settings", "spacing-tokens"],
+  { revalidate: 300, tags: ["site-settings"] },
 );
