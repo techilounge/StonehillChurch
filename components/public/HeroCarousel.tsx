@@ -14,7 +14,10 @@ import type { HomepageSlide } from "@/types/content";
 
 interface HeroCarouselProps {
   slides: Serialized<HomepageSlide>[];
+  isLive?: boolean;
 }
+
+const isWatchLive = (label?: string | null) => label?.toLowerCase().trim() === "watch live";
 
 function normalizeOverlayOpacity(value: number | null | undefined) {
   const raw = typeof value === "number" && Number.isFinite(value) ? value : 0.45;
@@ -23,7 +26,7 @@ function normalizeOverlayOpacity(value: number | null | undefined) {
   return Math.min(Math.max(decimal, 0.25), 0.85);
 }
 
-export function HeroCarousel({ slides }: HeroCarouselProps) {
+export function HeroCarousel({ slides, isLive = false }: HeroCarouselProps) {
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -131,22 +134,58 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
                     {slide.subtitle}
                   </p>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                    {slide.primaryCtaLabel && slide.primaryCtaHref && (
-                      <Link
-                        href={slide.primaryCtaHref}
-                        className={cn(buttonVariants({ variant: "default", size: "lg" }), "bg-[#FFBD11] text-white hover:bg-[#FFBD11]/90 border-none")}
-                      >
-                        {slide.primaryCtaLabel}
-                      </Link>
-                    )}
-                    {slide.secondaryCtaLabel && slide.secondaryCtaHref && (
-                      <Link
-                        href={slide.secondaryCtaHref}
-                        className={cn(buttonVariants({ variant: "outline", size: "lg" }), "bg-white/10 text-white border-white/30 backdrop-blur-sm hover:bg-white/20")}
-                      >
-                        {slide.secondaryCtaLabel}
-                      </Link>
-                    )}
+                    {slide.primaryCtaLabel && slide.primaryCtaHref && (() => {
+                      const isLiveBtn = isLive && isWatchLive(slide.primaryCtaLabel);
+                      return (
+                        <Link
+                          href={slide.primaryCtaHref}
+                          aria-label={isLiveBtn ? `${slide.primaryCtaLabel} — Live stream currently active` : undefined}
+                          className={cn(
+                            buttonVariants({ variant: "default", size: "lg" }),
+                            isLiveBtn
+                              ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:text-white transition-colors motion-safe:animate-pulse-glow"
+                              : "bg-[#FFBD11] text-white hover:bg-[#FFBD11]/90 border-none"
+                          )}
+                        >
+                          {isLiveBtn && (
+                            <span className="mr-1.5 inline-flex items-center gap-1 rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                              <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                              </span>
+                              Live
+                            </span>
+                          )}
+                          {slide.primaryCtaLabel}
+                        </Link>
+                      );
+                    })()}
+                    {slide.secondaryCtaLabel && slide.secondaryCtaHref && (() => {
+                      const isLiveBtn = isLive && isWatchLive(slide.secondaryCtaLabel);
+                      return (
+                        <Link
+                          href={slide.secondaryCtaHref}
+                          aria-label={isLiveBtn ? `${slide.secondaryCtaLabel} — Live stream currently active` : undefined}
+                          className={cn(
+                            buttonVariants({ variant: "outline", size: "lg" }),
+                            isLiveBtn
+                              ? "bg-red-600 text-white border-red-600 hover:bg-red-700 hover:text-white transition-colors motion-safe:animate-pulse-glow"
+                              : "bg-white/10 text-white border-white/30 backdrop-blur-sm hover:bg-white/20"
+                          )}
+                        >
+                          {isLiveBtn && (
+                            <span className="mr-1.5 inline-flex items-center gap-1 rounded bg-white/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                              <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                              </span>
+                              Live
+                            </span>
+                          )}
+                          {slide.secondaryCtaLabel}
+                        </Link>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

@@ -106,6 +106,7 @@ export default function DesignShowcase() {
             </div>
             <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
               <HeroCarousel 
+                isLive={true}
                 slides={[
                   {
                     id: "1",
@@ -115,8 +116,8 @@ export default function DesignShowcase() {
                     imageAlt: "Sample background",
                     primaryCtaLabel: "Learn More",
                     primaryCtaHref: "#",
-                    secondaryCtaLabel: "",
-                    secondaryCtaHref: "",
+                    secondaryCtaLabel: "Watch Live",
+                    secondaryCtaHref: "#",
                     overlayOpacity: 60,
                     active: true,
                     status: "published",

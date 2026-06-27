@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.3] - 2026-06-27
+
+### Added
+- **Dynamic Live Stream Indicator in Carousel and Latest Sermon Section**
+  - **HeroCarousel dynamic watch live**: Updated [HeroCarousel.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/HeroCarousel.tsx) to accept an optional `isLive` prop and dynamically transform any primary/secondary CTA buttons labeled "Watch Live" (case-insensitive) to a red styling (`bg-red-600 hover:bg-red-700`) with a pulsing glow animation (`motion-safe:animate-pulse-glow`), a visual "LIVE" badge/dot, and accessible `aria-label="Watch Live — Live stream currently active"`.
+  - **Homepage wiring**: Updated [page.tsx](file:///c:/Users/techi/APPs/Stonehill/app/(public)/page.tsx) to pass the live status (`!!latestSermon?.isLive`) to `HeroCarousel`.
+  - **Latest Sermon Section indicator**: Updated [LatestSermonSection.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/LatestSermonSection.tsx) to dynamically adjust the "Watch Live" button's design. It now displays normal styling (dark/evergreen) when the stream is not live, and transitions to red with the pulse animation and "LIVE" badge only when active.
+
 ## [0.7.2] - 2026-06-07
 
 ### Added
