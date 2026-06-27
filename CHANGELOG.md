@@ -10,6 +10,7 @@ All notable changes to the Stonehill Church website will be documented in this f
   - **Shared Live State Provider**: Created [LiveStatusProvider.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/LiveStatusProvider.tsx) and wired it in [layout.tsx](file:///c:/Users/techi/APPs/Stonehill/app/(public)/layout.tsx) to manage live stream status as a single source of truth. Features a 20-second client-polling interval and fallback timeout logic (forces state to `false` after 2.5 minutes of failures) to prevent stuck live states.
   - **Public endpoint**: Added `/api/live-status` in [route.ts](file:///c:/Users/techi/APPs/Stonehill/app/api/live-status/route.ts) for client-side polling.
   - **Subscribed client components**: Refactored `HeroCarousel`, `QuickActions`, and `LatestSermonSection` to consume `useLiveStatus` state so indicators activate/deactivate in real-time. Extracted `/live` page's indicator to a new client component `LiveLabel` to achieve the same client-side sync.
+  - **Form Field hydration error fix**: Added `suppressHydrationWarning` to the FormField wrapper div in [FormField.tsx](file:///c:/Users/techi/APPs/Stonehill/components/forms/FormField.tsx) to prevent Next.js hydration mismatches caused by password manager browser extensions (like LastPass or 1Password) injecting helper icons inside fields on client-side load.
 
 ## [0.7.3] - 2026-06-27
 

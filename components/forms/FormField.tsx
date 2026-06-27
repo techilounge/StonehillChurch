@@ -60,7 +60,7 @@ export function FormField({
     : child;
 
   return (
-    <div className={cn("grid gap-2", className)} {...props}>
+    <div className={cn("grid gap-2", className)} suppressHydrationWarning {...props}>
       {label && (
         <label htmlFor={fieldId} className="text-sm font-medium text-slate-900">
           {label}
