@@ -11,6 +11,7 @@ import { buttonVariants } from "@/lib/buttonVariants";
 import { cn } from "@/lib/utils";
 import type { Serialized } from "@/lib/data/homepage";
 import type { HomepageSlide } from "@/types/content";
+import { useLiveStatus } from "@/components/public/LiveStatusProvider";
 
 interface HeroCarouselProps {
   slides: Serialized<HomepageSlide>[];
@@ -26,7 +27,8 @@ function normalizeOverlayOpacity(value: number | null | undefined) {
   return Math.min(Math.max(decimal, 0.25), 0.85);
 }
 
-export function HeroCarousel({ slides, isLive = false }: HeroCarouselProps) {
+export function HeroCarousel({ slides }: HeroCarouselProps) {
+  const { isLive } = useLiveStatus();
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {

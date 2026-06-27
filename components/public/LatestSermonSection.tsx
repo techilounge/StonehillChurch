@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { PlayCircle } from "lucide-react";
@@ -6,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { SermonCard } from "./SermonCard";
 import type { Serialized } from "@/lib/data/homepage";
 import type { Sermon } from "@/types/content";
+import { useLiveStatus } from "@/components/public/LiveStatusProvider";
 
 interface LatestSermonSectionProps {
   sermon: Serialized<Sermon> | null;
@@ -27,7 +30,7 @@ export function LatestSermonSection({ sermon }: LatestSermonSectionProps) {
     );
   }
 
-  const isLive = !!sermon?.isLive;
+  const { isLive } = useLiveStatus();
 
   return (
     <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">

@@ -5,6 +5,7 @@ import { CalendarDays, Clock, ExternalLink, Radio, Youtube } from "lucide-react"
 import { PageHero } from "@/components/public/PageHero";
 import { SermonCard } from "@/components/public/SermonCard";
 import { YouTubeLiteEmbed } from "@/components/public/YouTubeLiteEmbed";
+import { LiveLabel } from "@/components/public/LiveLabel";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { getSermons } from "@/lib/data/sermons";
 import { getSiteSettings } from "@/lib/data/siteSettings";
@@ -112,25 +113,7 @@ export default async function LiveStreamPage() {
           <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft">
             <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
               <div className="flex flex-wrap items-center gap-3">
-                <span
-                  role={isLiveActive ? "status" : undefined}
-                  aria-label={isLiveActive ? "Live stream currently active" : undefined}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.16em] transition-all",
-                    isLiveActive
-                      ? "bg-red-100 text-red-700 border border-red-200 motion-safe:animate-pulse-glow"
-                      : "bg-slate-50 text-stonehill-dark border border-transparent",
-                  )}
-                >
-                  <Radio className="h-3.5 w-3.5" aria-hidden="true" />
-                  {isLiveActive ? "Live Stream" : "Online Worship"}
-                  {isLiveActive && (
-                    <span className="relative flex h-1.5 w-1.5 ml-0.5" aria-hidden="true">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-600"></span>
-                    </span>
-                  )}
-                </span>
+                <LiveLabel showLiveBanner={youtubeSettings.showLiveBanner} />
                 <h2 className="text-xl font-semibold text-stonehill-primary">
                   Stonehill SDA Church Worship
                 </h2>

@@ -6,6 +6,7 @@ import { organizationJsonLd, placeJsonLd, siteSettingsToSeoSettings } from "@/li
 
 import { AppCheckInit } from "@/components/public/AppCheckInit";
 import { PopupController } from "@/components/public/PopupController";
+import { LiveStatusProvider } from "@/components/public/LiveStatusProvider";
 
 export const revalidate = 300;
 
@@ -16,27 +17,35 @@ export default async function PublicLayout({
 }>) {
   const { getCachedSiteSettings } = await import("@/lib/data/siteSettings");
   const { getCachedMenus } = await import("@/lib/data/menus");
-  const [siteSettings, menus] = await Promise.all([
+  const { getLatestSermon } = await import("@/lib/data/sermons");
+  const { getYoutubeSettings } = await import("@/lib/data/youtubeSettings");
+  
+  const [siteSettings, menus, latestSermon, youtubeSettings] = await Promise.all([
     getCachedSiteSettings(),
     getCachedMenus(),
+    getLatestSermon(),
+    getYoutubeSettings(),
   ]);
+  
+  const initialIsLive = !!latestSermon?.isLive || !!youtubeSettings.showLiveBanner;
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <TopAnnouncementBar />
-      <PublicHeader settings={siteSettings} headerMenu={menus.header} />
-      {/*
-       * Skip-to-content anchor. NOT a <main> element — each (public) page
-       * already wraps its content in its own <main> for proper landmark
-       * semantics. Nesting <main> here caused React 19/Turbopack to flag a
-       * hydration mismatch because browsers auto-close the outer <main> when
-       * they parse a nested one, breaking the SSR/CSR DOM agreement.
-       */}
-      <div id="main-content" tabIndex={-1}>
-        {children}
-      </div>
-      <PublicFooter settings={siteSettings} footerMenu={menus.footer} />
+      <LiveStatusProvider initialIsLive={initialIsLive}>
+        <TopAnnouncementBar />
+        <PublicHeader settings={siteSettings} headerMenu={menus.header} />
+        {/*
+         * Skip-to-content anchor. NOT a <main> element — each (public) page
+         * already wraps its content in its own <main> for proper landmark
+         * semantics. Nesting <main> here caused React 19/Turbopack to flag a
+         * hydration mismatch because browsers auto-close the outer <main> when
+         * they parse a nested one, breaking the SSR/CSR DOM agreement.
+         */}
+        <div id="main-content" tabIndex={-1}>
+          {children}
+        </div>
+        <PublicFooter settings={siteSettings} footerMenu={menus.footer} />
       {/*
        * JSON-LD lives at the bottom of the layout as the last child of the
        * outer div. Placing it here (rather than as a Fragment sibling at the
@@ -48,6 +57,7 @@ export default async function PublicLayout({
       <JsonLd data={[organizationJsonLd(seoSettings), placeJsonLd(seoSettings)]} />
       <AppCheckInit />
       <PopupController />
+      </LiveStatusProvider>
     </div>
   );
 }

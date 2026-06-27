@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.4] - 2026-06-27
+
+### Fixed
+- **Resolve Live Indicator Reset Failure Across Homepage & Live Page Components**
+  - **Shared Live State Provider**: Created [LiveStatusProvider.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/LiveStatusProvider.tsx) and wired it in [layout.tsx](file:///c:/Users/techi/APPs/Stonehill/app/(public)/layout.tsx) to manage live stream status as a single source of truth. Features a 20-second client-polling interval and fallback timeout logic (forces state to `false` after 2.5 minutes of failures) to prevent stuck live states.
+  - **Public endpoint**: Added `/api/live-status` in [route.ts](file:///c:/Users/techi/APPs/Stonehill/app/api/live-status/route.ts) for client-side polling.
+  - **Subscribed client components**: Refactored `HeroCarousel`, `QuickActions`, and `LatestSermonSection` to consume `useLiveStatus` state so indicators activate/deactivate in real-time. Extracted `/live` page's indicator to a new client component `LiveLabel` to achieve the same client-side sync.
+
 ## [0.7.3] - 2026-06-27
 
 - **Dynamic Live Stream Indicator in Carousel, Latest Sermon Section, and Live Page**

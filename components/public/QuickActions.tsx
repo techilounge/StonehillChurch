@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import {
@@ -10,6 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
+import { useLiveStatus } from "@/components/public/LiveStatusProvider";
 
 type QuickAction = {
   title: string;
@@ -67,7 +70,8 @@ export interface QuickActionsProps {
   isLive?: boolean;
 }
 
-export function QuickActions({ isLive = false }: QuickActionsProps) {
+export function QuickActions({ isLive: initialIsLive = false }: QuickActionsProps) {
+  const { isLive } = useLiveStatus();
   return (
     <section className="py-12 bg-white sm:py-16 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
