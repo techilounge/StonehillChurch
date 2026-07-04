@@ -433,15 +433,31 @@ export const userInviteSchema = z.object({
 });
 
 // siteSettings
+const siteSettingPrimitiveSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
+// Allow up to two levels of nesting so structured configs
+// (e.g. { height: { mode, preset, customValue, unit } }) pass validation.
+const siteSettingNestedRecordSchema = z.record(
+  z.union([
+    siteSettingPrimitiveSchema,
+    z.record(siteSettingPrimitiveSchema),
+  ]),
+);
+
 export const siteSettingValueSchema: z.ZodType<
-  string | number | boolean | null | string[] | Record<string, string | number | boolean | null>
+  | string
+  | number
+  | boolean
+  | null
+  | string[]
+  | Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>
 > = z.union([
   z.string(),
   z.number(),
   z.boolean(),
   z.null(),
   z.array(z.string()),
-  z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])),
+  siteSettingNestedRecordSchema,
 ]);
 
 export const siteSettingSchema = z.object({
