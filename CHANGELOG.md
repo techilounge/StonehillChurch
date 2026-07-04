@@ -6,9 +6,12 @@ All notable changes to the Stonehill Church website will be documented in this f
 ## [0.7.5] - 2026-07-04
 
 ### Added
+- **Homepage Slide Height Configuration**: Added a "Homepage Slide Height Configuration" section in admin Settings ([SettingsEditor.tsx](file:///c:/Users/techi/APPs/Stonehill/app/admin/settings/SettingsEditor.tsx)) supporting default, preset (Small, Medium, Large, Full Screen), and custom height settings (px, vh, %).
 - **Admin Console Auth Back Button**: Added a "Back to website" link on the admin login page ([page.tsx](file:///c:/Users/techi/APPs/Stonehill/app/admin/login/page.tsx)) allowing users to return to the public home page.
 
 ### Fixed
+- **Settings validation fix**: Added `"design"` to the `siteSettingsGroupSchema` in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) to permit saving site settings under the design group successfully on the server.
+- **Settings editor feedback UX**: Automatically scroll the Settings editor back to the top of the window on save to make the success/error Toast message visible.
 - **Admin Login redirect/issue warning flash**: Updated the "Admin Login" link in [PublicFooter.tsx](file:///c:/Users/techi/APPs/Stonehill/components/layout/PublicFooter.tsx) to point directly to `/admin/login` instead of `/admin/dashboard`, preventing the Server Component redirect sequence that triggered a transient Next.js/Turbopack dev issue overlay.
 
 ## [0.7.4] - 2026-06-27

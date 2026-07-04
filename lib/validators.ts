@@ -77,6 +77,7 @@ export const siteSettingsGroupSchema = z.enum([
   "giving",
   "service_times",
   "seo",
+  "design",
 ]);
 
 export const auditActionSchema = z.enum([

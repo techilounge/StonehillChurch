@@ -12,10 +12,12 @@ import { cn } from "@/lib/utils";
 import type { Serialized } from "@/lib/data/homepage";
 import type { HomepageSlide } from "@/types/content";
 import { useLiveStatus } from "@/components/public/LiveStatusProvider";
+import type { HomepageSlidesConfig } from "@/types/settings";
 
 interface HeroCarouselProps {
   slides: Serialized<HomepageSlide>[];
   isLive?: boolean;
+  heightConfig?: HomepageSlidesConfig;
 }
 
 const isWatchLive = (label?: string | null) => label?.toLowerCase().trim() === "watch live";
@@ -27,9 +29,100 @@ function normalizeOverlayOpacity(value: number | null | undefined) {
   return Math.min(Math.max(decimal, 0.25), 0.85);
 }
 
-export function HeroCarousel({ slides }: HeroCarouselProps) {
+export function HeroCarousel({ slides, heightConfig }: HeroCarouselProps) {
   const { isLive } = useLiveStatus();
   const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Resolve height configuration
+  let heightDesktop = "60vh";
+  let heightTablet = "60vh";
+  let heightMobile = "60vh";
+
+  let minHeightDesktop = "500px";
+  let minHeightTablet = "500px";
+  let minHeightMobile = "500px";
+
+  const mode = heightConfig?.height?.mode || "default";
+
+  if (mode === "default") {
+    heightDesktop = "60vh";
+    heightTablet = "60vh";
+    heightMobile = "60vh";
+    minHeightDesktop = "500px";
+    minHeightTablet = "500px";
+    minHeightMobile = "500px";
+  } else if (mode === "preset") {
+    const preset = heightConfig?.height?.preset || "medium";
+    if (preset === "small") {
+      heightDesktop = "45vh";
+      heightTablet = "40vh";
+      heightMobile = "35vh";
+      minHeightDesktop = "400px";
+      minHeightTablet = "300px";
+      minHeightMobile = "250px";
+    } else if (preset === "medium") {
+      heightDesktop = "60vh";
+      heightTablet = "50vh";
+      heightMobile = "40vh";
+      minHeightDesktop = "500px";
+      minHeightTablet = "400px";
+      minHeightMobile = "300px";
+    } else if (preset === "large") {
+      heightDesktop = "75vh";
+      heightTablet = "65vh";
+      heightMobile = "55vh";
+      minHeightDesktop = "650px";
+      minHeightTablet = "550px";
+      minHeightMobile = "450px";
+    } else if (preset === "fullscreen") {
+      heightDesktop = "100dvh";
+      heightTablet = "100dvh";
+      heightMobile = "100dvh";
+      minHeightDesktop = "100%";
+      minHeightTablet = "100%";
+      minHeightMobile = "100%";
+    }
+  } else if (mode === "custom") {
+    const val = heightConfig?.height?.customValue || "600";
+    const unit = heightConfig?.height?.unit || "px";
+    const num = parseFloat(val);
+    const cleanedVal = Number.isFinite(num) ? num : 600;
+
+    if (unit === "px") {
+      heightDesktop = `${cleanedVal}px`;
+      heightTablet = `${Math.round(cleanedVal * 0.85)}px`;
+      heightMobile = `${Math.round(cleanedVal * 0.7)}px`;
+      
+      minHeightDesktop = `${Math.min(500, cleanedVal)}px`;
+      minHeightTablet = `${Math.min(400, Math.round(cleanedVal * 0.85))}px`;
+      minHeightMobile = `${Math.min(300, Math.round(cleanedVal * 0.7))}px`;
+    } else if (unit === "vh") {
+      heightDesktop = `${cleanedVal}vh`;
+      heightTablet = `${Math.round(cleanedVal * 0.85)}vh`;
+      heightMobile = `${Math.round(cleanedVal * 0.7)}vh`;
+      
+      minHeightDesktop = "400px";
+      minHeightTablet = "300px";
+      minHeightMobile = "250px";
+    } else { // %
+      heightDesktop = `${cleanedVal}%`;
+      heightTablet = `${cleanedVal}%`;
+      heightMobile = `${cleanedVal}%`;
+      
+      minHeightDesktop = "400px";
+      minHeightTablet = "300px";
+      minHeightMobile = "250px";
+    }
+  }
+
+  const resolvedHeightStyle = {
+    "--slide-height-desktop": heightDesktop,
+    "--slide-height-tablet": heightTablet,
+    "--slide-height-mobile": heightMobile,
+    "--slide-min-height-desktop": minHeightDesktop,
+    "--slide-min-height-tablet": minHeightTablet,
+    "--slide-min-height-mobile": minHeightMobile,
+  } as React.CSSProperties;
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -78,7 +171,28 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
 
   if (!slides || slides.length === 0) {
     return (
-      <div className="relative w-full h-[60vh] min-h-[500px] bg-stonehill-primary flex items-center justify-center text-center px-4">
+      <div 
+        className="relative w-full bg-stonehill-primary flex items-center justify-center text-center px-4 hero-slide"
+        style={resolvedHeightStyle}
+      >
+        <style>{`
+          .hero-slide {
+            height: var(--slide-height-mobile);
+            min-height: var(--slide-min-height-mobile);
+          }
+          @media (min-width: 640px) {
+            .hero-slide {
+              height: var(--slide-height-tablet);
+              min-height: var(--slide-min-height-tablet);
+            }
+          }
+          @media (min-width: 1024px) {
+            .hero-slide {
+              height: var(--slide-height-desktop);
+              min-height: var(--slide-min-height-desktop);
+            }
+          }
+        `}</style>
         <div className="absolute inset-0 bg-slate-900/40 z-10" />
         <div className="relative z-20 max-w-4xl mx-auto space-y-6">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
@@ -101,12 +215,31 @@ export function HeroCarousel({ slides }: HeroCarouselProps) {
       aria-roledescription="carousel"
       aria-label="Featured slides"
     >
+      <style>{`
+        .hero-slide {
+          height: var(--slide-height-mobile);
+          min-height: var(--slide-min-height-mobile);
+        }
+        @media (min-width: 640px) {
+          .hero-slide {
+            height: var(--slide-height-tablet);
+            min-height: var(--slide-min-height-tablet);
+          }
+        }
+        @media (min-width: 1024px) {
+          .hero-slide {
+            height: var(--slide-height-desktop);
+            min-height: var(--slide-min-height-desktop);
+          }
+        }
+      `}</style>
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y" aria-live="polite" aria-atomic="true">
           {slides.map((slide, index) => (
             <div 
               key={slide.id} 
-              className="relative flex-[0_0_100%] min-w-0 h-[60vh] min-h-[500px] bg-stonehill-primary"
+              className="relative flex-[0_0_100%] min-w-0 bg-stonehill-primary hero-slide"
+              style={resolvedHeightStyle}
               role="group"
               aria-roledescription="slide"
               aria-label={`Slide ${index + 1} of ${slides.length}`}

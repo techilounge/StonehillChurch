@@ -56,3 +56,23 @@ export type YoutubeSettings = {
 };
 
 export type YoutubeSettingsConfig = Omit<YoutubeSettings, "updatedAt" | "updatedBy">;
+
+export type HomepageSlidesHeightConfig = {
+  mode: "default" | "preset" | "custom";
+  preset: "small" | "medium" | "large" | "fullscreen";
+  customValue: string;
+  unit: "px" | "%" | "vh";
+};
+
+export type HomepageSlidesConfig = {
+  height: HomepageSlidesHeightConfig;
+};
+
+export const DEFAULT_HOMEPAGE_SLIDES_CONFIG: HomepageSlidesConfig = {
+  height: {
+    mode: "default",
+    preset: "medium",
+    customValue: "600",
+    unit: "px",
+  },
+};

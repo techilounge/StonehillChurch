@@ -97,8 +97,10 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
       } else {
         setMessage({ type: "error", text: res.error.message || "Failed to update settings." });
       }
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e: any) {
       setMessage({ type: "error", text: e.message || "An unexpected error occurred." });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +112,81 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
       [key]: {
         ...(prev[key] || {}),
         [field]: val,
+      },
+    }));
+  };
+
+  const slideConfig = settings["homepageSlides"] || {
+    height: {
+      mode: "default",
+      preset: "medium",
+      customValue: "600",
+      unit: "px"
+    }
+  };
+
+  const handleHeightModeChange = (mode: "default" | "preset" | "custom") => {
+    setSettings((prev) => ({
+      ...prev,
+      homepageSlides: {
+        ...(prev.homepageSlides || {}),
+        height: {
+          ...(prev.homepageSlides?.height || { preset: "medium", customValue: "600", unit: "px" }),
+          mode,
+        },
+      },
+    }));
+  };
+
+  const handleHeightPresetChange = (preset: "small" | "medium" | "large" | "fullscreen") => {
+    setSettings((prev) => ({
+      ...prev,
+      homepageSlides: {
+        ...(prev.homepageSlides || {}),
+        height: {
+          ...(prev.homepageSlides?.height || { mode: "preset", customValue: "600", unit: "px" }),
+          preset,
+        },
+      },
+    }));
+  };
+
+  const handleCustomValueChange = (customValue: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      homepageSlides: {
+        ...(prev.homepageSlides || {}),
+        height: {
+          ...(prev.homepageSlides?.height || { mode: "custom", preset: "medium", unit: "px" }),
+          customValue,
+        },
+      },
+    }));
+  };
+
+  const handleHeightUnitChange = (unit: "px" | "%" | "vh") => {
+    setSettings((prev) => ({
+      ...prev,
+      homepageSlides: {
+        ...(prev.homepageSlides || {}),
+        height: {
+          ...(prev.homepageSlides?.height || { mode: "custom", preset: "medium", customValue: "600" }),
+          unit,
+        },
+      },
+    }));
+  };
+
+  const handleResetHeight = () => {
+    setSettings((prev) => ({
+      ...prev,
+      homepageSlides: {
+        height: {
+          mode: "default",
+          preset: "medium",
+          customValue: "600",
+          unit: "px",
+        },
       },
     }));
   };
@@ -405,6 +482,133 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
               onClick={() => handleSave("design", "design", settings["design"] || {})}
             >
               <Save className="h-4 w-4 mr-2" /> Save Spacing Tokens
+            </Button>
+          </div>
+        )}
+      </section>
+
+      {/* Homepage Slide Height Configuration */}
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Homepage Slide Height Configuration</h3>
+          <p className="text-sm text-slate-500">
+            Configure the height of the hero image slides on the homepage.
+          </p>
+        </div>
+        <div className="p-6 flex flex-col gap-6">
+          {/* Mode Selector */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-900">Height Mode</label>
+            <div className="flex flex-wrap gap-6 mt-1">
+              {[
+                { label: "Default (60vh / current height)", value: "default" },
+                { label: "Preset Heights", value: "preset" },
+                { label: "Custom Height", value: "custom" },
+              ].map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
+                  <input
+                    type="radio"
+                    name="slide-height-mode"
+                    value={opt.value}
+                    checked={slideConfig.height?.mode === opt.value}
+                    disabled={!canEdit || isSubmitting}
+                    onChange={(e) => handleHeightModeChange(e.target.value as any)}
+                    className="text-stonehill-accent focus:ring-stonehill-accent"
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Preset Height Selector */}
+          {slideConfig.height?.mode === "preset" && (
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-slate-900">Choose Preset</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-1">
+                {[
+                  { label: "Small (45vh)", value: "small" },
+                  { label: "Medium (60vh)", value: "medium" },
+                  { label: "Large (75vh)", value: "large" },
+                  { label: "Full Screen (100vh)", value: "fullscreen" },
+                ].map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`flex flex-col items-center justify-center p-4 border rounded-xl cursor-pointer text-center transition-all ${
+                      slideConfig.height?.preset === opt.value
+                        ? "border-stonehill-accent bg-slate-50 text-stonehill-primary font-medium"
+                        : "border-slate-200 text-slate-600 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="slide-height-preset"
+                      value={opt.value}
+                      checked={slideConfig.height?.preset === opt.value}
+                      disabled={!canEdit || isSubmitting}
+                      onChange={(e) => handleHeightPresetChange(e.target.value as any)}
+                      className="sr-only"
+                    />
+                    <span className="text-sm">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Height Inputs */}
+          {slideConfig.height?.mode === "custom" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-slate-900">Custom Value</label>
+                <TextInput
+                  type="number"
+                  min={1}
+                  max={2000}
+                  value={slideConfig.height?.customValue || ""}
+                  disabled={!canEdit || isSubmitting}
+                  onChange={(e) => handleCustomValueChange(e.target.value)}
+                  placeholder="e.g. 600"
+                />
+                <span className="text-xs text-slate-500">
+                  Value must be between 1 and 2000.
+                </span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-slate-900">Unit</label>
+                <select
+                  value={slideConfig.height?.unit || "px"}
+                  disabled={!canEdit || isSubmitting}
+                  onChange={(e) => handleHeightUnitChange(e.target.value as any)}
+                  className="flex min-h-[44px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+                >
+                  <option value="px">pixels (px)</option>
+                  <option value="vh">viewport height (vh)</option>
+                  <option value="%">percent (%)</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* Helper Text */}
+          <p className="text-xs text-slate-500 italic mt-2">
+            * This setting applies globally to all Homepage Carousel slides across desktop, tablet, and mobile layouts.
+          </p>
+        </div>
+        {canEdit && (
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-between items-center">
+            <Button
+              variant="outline"
+              disabled={isSubmitting}
+              onClick={handleResetHeight}
+            >
+              Reset to Default
+            </Button>
+            <Button
+              disabled={isSubmitting}
+              onClick={() => handleSave("homepageSlides", "design", slideConfig)}
+            >
+              <Save className="h-4 w-4 mr-2" /> Save Height Settings
             </Button>
           </div>
         )}
