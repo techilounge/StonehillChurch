@@ -11,6 +11,7 @@ All notable changes to the Stonehill Church website will be documented in this f
 
 ### Fixed
 - **Settings validation fix**: Added `"design"` to the `siteSettingsGroupSchema` in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) to permit saving site settings under the design group successfully on the server.
+- **Settings value validation nested schema fix**: Updated `siteSettingValueSchema` in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) to support up to two levels of nesting (e.g. `{ height: { mode, preset, ... } }`) instead of only flat records, preventing "CMS document data is invalid" validation errors on save.
 - **Settings editor feedback UX**: Automatically scroll the Settings editor back to the top of the window on save to make the success/error Toast message visible.
 - **Admin Login redirect/issue warning flash**: Updated the "Admin Login" link in [PublicFooter.tsx](file:///c:/Users/techi/APPs/Stonehill/components/layout/PublicFooter.tsx) to point directly to `/admin/login` instead of `/admin/dashboard`, preventing the Server Component redirect sequence that triggered a transient Next.js/Turbopack dev issue overlay.
 
