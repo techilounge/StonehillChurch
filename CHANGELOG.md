@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.5] - 2026-07-04
+
+### Added
+- **Admin Console Auth Back Button**: Added a "Back to website" link on the admin login page ([page.tsx](file:///c:/Users/techi/APPs/Stonehill/app/admin/login/page.tsx)) allowing users to return to the public home page.
+
+### Fixed
+- **Admin Login redirect/issue warning flash**: Updated the "Admin Login" link in [PublicFooter.tsx](file:///c:/Users/techi/APPs/Stonehill/components/layout/PublicFooter.tsx) to point directly to `/admin/login` instead of `/admin/dashboard`, preventing the Server Component redirect sequence that triggered a transient Next.js/Turbopack dev issue overlay.
+
 ## [0.7.4] - 2026-06-27
 
 ### Fixed

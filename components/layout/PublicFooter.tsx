@@ -155,7 +155,7 @@ export function PublicFooter({ settings, footerMenu }: PublicFooterProps) {
             &copy; {new Date().getFullYear()} Stonehill Seventh-day Adventist Church. All rights reserved.
           </p>
           <div className="mt-4 flex space-x-6 sm:mt-0 text-xs text-slate-500">
-            <Link href="/admin/dashboard" className={cn(footerLinkClassName, "px-1")}>Admin Login</Link>
+            <Link href="/admin/login" className={cn(footerLinkClassName, "px-1")}>Admin Login</Link>
           </div>
         </div>
       </div>

@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { ADMIN_DEFAULT_PATH, safeAdminReturnTo } from "@/lib/adminRoutes";
 import { getCurrentAdminSession } from "@/lib/api/adminSession";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, ArrowLeft } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,17 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
   const message = reasonMessage(params.reason);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
+      {/* Back to Home Link */}
+      <div className="absolute left-4 top-4 sm:left-8 sm:top-8">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-950 hover:bg-slate-200/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to website</span>
+        </Link>
+      </div>
       <div className="w-full max-w-[420px]">
         {/* Header / Logo section */}
         <div className="mb-8 text-center sm:mx-auto sm:w-full sm:max-w-md">
