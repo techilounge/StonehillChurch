@@ -11,7 +11,13 @@ export async function GET() {
       getYoutubeSettings(),
     ]);
 
-    const isLive = !!latestSermon?.isLive || !!youtubeSettings.showLiveBanner;
+    const isLiveFromSermon = !!latestSermon?.isLive;
+    const isLiveFromBanner = !!youtubeSettings.showLiveBanner;
+    const isLive = isLiveFromSermon || isLiveFromBanner;
+
+    console.log(
+      `[LiveStatus API] isLive=${isLive} (sermon.isLive=${isLiveFromSermon}, showLiveBanner=${isLiveFromBanner}, latestSermon=${latestSermon?.title ?? "null"})`
+    );
 
     return NextResponse.json({
       status: "ok",

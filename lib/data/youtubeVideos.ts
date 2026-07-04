@@ -12,7 +12,19 @@ import { logDataFallback } from "./utils";
 const YOUTUBE_PLAYLIST_ITEMS_ENDPOINT = "https://www.googleapis.com/youtube/v3/playlistItems";
 const YOUTUBE_SEARCH_ENDPOINT = "https://www.googleapis.com/youtube/v3/search";
 const UPLOADS_CACHE_SECONDS = 60 * 30;
-const LIVE_CACHE_SECONDS = 60;
+const LIVE_CACHE_SECONDS = 300;
+
+// In-memory fallback cache for live broadcast detection.
+// When the YouTube Search API returns 429 (quota exceeded), we serve
+// the last known successful result instead of flipping isLive to false.
+let _liveBroadcastCache: {
+  video: YouTubeVideo | null;
+  timestamp: number;
+} = { video: null, timestamp: 0 };
+
+// How long (ms) the cached live result remains trustworthy. After this
+// window we stop serving it and accept that we truly don't know.
+const LIVE_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 type YouTubeThumbnail = {
   url?: string;
@@ -154,6 +166,24 @@ export async function getLatestYoutubeUploads(
     .filter((video): video is YouTubeVideo => video !== null);
 }
 
+/**
+ * Serve the in-memory cached live broadcast result when the YouTube API
+ * is unavailable (quota exhaustion, network error, etc.).
+ */
+function _serveLiveFallback(reason: string): YouTubeVideo | null {
+  const age = Date.now() - _liveBroadcastCache.timestamp;
+  if (_liveBroadcastCache.video && age < LIVE_CACHE_TTL_MS) {
+    console.warn(
+      `[getLiveYoutubeBroadcast] Serving cached live result (age=${Math.round(age / 1000)}s) due to: ${reason}`
+    );
+    return _liveBroadcastCache.video;
+  }
+  console.warn(
+    `[getLiveYoutubeBroadcast] No usable cache (age=${Math.round(age / 1000)}s) — returning null. Reason: ${reason}`
+  );
+  return null;
+}
+
 export async function getLiveYoutubeBroadcast(
   settings: Pick<YoutubeSettingsConfig, "channelId">,
 ): Promise<YouTubeVideo | null> {
@@ -161,6 +191,7 @@ export async function getLiveYoutubeBroadcast(
   const channelId = settings.channelId.trim();
 
   if (!apiKey || !channelId) {
+    console.warn("[getLiveYoutubeBroadcast] Missing apiKey or channelId — skipping live check.");
     return null;
   }
 
@@ -179,15 +210,25 @@ export async function getLiveYoutubeBroadcast(
     response = await fetch(url, { headers, next: { revalidate: LIVE_CACHE_SECONDS } });
   } catch (error) {
     logDataFallback("getLiveYoutubeBroadcast", error);
-    return null;
+    return _serveLiveFallback("fetch error");
   }
 
   if (!response.ok) {
+    // Log the response body — YouTube returns quota errors as JSON with
+    // a descriptive reason field (e.g. "quotaExceeded").
+    let body = "";
+    try {
+      body = await response.text();
+    } catch { /* ignore */ }
+    console.error(
+      `[getLiveYoutubeBroadcast] YouTube API responded ${response.status}: ${body.slice(0, 300)}`
+    );
     logDataFallback(
       "getLiveYoutubeBroadcast",
       new Error(`YouTube live API request failed with status ${response.status}.`),
     );
-    return null;
+    // On rate-limit / quota errors, serve the last known result
+    return _serveLiveFallback(`HTTP ${response.status}`);
   }
 
   const data = (await response.json()) as YouTubeSearchResponse;
@@ -195,10 +236,15 @@ export async function getLiveYoutubeBroadcast(
   const videoId = liveItem?.id?.videoId;
 
   if (!videoId) {
+    console.log("[getLiveYoutubeBroadcast] YouTube API returned 200 but no live items found.");
+    // Authoritative "not live" — clear the cache
+    _liveBroadcastCache = { video: null, timestamp: Date.now() };
     return null;
   }
 
-  return {
+  console.log(`[getLiveYoutubeBroadcast] Live broadcast detected: ${videoId}`);
+
+  const result: YouTubeVideo = {
     id: videoId,
     title: decodeHtmlEntities(liveItem?.snippet?.title ?? "Stonehill livestream"),
     description: decodeHtmlEntities(liveItem?.snippet?.description ?? ""),
@@ -206,6 +252,11 @@ export async function getLiveYoutubeBroadcast(
     thumbnailUrl: bestThumbnail({ snippet: liveItem?.snippet }, videoId),
     url: getYouTubeWatchUrl(videoId),
   };
+
+  // Cache the successful result
+  _liveBroadcastCache = { video: result, timestamp: Date.now() };
+
+  return result;
 }
 
 export async function getYoutubeVideoById(videoId: string): Promise<YouTubeVideo | null> {

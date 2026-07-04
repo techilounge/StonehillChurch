@@ -84,8 +84,8 @@ export function LiveStatusProvider({
     // Run first check immediately on mount
     fetchStatus();
 
-    // Poll every 20 seconds
-    const interval = setInterval(fetchStatus, 20 * 1000);
+    // Poll every 60 seconds (reduced from 20s to conserve YouTube API quota)
+    const interval = setInterval(fetchStatus, 60 * 1000);
 
     return () => {
       isMountedRef.current = false;
