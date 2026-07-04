@@ -220,7 +220,7 @@ export async function getLiveYoutubeBroadcast(
     try {
       body = await response.text();
     } catch { /* ignore */ }
-    console.error(
+    console.warn(
       `[getLiveYoutubeBroadcast] YouTube API responded ${response.status}: ${body.slice(0, 300)}`
     );
     logDataFallback(
