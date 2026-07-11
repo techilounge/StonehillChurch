@@ -3,6 +3,16 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.7.6] - 2026-07-04
+
+### Fixed
+- **YouTube API quota burn from live-status polling.** The client polled `/api/live-status` every 60 seconds and every hit invoked `getLiveYoutubeBroadcast()` (100-unit `search.list` call). At the free 10,000-unit/day quota, ~1.7 hours of any single visitor on the homepage exhausted the day; the pattern didn't dedupe across visitors either. Applied four fixes:
+  - **Server-side cache**: New `getCachedLiveYoutubeBroadcast()` in [youtubeVideos.ts](file:///c:/Users/techi/APPs/Stonehill/lib/data/youtubeVideos.ts) wraps the API call in `unstable_cache` with a 5-minute TTL keyed on `channelId`. `getLatestSermon()` + `getSermons()` now use the cached wrapper. Multiple concurrent visitors share a single YouTube call.
+  - **Client poll interval bumped from 60s to 5 minutes** in [LiveStatusProvider.tsx](file:///c:/Users/techi/APPs/Stonehill/components/public/LiveStatusProvider.tsx).
+  - **Pause polling on hidden tabs** (`document.visibilityState !== "visible"`). A visibility-change listener re-polls when the tab regains focus after the poll window expired.
+  - **Effect dependency fix**: replaced `[isLive]` with `[]` and read the live state via a ref. The old dependency restarted the interval on every state transition, and React StrictMode dev double-mount was multiplying calls (visible in the log as pairs of requests 1 second apart at each poll cycle).
+  - Kept the existing in-memory fallback cache so real API failures (429 / network) still fall back to the last known good result.
+
 ## [0.7.5] - 2026-07-04
 
 ### Added

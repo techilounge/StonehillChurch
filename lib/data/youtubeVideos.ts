@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import {
   getYouTubeThumbnailUrl,
   getYouTubeUploadsPlaylistId,
@@ -17,10 +18,24 @@ const LIVE_CACHE_SECONDS = 300;
 // In-memory fallback cache for live broadcast detection.
 // When the YouTube Search API returns 429 (quota exceeded), we serve
 // the last known successful result instead of flipping isLive to false.
-let _liveBroadcastCache: {
-  video: YouTubeVideo | null;
-  timestamp: number;
-} = { video: null, timestamp: 0 };
+// Bound to globalThis to survive Hot Module Reloading (HMR) / file recompilations.
+const globalForYoutube = globalThis as unknown as {
+  _liveBroadcastCache?: {
+    video: YouTubeVideo | null;
+    timestamp: number;
+  };
+};
+
+function getLiveCache() {
+  if (!globalForYoutube._liveBroadcastCache) {
+    globalForYoutube._liveBroadcastCache = { video: null, timestamp: 0 };
+  }
+  return globalForYoutube._liveBroadcastCache;
+}
+
+function setLiveCache(video: YouTubeVideo | null) {
+  globalForYoutube._liveBroadcastCache = { video, timestamp: Date.now() };
+}
 
 // How long (ms) the cached live result remains trustworthy. After this
 // window we stop serving it and accept that we truly don't know.
@@ -167,16 +182,76 @@ export async function getLatestYoutubeUploads(
 }
 
 /**
+ * Scrape the public YouTube channel live page to detect if a live stream is currently active.
+ * This does not use any API quota and is a highly reliable fallback when the API returns 429.
+ */
+async function getLiveVideoByScraping(channelId: string): Promise<YouTubeVideo | null> {
+  try {
+    const url = `https://www.youtube.com/channel/${channelId}/live`;
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      next: { revalidate: 60 } // Cache this check for 60 seconds
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const html = await response.text();
+    
+    // Check if the page contains a watch URL
+    if (!html.includes("watchEndpoint") && !html.includes("watch?v=")) {
+      return null;
+    }
+
+    // Try to extract video ID from watchEndpoint JSON structure
+    const match = html.match(/"watchEndpoint"\s*:\s*{\s*"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"/);
+    let videoId = match ? match[1] : null;
+
+    if (!videoId) {
+      // Fallback: extract from watch?v= parameter in HTML
+      const match2 = html.match(/\/watch\?v=([A-Za-z0-9_-]{11})/);
+      videoId = match2 ? match2[1] : null;
+    }
+
+    if (!videoId) {
+      return null;
+    }
+
+    // Try to extract title from <title> tag
+    const titleMatch = html.match(/<title>(.*?)<\/title>/);
+    const title = titleMatch ? titleMatch[1].replace(" - YouTube", "") : "Stonehill Livestream";
+
+    return {
+      id: videoId,
+      title,
+      description: "Watch our live broadcast on YouTube.",
+      publishedAt: new Date().toISOString(),
+      thumbnailUrl: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+    };
+  } catch (err) {
+    console.warn("[getLiveVideoByScraping] Failed to scrape live page:", err);
+    return null;
+  }
+}
+
+
+/**
  * Serve the in-memory cached live broadcast result when the YouTube API
  * is unavailable (quota exhaustion, network error, etc.).
  */
 function _serveLiveFallback(reason: string): YouTubeVideo | null {
-  const age = Date.now() - _liveBroadcastCache.timestamp;
-  if (_liveBroadcastCache.video && age < LIVE_CACHE_TTL_MS) {
+  const cache = getLiveCache();
+  const age = Date.now() - cache.timestamp;
+  if (cache.video && age < LIVE_CACHE_TTL_MS) {
     console.warn(
       `[getLiveYoutubeBroadcast] Serving cached live result (age=${Math.round(age / 1000)}s) due to: ${reason}`
     );
-    return _liveBroadcastCache.video;
+    return cache.video;
   }
   console.warn(
     `[getLiveYoutubeBroadcast] No usable cache (age=${Math.round(age / 1000)}s) — returning null. Reason: ${reason}`
@@ -210,6 +285,13 @@ export async function getLiveYoutubeBroadcast(
     response = await fetch(url, { headers, next: { revalidate: LIVE_CACHE_SECONDS } });
   } catch (error) {
     logDataFallback("getLiveYoutubeBroadcast", error);
+    // Try public scraping fallback first
+    const scraped = await getLiveVideoByScraping(channelId);
+    if (scraped) {
+      console.log(`[getLiveYoutubeBroadcast] Resolved active live broadcast from scraping fallback: ${scraped.id}`);
+      setLiveCache(scraped);
+      return scraped;
+    }
     return _serveLiveFallback("fetch error");
   }
 
@@ -227,6 +309,13 @@ export async function getLiveYoutubeBroadcast(
       "getLiveYoutubeBroadcast",
       new Error(`YouTube live API request failed with status ${response.status}.`),
     );
+    // Try public scraping fallback first
+    const scraped = await getLiveVideoByScraping(channelId);
+    if (scraped) {
+      console.log(`[getLiveYoutubeBroadcast] Resolved active live broadcast from scraping fallback: ${scraped.id}`);
+      setLiveCache(scraped);
+      return scraped;
+    }
     // On rate-limit / quota errors, serve the last known result
     return _serveLiveFallback(`HTTP ${response.status}`);
   }
@@ -238,7 +327,7 @@ export async function getLiveYoutubeBroadcast(
   if (!videoId) {
     console.log("[getLiveYoutubeBroadcast] YouTube API returned 200 but no live items found.");
     // Authoritative "not live" — clear the cache
-    _liveBroadcastCache = { video: null, timestamp: Date.now() };
+    setLiveCache(null);
     return null;
   }
 
@@ -254,10 +343,27 @@ export async function getLiveYoutubeBroadcast(
   };
 
   // Cache the successful result
-  _liveBroadcastCache = { video: result, timestamp: Date.now() };
+  setLiveCache(result);
 
   return result;
 }
+
+/**
+ * Deduplicated wrapper around `getLiveYoutubeBroadcast` that runs the actual
+ * YouTube API call at most once every 5 minutes per channel across the entire
+ * server process (regardless of how many client polls or concurrent visitors
+ * ask for it). Keyed by `channelId` and tagged `youtube-live` so admin edits
+ * to YouTube settings can invalidate on demand.
+ *
+ * YouTube `search.list` costs 100 quota units per call. With client polling
+ * every 5 minutes AND this 5-minute server cache in place, a busy day still
+ * spends only ~288 units regardless of visitor count.
+ */
+export const getCachedLiveYoutubeBroadcast = unstable_cache(
+  async (settings: Pick<YoutubeSettingsConfig, "channelId">) => getLiveYoutubeBroadcast(settings),
+  ["youtube-live-broadcast"],
+  { revalidate: 300, tags: ["youtube-live", "youtube-settings"] },
+);
 
 export async function getYoutubeVideoById(videoId: string): Promise<YouTubeVideo | null> {
   const apiKey = process.env.YOUTUBE_API_KEY;

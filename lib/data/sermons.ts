@@ -6,7 +6,11 @@ import type { Sermon } from "@/types/content";
 import { PUBLISHED } from "@/types/shared";
 import { logDataFallback, serializeData, withReadTimeout, type Serialized } from "./utils";
 import { getYoutubeSettings } from "./youtubeSettings";
-import { getLatestYoutubeUploads, getYoutubeVideoById, getLiveYoutubeBroadcast } from "./youtubeVideos";
+import {
+  getLatestYoutubeUploads,
+  getYoutubeVideoById,
+  getCachedLiveYoutubeBroadcast,
+} from "./youtubeVideos";
 import type { YouTubeVideo } from "@/lib/youtube";
 
 function youtubeVideoToSermon(video: YouTubeVideo, isLive?: boolean): Serialized<Sermon> {
@@ -41,7 +45,7 @@ export async function getSermons(): Promise<Serialized<Sermon>[]> {
     const youtubeSettings = await getYoutubeSettings();
     if (youtubeSettings.autoFetchLatestSermons) {
       const [liveVideo, videos] = await Promise.all([
-        getLiveYoutubeBroadcast(youtubeSettings),
+        getCachedLiveYoutubeBroadcast({ channelId: youtubeSettings.channelId }),
         getLatestYoutubeUploads(youtubeSettings, 12)
       ]);
       
@@ -118,7 +122,7 @@ export async function getLatestSermon(): Promise<Serialized<Sermon> | null> {
   try {
     const youtubeSettings = await getYoutubeSettings();
     if (youtubeSettings.autoFetchLatestSermons) {
-      const liveVideo = await getLiveYoutubeBroadcast(youtubeSettings);
+      const liveVideo = await getCachedLiveYoutubeBroadcast({ channelId: youtubeSettings.channelId });
       if (liveVideo) {
         return youtubeVideoToSermon(liveVideo, true);
       }
