@@ -72,6 +72,17 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
     }
   };
 
+  const renderFieldError = (fieldName: string) => {
+    const errorMessages = fieldErrors[fieldName];
+    if (!errorMessages || errorMessages.length === 0) return null;
+    return (
+      <div className="flex items-center gap-1.5 mt-1.5 text-xs text-red-600 font-medium">
+        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+        <span>{errorMessages.join(", ")}</span>
+      </div>
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent, forceStatus?: string) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -83,15 +94,13 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
       payload.status = forceStatus;
     }
 
-    // Normalize undefined → null for every declared field. Fields hidden by
-    // `showWhen` (e.g. video* when mediaType is "image", trigger* when the
-    // popup is scheduled) never get touched and stay undefined in state.
-    // The shared CMS schemas use `.nullable()` rather than `.nullish()`, so
-    // undefined fails validation with "Required" / "Expected string, got
-    // undefined" even though null would be perfectly valid.
     for (const field of config.fields) {
-      if (payload[field.name] === undefined) {
-        payload[field.name] = null;
+      if (payload[field.name] === undefined || payload[field.name] === null) {
+        if (field.type === "boolean") {
+          payload[field.name] = false;
+        } else {
+          payload[field.name] = null;
+        }
       }
     }
 
@@ -104,9 +113,21 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
         router.push(`/admin/${routePath}`);
         router.refresh();
       } else {
+        console.log("CMS SAVE RESPONSE ERROR:", JSON.stringify(response.error, null, 2));
         setServerError(response.error.message || "Failed to save document.");
         if (response.error.fieldErrors) {
           setFieldErrors(response.error.fieldErrors);
+          
+          // Smooth scroll to the first invalid field
+          const firstErrField = config.fields.find((f) => response.error.fieldErrors?.[f.name]);
+          if (firstErrField) {
+            setTimeout(() => {
+              const container = document.getElementById(`field-container-${firstErrField.name}`);
+              if (container) {
+                container.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+            }, 50);
+          }
         }
       }
     } catch (err: any) {
@@ -202,7 +223,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
             const value = formData[field.name];
 
             return (
-              <div key={field.name} className="flex flex-col gap-1.5">
+              <div key={field.name} id={`field-container-${field.name}`} className="flex flex-col gap-1.5">
                 <label className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
                   <span className="inline-flex items-center gap-1">
                     {field.label}
@@ -222,14 +243,17 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                 )}
 
                 {field.type === "text" || field.type === "slug" || field.type === "url" || field.type === "email" ? (
-                  <TextInput
-                    type={field.type === "email" ? "email" : field.type === "url" ? "url" : "text"}
-                    value={value || ""}
-                    onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                    placeholder={field.placeholder}
-                    required={field.required}
-                    hasError={hasError}
-                  />
+                  <>
+                    <TextInput
+                      type={field.type === "email" ? "email" : field.type === "url" ? "url" : "text"}
+                      value={value || ""}
+                      onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                      placeholder={field.placeholder}
+                      required={field.required}
+                      hasError={hasError}
+                    />
+                    {renderFieldError(field.name)}
+                  </>
                 ) : field.type === "textarea" || field.type === "richText" ? (
                   <>
                     <TextArea
@@ -261,99 +285,115 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                         </div>
                       );
                     })()}
+                    {renderFieldError(field.name)}
                   </>
                 ) : field.type === "number" ? (
-                  <TextInput
-                    type="number"
-                    value={value ?? ""}
-                    onChange={(e) => handleFieldChange(field.name, e.target.value === "" ? null : Number(e.target.value))}
-                    required={field.required}
-                    hasError={hasError}
-                  />
+                  <>
+                    <TextInput
+                      type="number"
+                      value={value ?? ""}
+                      onChange={(e) => handleFieldChange(field.name, e.target.value === "" ? null : Number(e.target.value))}
+                      required={field.required}
+                      hasError={hasError}
+                    />
+                    {renderFieldError(field.name)}
+                  </>
                 ) : field.type === "boolean" ? (
-                  <CheckboxField
-                    checked={!!value}
-                    onChange={(e) => handleFieldChange(field.name, e.target.checked)}
-                    label={`Enable ${field.label}`}
-                  />
+                  <>
+                    <CheckboxField
+                      checked={!!value}
+                      onChange={(e) => handleFieldChange(field.name, e.target.checked)}
+                      label={`Enable ${field.label}`}
+                    />
+                    {renderFieldError(field.name)}
+                  </>
                 ) : field.type === "select" ? (
-                  <SelectInput
-                    value={value || ""}
-                    onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                    required={field.required}
-                    hasError={hasError}
-                  >
-                    <option value="">Select an option...</option>
-                    {(dynamicOptions?.[field.name] && dynamicOptions[field.name].length > 0
-                      ? dynamicOptions[field.name]
-                      : field.options ?? []
-                    ).map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </SelectInput>
+                  <>
+                    <SelectInput
+                      value={value || ""}
+                      onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                      required={field.required}
+                      hasError={hasError}
+                    >
+                      <option value="">Select an option...</option>
+                      {(dynamicOptions?.[field.name] && dynamicOptions[field.name].length > 0
+                        ? dynamicOptions[field.name]
+                        : field.options ?? []
+                      ).map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </SelectInput>
+                    {renderFieldError(field.name)}
+                  </>
                 ) : field.type === "date" || field.type === "datetime" ? (
-                  <TextInput
-                    type={field.type === "date" ? "date" : "datetime-local"}
-                    value={
-                      value
-                        ? field.type === "date"
-                          ? isoToDateInput(value)
-                          : isoToDatetimeLocal(value)
-                        : ""
-                    }
-                    onChange={(e) => {
-                      const raw = e.target.value;
-                      if (!raw) {
-                        handleFieldChange(field.name, null);
-                        return;
+                  <>
+                    <TextInput
+                      type={field.type === "date" ? "date" : "datetime-local"}
+                      value={
+                        value
+                          ? field.type === "date"
+                            ? isoToDateInput(value)
+                            : isoToDatetimeLocal(value)
+                          : ""
                       }
-                      // `<input type="date">` emits "YYYY-MM-DD", which `new
-                      // Date(...)` parses as UTC midnight. Read back via local
-                      // getters in any TZ west of UTC and you get the previous
-                      // day. Construct local midnight instead so the round-trip
-                      // is stable.
-                      if (field.type === "date") {
-                        const [y, m, d] = raw.split("-").map(Number);
-                        handleFieldChange(
-                          field.name,
-                          new Date(y, m - 1, d).toISOString(),
-                        );
-                      } else {
-                        handleFieldChange(field.name, new Date(raw).toISOString());
-                      }
-                    }}
-                    required={field.required}
-                    hasError={hasError}
-                  />
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (!raw) {
+                          handleFieldChange(field.name, null);
+                          return;
+                        }
+                        // `<input type="date">` emits "YYYY-MM-DD", which `new
+                        // Date(...)` parses as UTC midnight. Read back via local
+                        // getters in any TZ west of UTC and you get the previous
+                        // day. Construct local midnight instead so the round-trip
+                        // is stable.
+                        if (field.type === "date") {
+                          const [y, m, d] = raw.split("-").map(Number);
+                          handleFieldChange(
+                            field.name,
+                            new Date(y, m - 1, d).toISOString(),
+                          );
+                        } else {
+                          handleFieldChange(field.name, new Date(raw).toISOString());
+                        }
+                      }}
+                      required={field.required}
+                      hasError={hasError}
+                    />
+                    {renderFieldError(field.name)}
+                  </>
                 ) : field.type === "recurrence" ? (
-                  <RecurrenceEditor
-                    value={typeof value === "string" ? value : null}
-                    onChange={(rule) => handleFieldChange(field.name, rule)}
-                    startDateTime={
-                      typeof formData.startDateTime === "string"
-                        ? formData.startDateTime
-                        : null
-                    }
-                    endDateTime={
-                      typeof formData.endDateTime === "string"
-                        ? formData.endDateTime
-                        : null
-                    }
-                    startTime={
-                      typeof formData.recurrenceStartTime === "string"
-                        ? formData.recurrenceStartTime
-                        : null
-                    }
-                    endTime={
-                      typeof formData.recurrenceEndTime === "string"
-                        ? formData.recurrenceEndTime
-                        : null
-                    }
-                    onStartTimeChange={(t) =>
-                      handleFieldChange("recurrenceStartTime", t)
-                    }
-                    onEndTimeChange={(t) => handleFieldChange("recurrenceEndTime", t)}
-                  />
+                  <>
+                    <RecurrenceEditor
+                      value={typeof value === "string" ? value : null}
+                      onChange={(rule) => handleFieldChange(field.name, rule)}
+                      startDateTime={
+                        typeof formData.startDateTime === "string"
+                          ? formData.startDateTime
+                          : null
+                      }
+                      endDateTime={
+                        typeof formData.endDateTime === "string"
+                          ? formData.endDateTime
+                          : null
+                      }
+                      startTime={
+                        typeof formData.recurrenceStartTime === "string"
+                          ? formData.recurrenceStartTime
+                          : null
+                      }
+                      endTime={
+                        typeof formData.recurrenceEndTime === "string"
+                          ? formData.recurrenceEndTime
+                          : null
+                      }
+                      onStartTimeChange={(t) =>
+                        handleFieldChange("recurrenceStartTime", t)
+                      }
+                      onEndTimeChange={(t) => handleFieldChange("recurrenceEndTime", t)}
+                    />
+                    {renderFieldError(field.name)}
+                  </>
                 ) : field.type === "videoUpload" ? (
                   <div className="flex flex-col gap-2">
                     <TextInput
@@ -398,11 +438,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                         {videoUploadError[field.name]}
                       </span>
                     )}
-                    {hasError && (
-                      <span className="text-xs text-red-600 font-medium">
-                        {errorMessages.join(", ")}
-                      </span>
-                    )}
+                    {hasError && renderFieldError(field.name)}
                   </div>
                 ) : field.type === "media" ? (
                   <div className="flex flex-col gap-3">
@@ -440,7 +476,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                         </span>
                       </div>
                     )}
-                    {hasError && <span className="text-xs text-red-600 font-medium">{errorMessages.join(", ")}</span>}
+                    {hasError && renderFieldError(field.name)}
                   </div>
                 ) : null}
               </div>

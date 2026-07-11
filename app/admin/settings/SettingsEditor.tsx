@@ -230,6 +230,21 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
         contactFormName: cfNameCheck.isValid ? undefined : cfNameCheck.error,
         contactFormEmails: cfEmailCheck.isValid ? undefined : cfEmailCheck.error,
       });
+
+      const firstInvalidId = !ptNameCheck.isValid ? "pt-name"
+        : !ptEmailCheck.isValid ? "pt-emails"
+        : !cNameCheck.isValid ? "c-name"
+        : !cEmailCheck.isValid ? "c-emails"
+        : !cfNameCheck.isValid ? "cf-name"
+        : "cf-emails";
+
+      setTimeout(() => {
+        const el = document.getElementById(firstInvalidId);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 50);
+
       return;
     }
 
@@ -471,7 +486,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 space-y-4">
             <h4 className="text-sm font-semibold text-slate-900">Prayer Requests — &ldquo;Share with Prayer Team&rdquo;</h4>
             
-            <div className="flex flex-col gap-1.5">
+            <div id="pt-name" className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Sender Name</label>
               <TextInput
                 placeholder="Stonehill Prayer Team"
@@ -484,11 +499,14 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
                 This name will appear as the sender in outgoing email notifications for this scenario.
               </p>
               {errors.prayerTeamName && (
-                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.prayerTeamName}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.prayerTeamName}</span>
+                </div>
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div id="pt-emails" className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Recipient Email(s)</label>
               <TextInput
                 placeholder="prayerteam@stonehillchurch.org, helpers@stonehillchurch.org"
@@ -500,7 +518,10 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
                 Notifications for prayer requests shared with the Prayer Team.
               </p>
               {errors.prayerTeamEmails && (
-                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.prayerTeamEmails}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.prayerTeamEmails}</span>
+                </div>
               )}
             </div>
           </div>
@@ -509,7 +530,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 space-y-4">
             <h4 className="text-sm font-semibold text-slate-900">Confidential Prayer Requests — &ldquo;Keep Confidential&rdquo;</h4>
             
-            <div className="flex flex-col gap-1.5">
+            <div id="c-name" className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Sender Name</label>
               <TextInput
                 placeholder="Pastoral Care Team"
@@ -522,11 +543,14 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
                 This name will appear as the sender in outgoing email notifications for this scenario.
               </p>
               {errors.confidentialName && (
-                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.confidentialName}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.confidentialName}</span>
+                </div>
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div id="c-emails" className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Recipient Email(s)</label>
               <TextInput
                 placeholder="pastor@stonehillchurch.org"
@@ -538,7 +562,10 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
                 Notifications for confidential prayer requests sent only to pastoral staff.
               </p>
               {errors.confidentialEmails && (
-                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.confidentialEmails}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.confidentialEmails}</span>
+                </div>
               )}
             </div>
           </div>
@@ -547,7 +574,7 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 space-y-4">
             <h4 className="text-sm font-semibold text-slate-900">General Contact Form Submissions</h4>
             
-            <div className="flex flex-col gap-1.5">
+            <div id="cf-name" className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Sender Name</label>
               <TextInput
                 placeholder="Stonehill Office"
@@ -560,11 +587,14 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
                 This name will appear as the sender in outgoing email notifications for this scenario.
               </p>
               {errors.contactFormName && (
-                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.contactFormName}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.contactFormName}</span>
+                </div>
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div id="cf-emails" className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">Recipient Email(s)</label>
               <TextInput
                 placeholder="office@stonehillchurch.org"
@@ -576,7 +606,10 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
                 Notifications for messages submitted through the Contact page.
               </p>
               {errors.contactFormEmails && (
-                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.contactFormEmails}</p>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.contactFormEmails}</span>
+                </div>
               )}
             </div>
           </div>

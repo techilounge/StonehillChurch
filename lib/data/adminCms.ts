@@ -290,9 +290,13 @@ function validateFullData(
   const parsed = config.schema.safeParse(normalizedInput);
 
   if (!parsed.success) {
+    console.error(`[CMS Validation Error] full validation failed for module: ${config.collection}`, {
+      input: normalizedInput,
+      errors: parsed.error.flatten().fieldErrors
+    });
     throw new CmsAdminError(
       "VALIDATION_ERROR",
-      "CMS document data is invalid.",
+      "Some fields need attention before this form can be saved.",
       400,
       cleanFieldErrors(parsed.error.flatten().fieldErrors),
     );
@@ -316,9 +320,13 @@ function validatePartialData(
   const parsed = partialSchema.safeParse(normalizedInput);
 
   if (!parsed.success) {
+    console.error(`[CMS Validation Error] partial validation failed for module: ${config.collection}`, {
+      input: normalizedInput,
+      errors: parsed.error.flatten().fieldErrors
+    });
     throw new CmsAdminError(
       "VALIDATION_ERROR",
-      "CMS update data is invalid.",
+      "Some fields need attention before this form can be saved.",
       400,
       cleanFieldErrors(parsed.error.flatten().fieldErrors),
     );

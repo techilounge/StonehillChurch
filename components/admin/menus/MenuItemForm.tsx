@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X, Globe, FileText, ExternalLink } from "lucide-react";
+import { X, Globe, FileText, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/shared/Button";
 import { TextInput } from "@/components/forms/TextInput";
 import type { MenuItem } from "@/types/menus";
@@ -144,8 +144,10 @@ export function MenuItemForm({ editingItem, pages, onSave, onCancel }: MenuItemF
                 id="menu-page-select"
                 value={selectedSlug}
                 onChange={(e) => handlePageSelect(e.target.value)}
-                className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-stonehill-accent focus:border-transparent transition-colors ${
-                  errors.url ? "border-red-300 bg-red-50" : "border-slate-300 bg-white"
+                className={`w-full rounded-lg border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-colors ${
+                  errors.url
+                    ? "border-red-600 focus:ring-red-600 bg-red-50/10"
+                    : "border-slate-300 bg-white focus:ring-stonehill-accent focus:border-transparent"
                 }`}
               >
                 <option value="">— Choose a page —</option>
@@ -155,7 +157,12 @@ export function MenuItemForm({ editingItem, pages, onSave, onCancel }: MenuItemF
                   </option>
                 ))}
               </select>
-              {errors.url && <p className="mt-1 text-xs text-red-600">{errors.url}</p>}
+              {errors.url && (
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.url}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -170,9 +177,14 @@ export function MenuItemForm({ editingItem, pages, onSave, onCancel }: MenuItemF
                 value={url}
                 onChange={(e) => { setUrl(e.target.value); setErrors((prev) => ({ ...prev, url: "" })); }}
                 placeholder="https://example.com or /custom-path"
-                className={errors.url ? "border-red-300 bg-red-50" : ""}
+                hasError={Boolean(errors.url)}
               />
-              {errors.url && <p className="mt-1 text-xs text-red-600">{errors.url}</p>}
+              {errors.url && (
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  <span>{errors.url}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -186,9 +198,14 @@ export function MenuItemForm({ editingItem, pages, onSave, onCancel }: MenuItemF
               value={label}
               onChange={(e) => { setLabel(e.target.value); setErrors((prev) => ({ ...prev, label: "" })); }}
               placeholder="e.g. About Us"
-              className={errors.label ? "border-red-300 bg-red-50" : ""}
+              hasError={Boolean(errors.label)}
             />
-            {errors.label && <p className="mt-1 text-xs text-red-600">{errors.label}</p>}
+            {errors.label && (
+              <div className="flex items-center gap-1.5 mt-1 text-xs text-red-600 font-medium">
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                <span>{errors.label}</span>
+              </div>
+            )}
           </div>
 
           {/* Open in New Tab */}
