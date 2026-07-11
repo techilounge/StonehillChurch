@@ -78,6 +78,7 @@ export const siteSettingsGroupSchema = z.enum([
   "service_times",
   "seo",
   "design",
+  "notifications",
 ]);
 
 export const auditActionSchema = z.enum([
@@ -433,7 +434,7 @@ export const userInviteSchema = z.object({
 });
 
 // siteSettings
-const siteSettingPrimitiveSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+const siteSettingPrimitiveSchema = z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(z.string())]);
 
 // Allow up to two levels of nesting so structured configs
 // (e.g. { height: { mode, preset, customValue, unit } }) pass validation.
@@ -450,7 +451,7 @@ export const siteSettingValueSchema: z.ZodType<
   | boolean
   | null
   | string[]
-  | Record<string, string | number | boolean | null | Record<string, string | number | boolean | null>>
+  | Record<string, string | number | boolean | null | string[] | Record<string, string | number | boolean | null | string[]>>
 > = z.union([
   z.string(),
   z.number(),

@@ -32,6 +32,7 @@ export const DEFAULT_FOOTER_MENU: MenuItem[] = [
       { id: "c4", label: "Give", url: "/give", openInNewTab: false, children: [] },
       { id: "c5", label: "Volunteer", url: "/volunteer", openInNewTab: false, children: [] },
       { id: "c6", label: "Submit Announcement", url: "/submit-announcement", openInNewTab: false, children: [] },
+      { id: "c7", label: "Prayer Request", url: "/prayer-request", openInNewTab: false, children: [] },
     ],
   },
   {

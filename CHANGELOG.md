@@ -3,6 +3,25 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.8.0] - 2026-07-11
+
+### Added
+- **Scenario-Specific Notification Routing:** Expanded admin Settings -> Notification Settings ([SettingsEditor.tsx](file:///c:/Users/techi/APPs/Stonehill/app/admin/settings/SettingsEditor.tsx)) to configure distinct recipients and custom Sender Names for:
+  - *Prayer Requests* — "Share with Prayer Team" (`notifications.prayerTeam`)
+  - *Confidential Prayer Requests* — "Keep Confidential" (`notifications.confidential`)
+  - *General Contact Form Submissions* (`notifications.contactForm`)
+- **Public Page Entry Points for Prayer Requests:** Added multiple entry points linking to `/prayer-request`:
+  - Contact Page: Link added under Member Resources.
+  - Livestream Page: Dedicated sidebar card featuring a "Submit a Prayer Request" button matching the main theme styling.
+  - Fallback Footer Menu: Added "Prayer Request" link under the *Connect* column.
+  - Resources Page: Added "Submit Prayer Request" button at the bottom next to *Contact Office*.
+- **Admin Menu Options:** Added `/prayer-request`, `/maintenance-request`, and `/membership-transfer` routes to the well-known route selector in [page.tsx](file:///c:/Users/techi/APPs/Stonehill/app/admin/menus/page.tsx) so admins can add them in the Menu Manager dropdown.
+
+### Fixed
+- **Settings Data Nested Flattening:** Implemented a recursive settings value flattener in `getSiteSettings()` inside [siteSettings.ts](file:///c:/Users/techi/APPs/Stonehill/lib/data/siteSettings.ts). This correctly flattens multi-level nested setting objects (e.g. `notifications.prayerTeam.senderName`) to dotted keys while preserving flat schemas.
+- **Settings Validation Types:** Updated validation schemas and type signatures in [validators.ts](file:///c:/Users/techi/APPs/Stonehill/lib/validators.ts) and [settings.ts](file:///c:/Users/techi/APPs/Stonehill/types/settings.ts) to permit string arrays and nested objects as valid Firestore site settings.
+- **Admin Menu Card Carets:** Styled the nesting caret controls on Sortable Menu Item cards ([SortableMenuItem.tsx](file:///c:/Users/techi/APPs/Stonehill/components/admin/menus/SortableMenuItem.tsx)) with a highly visible circular red border and font color.
+
 ## [0.7.6] - 2026-07-04
 
 ### Fixed

@@ -1,12 +1,23 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/AdminPageShell";
 import { adminLoginRedirectPath } from "@/lib/adminRoutes";
 import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { listFormSubmissions } from "@/lib/data/formSubmissions";
 import { redirect } from "next/navigation";
+import { formTypeSchema, formSubmissionStatusSchema } from "@/lib/validators";
+import { AdminFormsFilter } from "@/components/admin/forms/AdminFormsFilter";
+import type { FormSubmissionStatus } from "@/types/shared";
 
 export const dynamic = "force-dynamic";
+
+type PageParams = {
+  searchParams: Promise<{
+    formType?: string;
+    status?: string;
+    search?: string;
+  }>;
+};
 
 function getStatusBadgeClass(status: string) {
   switch (status) {
@@ -48,20 +59,53 @@ function formatSubmissionDate(value: string | Date | null | undefined) {
   }).format(date);
 }
 
-export default async function AdminFormsPage() {
+export default async function AdminFormsPage({ searchParams }: PageParams) {
   const authResult = await getCurrentAdminSession("forms:manage");
 
   if (!authResult.ok) {
     redirect(adminLoginRedirectPath("/admin/forms", authResult.reason));
   }
 
-  const submissions = await listFormSubmissions();
+  const params = await searchParams;
+  const rawFormType = params.formType;
+  const rawStatus = params.status;
+  const search = params.search;
+
+  const formTypeParsed = rawFormType ? formTypeSchema.safeParse(rawFormType) : null;
+  const statusParsed = rawStatus ? formSubmissionStatusSchema.safeParse(rawStatus) : null;
+
+  const filterFormType = formTypeParsed?.success ? formTypeParsed.data : undefined;
+  const filterStatus = statusParsed?.success ? (statusParsed.data as FormSubmissionStatus) : undefined;
+
+  // Query database-level filters (formType, status)
+  let submissions = await listFormSubmissions({
+    formType: filterFormType,
+    status: filterStatus,
+  });
+
+  // Apply client-side in-memory text search filtering on the results
+  if (search && search.trim()) {
+    const searchLower = search.toLowerCase().trim();
+    submissions = submissions.filter((sub) => {
+      return (
+        sub.name.toLowerCase().includes(searchLower) ||
+        (sub.email && sub.email.toLowerCase().includes(searchLower)) ||
+        (sub.phone && sub.phone.includes(searchLower)) ||
+        (sub.subject && sub.subject.toLowerCase().includes(searchLower)) ||
+        sub.message.toLowerCase().includes(searchLower)
+      );
+    });
+  }
 
   return (
     <AdminPageShell
       title="Form Submissions"
       description="Review and manage submissions from public forms."
     >
+      <Suspense fallback={<div className="h-20 bg-slate-50 animate-pulse rounded-2xl mb-6 border border-slate-200" />}>
+        <AdminFormsFilter />
+      </Suspense>
+
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">

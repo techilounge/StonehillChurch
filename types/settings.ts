@@ -7,7 +7,8 @@ export type SiteSettingsGroup =
   | "giving"
   | "service_times"
   | "seo"
-  | "design";
+  | "design"
+  | "notifications";
 
 // Global spacing scale exposed to the Page Builder via CSS custom properties
 // (`--pb-space-${name}`). Admins edit these in Site Settings → Design Tokens;

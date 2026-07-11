@@ -44,6 +44,9 @@ export default async function MenuManagementPage() {
     { slug: "submit-announcement", title: "Submit Announcement" },
     { slug: "church-calendar", title: "Church Calendar" },
     { slug: "church-bulletin", title: "Church Bulletin" },
+    { slug: "prayer-request", title: "Prayer Request" },
+    { slug: "maintenance-request", title: "Maintenance Request" },
+    { slug: "membership-transfer", title: "Membership Transfer" },
   ];
 
   // Merge, avoiding duplicates

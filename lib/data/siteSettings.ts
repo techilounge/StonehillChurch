@@ -28,7 +28,36 @@ function settingValueToString(value: unknown): string {
     return String(value);
   }
 
+  if (Array.isArray(value)) {
+    return value.filter((v) => typeof v === "string").join(",");
+  }
+
   return "";
+}
+
+function flattenSettingValue(
+  prefix: string,
+  value: unknown,
+  flatSettings: Record<string, string>,
+) {
+  if (value === null || typeof value === "undefined") {
+    flatSettings[prefix] = "";
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    flatSettings[prefix] = value.filter((v) => typeof v === "string").join(",");
+    return;
+  }
+
+  if (isPlainObject(value)) {
+    Object.entries(value).forEach(([field, val]) => {
+      flattenSettingValue(`${prefix}.${field}`, val, flatSettings);
+    });
+    return;
+  }
+
+  flatSettings[prefix] = settingValueToString(value);
 }
 
 export async function getSiteSettings(): Promise<SiteSettingsMap> {
@@ -36,23 +65,15 @@ export async function getSiteSettings(): Promise<SiteSettingsMap> {
     const db = getAdminFirestore();
     const snapshot = await withReadTimeout(db.collection(collections.siteSettings).get());
     const flatSettings: SiteSettingsMap = {};
-    const groupedSettings: SiteSettingsMap = {};
     
     snapshot.docs.forEach((doc) => {
       const data = doc.data() as SiteSettingDoc;
       const key = typeof data.key === "string" && data.key.trim() ? data.key.trim() : doc.id;
 
-      if (isPlainObject(data.value)) {
-        Object.entries(data.value).forEach(([field, value]) => {
-          groupedSettings[`${key}.${field}`] = settingValueToString(value);
-        });
-        return;
-      }
-
-      flatSettings[key] = settingValueToString(data.value);
+      flattenSettingValue(key, data.value, flatSettings);
     });
 
-    return { ...flatSettings, ...groupedSettings };
+    return flatSettings;
   } catch (error) {
     logDataFallback("getSiteSettings", error);
     return {};

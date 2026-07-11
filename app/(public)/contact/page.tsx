@@ -99,6 +99,9 @@ export default async function ContactPage() {
               <div className="pt-8 border-t border-slate-200 mt-10">
                 <h3 className="text-xl font-bold tracking-tight text-stonehill-primary mb-4">Member Resources</h3>
                 <div className="flex flex-col gap-3">
+                  <Link href="/prayer-request" className="text-slate-900 hover:text-stonehill-primary font-medium transition-colors">
+                    Submit a Prayer Request &rarr;
+                  </Link>
                   <Link href="/maintenance-request" className="text-slate-900 hover:text-stonehill-primary font-medium transition-colors">
                     Submit a Maintenance Request &rarr;
                   </Link>

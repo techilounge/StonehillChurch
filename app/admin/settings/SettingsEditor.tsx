@@ -72,6 +72,190 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [message, setMessage] = React.useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Scenario-specific notification inputs
+  const [prayerTeamName, setPrayerTeamName] = React.useState(() => {
+    const val = settings["notifications"]?.prayerTeam;
+    return val && typeof val === "object" && !Array.isArray(val)
+      ? (val.senderName as string) || ""
+      : "";
+  });
+  const [prayerTeamEmails, setPrayerTeamEmails] = React.useState(() => {
+    const val = settings["notifications"]?.prayerTeam;
+    if (Array.isArray(val)) return val.join(", ");
+    if (val && typeof val === "object") {
+      return Array.isArray(val.recipients) ? val.recipients.join(", ") : "";
+    }
+    return "";
+  });
+
+  const [confidentialName, setConfidentialName] = React.useState(() => {
+    const val = settings["notifications"]?.confidential;
+    return val && typeof val === "object" && !Array.isArray(val)
+      ? (val.senderName as string) || ""
+      : "";
+  });
+  const [confidentialEmails, setConfidentialEmails] = React.useState(() => {
+    const val = settings["notifications"]?.confidential;
+    if (Array.isArray(val)) return val.join(", ");
+    if (val && typeof val === "object") {
+      return Array.isArray(val.recipients) ? val.recipients.join(", ") : "";
+    }
+    return "";
+  });
+
+  const [contactFormName, setContactFormName] = React.useState(() => {
+    const val = settings["notifications"]?.contactForm;
+    return val && typeof val === "object" && !Array.isArray(val)
+      ? (val.senderName as string) || ""
+      : "";
+  });
+  const [contactFormEmails, setContactFormEmails] = React.useState(() => {
+    const val = settings["notifications"]?.contactForm;
+    if (Array.isArray(val)) return val.join(", ");
+    if (val && typeof val === "object") {
+      return Array.isArray(val.recipients) ? val.recipients.join(", ") : "";
+    }
+    return "";
+  });
+
+  const [errors, setErrors] = React.useState<{
+    prayerTeamName?: string;
+    prayerTeamEmails?: string;
+    confidentialName?: string;
+    confidentialEmails?: string;
+    contactFormName?: string;
+    contactFormEmails?: string;
+  }>({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validateEmailList(val: string): { isValid: boolean; error?: string } {
+    if (!val.trim()) return { isValid: true };
+    const emails = val.split(",").map((e) => e.trim()).filter(Boolean);
+    if (emails.length === 0) return { isValid: true };
+    
+    const invalidEmails = emails.filter((email) => !emailRegex.test(email));
+    if (invalidEmails.length > 0) {
+      return {
+        isValid: false,
+        error: `Invalid email format: ${invalidEmails.join(", ")}`
+      };
+    }
+    return { isValid: true };
+  }
+
+  function validateSenderName(val: string): { isValid: boolean; error?: string } {
+    const trimmed = val.trim();
+    if (!trimmed) {
+      return { isValid: false, error: "Sender name cannot be empty." };
+    }
+    if (trimmed.length > 60) {
+      return { isValid: false, error: "Sender name cannot exceed 60 characters." };
+    }
+    return { isValid: true };
+  }
+
+  const handlePrayerTeamNameChange = (val: string) => {
+    setPrayerTeamName(val);
+    const result = validateSenderName(val);
+    setErrors((prev) => ({
+      ...prev,
+      prayerTeamName: result.isValid ? undefined : result.error
+    }));
+  };
+
+  const handlePrayerTeamEmailsChange = (val: string) => {
+    setPrayerTeamEmails(val);
+    const result = validateEmailList(val);
+    setErrors((prev) => ({
+      ...prev,
+      prayerTeamEmails: result.isValid ? undefined : result.error
+    }));
+  };
+
+  const handleConfidentialNameChange = (val: string) => {
+    setConfidentialName(val);
+    const result = validateSenderName(val);
+    setErrors((prev) => ({
+      ...prev,
+      confidentialName: result.isValid ? undefined : result.error
+    }));
+  };
+
+  const handleConfidentialEmailsChange = (val: string) => {
+    setConfidentialEmails(val);
+    const result = validateEmailList(val);
+    setErrors((prev) => ({
+      ...prev,
+      confidentialEmails: result.isValid ? undefined : result.error
+    }));
+  };
+
+  const handleContactFormNameChange = (val: string) => {
+    setContactFormName(val);
+    const result = validateSenderName(val);
+    setErrors((prev) => ({
+      ...prev,
+      contactFormName: result.isValid ? undefined : result.error
+    }));
+  };
+
+  const handleContactFormEmailsChange = (val: string) => {
+    setContactFormEmails(val);
+    const result = validateEmailList(val);
+    setErrors((prev) => ({
+      ...prev,
+      contactFormEmails: result.isValid ? undefined : result.error
+    }));
+  };
+
+  const handleSaveNotifications = async () => {
+    const ptNameCheck = validateSenderName(prayerTeamName);
+    const ptEmailCheck = validateEmailList(prayerTeamEmails);
+    const cNameCheck = validateSenderName(confidentialName);
+    const cEmailCheck = validateEmailList(confidentialEmails);
+    const cfNameCheck = validateSenderName(contactFormName);
+    const cfEmailCheck = validateEmailList(contactFormEmails);
+
+    if (
+      !ptNameCheck.isValid || !ptEmailCheck.isValid ||
+      !cNameCheck.isValid || !cEmailCheck.isValid ||
+      !cfNameCheck.isValid || !cfEmailCheck.isValid
+    ) {
+      setErrors({
+        prayerTeamName: ptNameCheck.isValid ? undefined : ptNameCheck.error,
+        prayerTeamEmails: ptEmailCheck.isValid ? undefined : ptEmailCheck.error,
+        confidentialName: cNameCheck.isValid ? undefined : cNameCheck.error,
+        confidentialEmails: cEmailCheck.isValid ? undefined : cEmailCheck.error,
+        contactFormName: cfNameCheck.isValid ? undefined : cfNameCheck.error,
+        contactFormEmails: cfEmailCheck.isValid ? undefined : cfEmailCheck.error,
+      });
+      return;
+    }
+
+    const value = {
+      prayerTeam: {
+        senderName: prayerTeamName.trim(),
+        recipients: prayerTeamEmails.split(",").map((e: string) => e.trim()).filter(Boolean),
+      },
+      confidential: {
+        senderName: confidentialName.trim(),
+        recipients: confidentialEmails.split(",").map((e: string) => e.trim()).filter(Boolean),
+      },
+      contactForm: {
+        senderName: contactFormName.trim(),
+        recipients: contactFormEmails.split(",").map((e: string) => e.trim()).filter(Boolean),
+      },
+    };
+
+    setSettings((prev) => ({
+      ...prev,
+      notifications: value
+    }));
+
+    await handleSave("notifications", "notifications", value);
+  };
+
   const getDocId = (key: string) => {
     return initialSettings.find((doc) => doc.key === key)?.id;
   };
@@ -270,6 +454,145 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
             <Button disabled={isSubmitting} onClick={() => handleSave("contact", "contact", settings["contact"] || {})}>
               <Save className="h-4 w-4 mr-2" /> Save Contact Info
+            </Button>
+          </div>
+        )}
+      </section>
+
+      {/* Notification Settings Group */}
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Notification Settings</h3>
+          <p className="text-sm text-slate-500">Configure email routing recipients and custom sender names for different scenarios.</p>
+        </div>
+        
+        <div className="p-6 flex flex-col gap-6">
+          {/* Card A: Share with Prayer Team */}
+          <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 space-y-4">
+            <h4 className="text-sm font-semibold text-slate-900">Prayer Requests — &ldquo;Share with Prayer Team&rdquo;</h4>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Sender Name</label>
+              <TextInput
+                placeholder="Stonehill Prayer Team"
+                value={prayerTeamName}
+                onChange={(e) => handlePrayerTeamNameChange(e.target.value)}
+                hasError={Boolean(errors.prayerTeamName)}
+                maxLength={60}
+              />
+              <p className="text-xs text-slate-500">
+                This name will appear as the sender in outgoing email notifications for this scenario.
+              </p>
+              {errors.prayerTeamName && (
+                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.prayerTeamName}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Recipient Email(s)</label>
+              <TextInput
+                placeholder="prayerteam@stonehillchurch.org, helpers@stonehillchurch.org"
+                value={prayerTeamEmails}
+                onChange={(e) => handlePrayerTeamEmailsChange(e.target.value)}
+                hasError={Boolean(errors.prayerTeamEmails)}
+              />
+              <p className="text-xs text-slate-500">
+                Notifications for prayer requests shared with the Prayer Team.
+              </p>
+              {errors.prayerTeamEmails && (
+                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.prayerTeamEmails}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Card B: Keep Confidential */}
+          <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 space-y-4">
+            <h4 className="text-sm font-semibold text-slate-900">Confidential Prayer Requests — &ldquo;Keep Confidential&rdquo;</h4>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Sender Name</label>
+              <TextInput
+                placeholder="Pastoral Care Team"
+                value={confidentialName}
+                onChange={(e) => handleConfidentialNameChange(e.target.value)}
+                hasError={Boolean(errors.confidentialName)}
+                maxLength={60}
+              />
+              <p className="text-xs text-slate-500">
+                This name will appear as the sender in outgoing email notifications for this scenario.
+              </p>
+              {errors.confidentialName && (
+                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.confidentialName}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Recipient Email(s)</label>
+              <TextInput
+                placeholder="pastor@stonehillchurch.org"
+                value={confidentialEmails}
+                onChange={(e) => handleConfidentialEmailsChange(e.target.value)}
+                hasError={Boolean(errors.confidentialEmails)}
+              />
+              <p className="text-xs text-slate-500">
+                Notifications for confidential prayer requests sent only to pastoral staff.
+              </p>
+              {errors.confidentialEmails && (
+                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.confidentialEmails}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Card C: General Contact Form */}
+          <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/30 space-y-4">
+            <h4 className="text-sm font-semibold text-slate-900">General Contact Form Submissions</h4>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Sender Name</label>
+              <TextInput
+                placeholder="Stonehill Office"
+                value={contactFormName}
+                onChange={(e) => handleContactFormNameChange(e.target.value)}
+                hasError={Boolean(errors.contactFormName)}
+                maxLength={60}
+              />
+              <p className="text-xs text-slate-500">
+                This name will appear as the sender in outgoing email notifications for this scenario.
+              </p>
+              {errors.contactFormName && (
+                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.contactFormName}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Recipient Email(s)</label>
+              <TextInput
+                placeholder="office@stonehillchurch.org"
+                value={contactFormEmails}
+                onChange={(e) => handleContactFormEmailsChange(e.target.value)}
+                hasError={Boolean(errors.contactFormEmails)}
+              />
+              <p className="text-xs text-slate-500">
+                Notifications for messages submitted through the Contact page.
+              </p>
+              {errors.contactFormEmails && (
+                <p className="text-xs text-red-600 font-medium mt-0.5">{errors.contactFormEmails}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {canEdit && (
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
+            <Button 
+              disabled={isSubmitting || Boolean(
+                errors.prayerTeamName || errors.prayerTeamEmails || 
+                errors.confidentialName || errors.confidentialEmails || 
+                errors.contactFormName || errors.contactFormEmails
+              )} 
+              onClick={handleSaveNotifications}
+            >
+              <Save className="h-4 w-4 mr-2" /> Save Notification Settings
             </Button>
           </div>
         )}

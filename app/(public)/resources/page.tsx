@@ -58,7 +58,7 @@ export default async function ResourcesPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           
           {/* Back Link */}
-          <div className="mb-6">
+          <div className="mb-6 pt-6">
             <Link 
               href="/" 
               className="inline-flex items-center gap-2 text-slate-900/60 hover:text-stonehill-accent font-medium transition-colors"
@@ -143,6 +143,12 @@ export default async function ResourcesPage() {
               className={cn(buttonVariants({ size: "lg" }), "w-full sm:w-auto")}
             >
               Contact Office
+            </Link>
+            <Link 
+              href="/prayer-request"
+              className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
+            >
+              Submit Prayer Request
             </Link>
           </div>
         </div>

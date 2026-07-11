@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FormField } from "@/components/forms/FormField";
 import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
-import { CheckboxField } from "@/components/forms/CheckboxField";
+import { RadioField } from "@/components/forms/RadioField";
 import { SubmitButton } from "@/components/forms/SubmitButton";
 import { FormStatusAlert } from "./FormStatusAlert";
 
@@ -15,6 +15,7 @@ export function PrayerRequestForm() {
 
   async function action(formData: FormData) {
     setStatus("idle");
+    const privacy = formData.get("privacy");
     const payload = {
       formType: "prayer_request",
       name: formData.get("name"),
@@ -22,8 +23,8 @@ export function PrayerRequestForm() {
       phone: formData.get("phone") || undefined,
       subject: formData.get("subject") || undefined,
       message: formData.get("message"),
-      shareWithPrayerTeam: formData.get("shareWithPrayerTeam") === "on",
-      confidential: formData.get("confidential") === "on",
+      shareWithPrayerTeam: privacy === "share",
+      confidential: privacy === "confidential",
       website: formData.get("website") || undefined,
     };
 
@@ -119,21 +120,25 @@ export function PrayerRequestForm() {
         />
       </FormField>
 
-      <div className="space-y-4">
-        <CheckboxField
-          id="shareWithPrayerTeam"
-          name="shareWithPrayerTeam"
-          label="Share with Prayer Team"
-          description="Allow our dedicated prayer team to see and pray for this request."
-          defaultChecked
-        />
-        <CheckboxField
-          id="confidential"
-          name="confidential"
-          label="Keep Confidential"
-          description="Only the pastoral staff will see this request."
-        />
-      </div>
+      <FormField label="Privacy Settings" id="privacy">
+        <div className="space-y-4 mt-2">
+          <RadioField
+            id="privacy-share"
+            name="privacy"
+            value="share"
+            label="Share with Prayer Team"
+            description="Allow our dedicated prayer team to see and pray for this request."
+            defaultChecked
+          />
+          <RadioField
+            id="privacy-confidential"
+            name="privacy"
+            value="confidential"
+            label="Keep Confidential"
+            description="Only the pastoral staff will see this request."
+          />
+        </div>
+      </FormField>
 
       <SubmitButton pendingText="Submitting..." className="w-full md:w-auto">
         Submit Prayer Request

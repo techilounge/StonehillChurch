@@ -190,7 +190,19 @@ export default async function LiveStreamPage() {
                 </div>
               ))}
             </div>
-            <p className="mt-5 text-sm leading-6 text-slate-900/70">
+            <div className="mt-8 border-t border-slate-200 pt-6">
+              <h3 className="text-sm font-semibold text-slate-900 mb-1">Need Prayer?</h3>
+              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                Our prayer team and pastoral staff would love to stand with you.
+              </p>
+              <Link 
+                href="/prayer-request" 
+                className={cn(buttonVariants({ variant: "default" }), "w-full")}
+              >
+                Submit a Prayer Request
+              </Link>
+            </div>
+            <p className="mt-6 text-sm leading-6 text-slate-900/70">
               The livestream is available for worship services when the church is broadcasting.
               Past messages remain available through the sermon library and YouTube channel.
             </p>

@@ -112,7 +112,7 @@ export function SortableMenuItem({
             type="button"
             onClick={() => onOutdent(item.id)}
             disabled={disabled}
-            className="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-stonehill-primary hover:bg-stonehill-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent disabled:opacity-30"
+            className="flex items-center justify-center w-7 h-7 rounded-full border border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-30"
             title="Move to top level"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
@@ -123,7 +123,7 @@ export function SortableMenuItem({
             type="button"
             onClick={() => onIndent(item.id)}
             disabled={disabled}
-            className="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-stonehill-primary hover:bg-stonehill-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent disabled:opacity-30"
+            className="flex items-center justify-center w-7 h-7 rounded-full border border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-30"
             title="Nest under previous item"
           >
             <ChevronRight className="h-3.5 w-3.5" />

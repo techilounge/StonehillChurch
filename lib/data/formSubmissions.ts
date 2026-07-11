@@ -56,19 +56,78 @@ export async function createFormSubmission(
   try {
     const { getCachedSiteSettings } = await import("./siteSettings");
     const settings = await getCachedSiteSettings();
-    const adminEmails =
-      (settings["notifications.adminInbox"] as string)?.trim() ||
-      (settings["contact.email"] as string)?.trim();
 
-    if (adminEmails) {
+    let recipients: string[] = [];
+    let senderName = "";
+    let scenario = "";
+
+    if (input.formType === "prayer_request") {
+      const isConfidential = input.payloadJson?.confidential === true;
+      if (isConfidential) {
+        scenario = "Confidential Prayer Request";
+        senderName = settings["notifications.confidential.senderName"];
+        const emails = settings["notifications.confidential.recipients"];
+        if (emails) {
+          recipients = emails.split(",").map((e) => e.trim()).filter(Boolean);
+        }
+      } else {
+        scenario = "Prayer Request";
+        senderName = settings["notifications.prayerTeam.senderName"];
+        const emails = settings["notifications.prayerTeam.recipients"];
+        if (emails) {
+          recipients = emails.split(",").map((e) => e.trim()).filter(Boolean);
+        }
+      }
+    } else if (input.formType === "contact") {
+      scenario = "General Contact";
+      senderName = settings["notifications.contactForm.senderName"];
+      const emails = settings["notifications.contactForm.recipients"];
+      if (emails) {
+        recipients = emails.split(",").map((e) => e.trim()).filter(Boolean);
+      }
+    } else {
+      scenario = `${input.formType} submission`;
+      senderName = settings["notifications.contactForm.senderName"];
+      const emails = settings["notifications.contactForm.recipients"];
+      if (emails) {
+        recipients = emails.split(",").map((e) => e.trim()).filter(Boolean);
+      }
+    }
+
+    // Log warning and fallback if no scenario-specific recipients are configured
+    if (recipients.length === 0) {
+      console.warn(
+        `[formSubmissions] No recipients configured for contact scenario: "${scenario}". Falling back to default inbox.`,
+      );
+      const fallbackEmails =
+        (settings["notifications.adminInbox"] as string)?.trim() ||
+        (settings["contact.email"] as string)?.trim();
+
+      if (fallbackEmails) {
+        recipients = fallbackEmails.split(",").map((e) => e.trim()).filter(Boolean);
+      }
+    }
+
+    if (recipients.length > 0) {
       const apiKey = process.env.RESEND_API_KEY?.trim();
-      const from =
-        process.env.RESEND_FROM_EMAIL?.trim() ||
-        process.env.RESEND_FROM?.trim() ||
-        "Stonehill SDA Church <onboarding@resend.dev>";
-
       if (apiKey) {
-        const recipients = adminEmails.split(",").map((e) => e.trim()).filter(Boolean);
+        // Resolve Outgoing From Header Name & Email
+        let fromEmail = "onboarding@resend.dev";
+        const envFrom = process.env.RESEND_FROM_EMAIL?.trim() || process.env.RESEND_FROM?.trim();
+        if (envFrom) {
+          const match = envFrom.match(/<([^>]+)>/);
+          fromEmail = match ? match[1].trim() : envFrom;
+        }
+
+        let resolvedFromName = senderName?.trim();
+        if (!resolvedFromName) {
+          console.warn(
+            `[formSubmissions] No sender name configured for contact scenario: "${scenario}". Falling back to default "Stonehill SDA Church".`,
+          );
+          resolvedFromName = "Stonehill SDA Church";
+        }
+
+        const fromHeader = `${resolvedFromName} <${fromEmail}>`;
         const subject = `[Stonehill SDA] New ${input.formType} submission`;
         const text = [
           `New ${input.formType} submission received.`,
@@ -78,19 +137,34 @@ export async function createFormSubmission(
           `View details: ${process.env.NEXT_PUBLIC_SITE_URL || "https://stonehillsda.org"}/admin/forms/${snapshot.id}`,
         ].filter(Boolean).join("\n");
 
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from,
-            to: recipients,
-            subject,
-            text,
-          }),
-        });
+        try {
+          const res = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              from: fromHeader,
+              to: recipients,
+              subject,
+              text,
+            }),
+          });
+
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            console.error(
+              `[formSubmissions] Failed to send email for scenario "${scenario}". Status: ${res.status}. Error:`,
+              errData,
+            );
+          }
+        } catch (fetchErr) {
+          console.error(
+            `[formSubmissions] Network error sending email for scenario "${scenario}":`,
+            fetchErr,
+          );
+        }
       }
     }
   } catch (error) {
