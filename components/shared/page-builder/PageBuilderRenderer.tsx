@@ -510,10 +510,17 @@ function BlockRenderer({ block }: { block: PageBlock }) {
       const responsive = content?.responsive || { desktop: "horizontal", tablet: "auto", mobile: "stacked" };
       const isMobileStacked = responsive.mobile !== "horizontal";
       
+      const alignItems = style?.alignItems || "start";
+      const alignClass =
+        alignItems === "center" ? "items-center" :
+        alignItems === "end" ? "items-end" :
+        alignItems === "stretch" ? "items-stretch" :
+        "items-start";
+      
       return (
         <div style={inlineStyles} className="w-full">
           <div
-            className={`flex gap-4 w-full ${
+            className={`flex gap-4 w-full ${alignClass} ${
               isMobileStacked ? "flex-col md:flex-row" : "flex-row"
             }`}
           >
@@ -525,6 +532,7 @@ function BlockRenderer({ block }: { block: PageBlock }) {
                 flexBasis: isMobileStacked ? undefined : width,
                 color: col.style?.textColor,
                 backgroundColor: col.style?.backgroundColor,
+                textAlign: col.style?.textAlign,
                 // Margin / Padding
                 padding: col.style?.padding,
                 margin: col.style?.margin,

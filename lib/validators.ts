@@ -506,6 +506,7 @@ export const blockStyleSchema = z.object({
   backgroundColor: z.string().max(40).optional(),
   fontSize: z.string().max(40).optional(),
   fontWeight: z.string().max(40).optional(),
+  alignItems: z.enum(["start", "center", "end", "stretch"]).optional(),
 });
 
 export const pageBlockSchema = z.object({

@@ -52,6 +52,7 @@ export type BlockStyle = {
   textAlign?: "left" | "center" | "right" | "justify";
   textColor?: string;
   backgroundColor?: string;
+  alignItems?: "start" | "center" | "end" | "stretch";
   // Specific to some blocks
   fontSize?: string;
   fontWeight?: string;

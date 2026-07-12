@@ -441,6 +441,19 @@ function ColumnInspector({
         tooltip="Per-side margin for this column (negative values allowed)."
       />
 
+      <div className="space-y-1.5">
+        <InspectorLabel tooltip="Alignment of the elements and text inside the column.">Content Horizontal Alignment</InspectorLabel>
+        <SelectInput
+          value={column.style?.textAlign || "left"}
+          onChange={(e) => onChange({ style: { ...column.style, textAlign: e.target.value as any } })}
+        >
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+          <option value="justify">Justify</option>
+        </SelectInput>
+      </div>
+
       <BackgroundPanel
         value={column.style}
         onChange={(nextStyle) => onChange({ style: nextStyle })}
@@ -1656,6 +1669,24 @@ function BlockInspector({
                 >
                   <option value="stacked">Stacked (Vertical)</option>
                   <option value="horizontal">Side by Side (Horizontal)</option>
+                </SelectInput>
+              </div>
+
+              <div className="space-y-1.5 border-t border-slate-100 pt-3 mt-3">
+                <InspectorLabel tooltip="How columns of different heights line up vertically. Stretch makes them equal height.">Column Vertical Alignment</InspectorLabel>
+                <SelectInput
+                  value={block.style?.alignItems || "start"}
+                  onChange={(e) => onChange({
+                    style: {
+                      ...block.style,
+                      alignItems: e.target.value as any
+                    }
+                  })}
+                >
+                  <option value="start">Top — auto height (recommended)</option>
+                  <option value="stretch">Stretch — equal height</option>
+                  <option value="center">Center</option>
+                  <option value="end">Bottom</option>
                 </SelectInput>
               </div>
             </div>

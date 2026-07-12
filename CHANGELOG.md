@@ -8,7 +8,8 @@ All notable changes to the Stonehill Church website will be documented in this f
 ### Added
 - **Horizontal Block Stacking (Row Blocks):** Introduced a new nested `"row"` block type that contains 1-4 columns. Columns can have independent widths, backgrounds (color, image, gradient), and padding/margin spacing.
 - **Cross-Column Drag and Drop:** Enhanced the drag-and-drop sensor tracking inside the page builder to allow moving blocks between different columns, rows, and sections seamlessly.
-- **Responsive Layout Settings:** Added inspector controls for desktop, tablet, and mobile column stacking behaviors (e.g. side-by-side or stacked).
+- **Responsive Layout Settings:** Added inspector controls for desktop, tablet, and mobile column stacking behaviors (e.g. side-by-side or stacked), plus Column Vertical Alignment (Top, Center, Bottom, Stretch) controls.
+- **Content Alignment Controls:** Implemented horizontal content alignment options (Left, Center, Right, Justify) inside the Column Settings panel.
 - **Ministries Page Builder Layouts:** Integrated visual page builder editing capabilities for Ministry pages, including a custom metadata settings panel and automatic public-facing rendering.
 - **Role-Based Layout Restrictions:** Implemented layout editing permissions that hide block addition/removal, section drag handles, and layout resizing controls for Editor roles, keeping them read-only while allowing full content updates.
 - **Custom HTML Block Type:** Added a custom code HTML block allowing admins to enter custom block-level markup.

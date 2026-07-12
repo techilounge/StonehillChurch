@@ -168,6 +168,7 @@ function NestedDroppableColumn({
         width: isMobileStacked ? undefined : width,
         flexBasis: isMobileStacked ? undefined : width,
         color: col.style?.textColor,
+        textAlign: col.style?.textAlign,
         ...previewBgFillStyle(col.style),
         ...previewSpacingStyle(devicePreview, col.style),
       } as React.CSSProperties}
@@ -882,6 +883,13 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
           const responsive = content.responsive || { desktop: "horizontal", tablet: "auto", mobile: "stacked" };
           const isMobileStacked = responsive.mobile !== "horizontal";
           
+          const alignItems = block.style?.alignItems || "start";
+          const alignClass =
+            alignItems === "center" ? "items-center" :
+            alignItems === "end" ? "items-end" :
+            alignItems === "stretch" ? "items-stretch" :
+            "items-start";
+          
           return (
             <div className="w-full space-y-4">
               {canModifyLayout && (
@@ -904,7 +912,7 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
               )}
 
               <div
-                className={`flex gap-4 w-full ${
+                className={`flex gap-4 w-full ${alignClass} ${
                   isMobileStacked ? "flex-col md:flex-row" : "flex-row"
                 }`}
               >
