@@ -19,9 +19,11 @@ export function ColumnResizeSeparator({
   rightIndex: number;
   columns: any[];
 }) {
-  const { handleUpdateSection, handleUpdateRow } = usePageBuilder();
+  const { handleUpdateSection, handleUpdateRow, canModifyLayout } = usePageBuilder();
   const separatorRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  if (!canModifyLayout) return null;
 
   // Parse width string to percentage
   const parseWidth = (widthStr: string | undefined, numCols: number): number => {

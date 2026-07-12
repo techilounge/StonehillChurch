@@ -6,7 +6,8 @@ import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getMinistryBySlug } from "@/lib/data/ministries";
-import { getSiteSettings } from "@/lib/data/siteSettings";
+import { getSiteSettings, getSpacingTokens } from "@/lib/data/siteSettings";
+import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import {
   breadcrumbJsonLd,
   createMetadata,
@@ -42,9 +43,10 @@ export async function generateMetadata({ params }: MinistryPageProps): Promise<M
 
 export default async function MinistryDetailPage({ params }: MinistryPageProps) {
   const { slug } = await params;
-  const [ministry, siteSettings] = await Promise.all([
+  const [ministry, siteSettings, spacingTokens] = await Promise.all([
     getMinistryBySlug(slug),
     getSiteSettings(),
+    getSpacingTokens(),
   ]);
 
   if (!ministry) {
@@ -85,27 +87,33 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
             </Link>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-200 flex flex-col md:flex-row">
+          <div className="bg-white rounded-3xl shadow-lg border border-slate-200 flex flex-col md:flex-row">
             
             {/* Main Content */}
-            <div className="p-8 md:p-10 flex-grow">
-              {ministry.imageUrl && (
-                <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-8 ring-1 ring-slate-200 bg-slate-50">
-                  <Image
-                    src={ministry.imageUrl}
-                    alt={ministry.imageAlt || ministry.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+            <div className="p-8 md:p-10 flex-grow overflow-hidden">
+              {ministry.builderData?.sections?.length ? (
+                <PageBuilderRenderer document={ministry.builderData} spacingTokens={spacingTokens} />
+              ) : (
+                <>
+                  {ministry.imageUrl && (
+                    <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden mb-8 ring-1 ring-slate-200 bg-slate-50">
+                      <Image
+                        src={ministry.imageUrl}
+                        alt={ministry.imageAlt || ministry.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-primary border-b border-slate-200 pb-4">About this Ministry</h2>
+                  <div className="prose prose-lg max-w-none prose-headings:text-stonehill-primary prose-p:text-slate-900/80 prose-a:text-stonehill-accent hover:prose-a:text-stonehill-accent/80 leading-relaxed">
+                    <div className="whitespace-pre-wrap">
+                      {ministry.longDescription}
+                    </div>
+                  </div>
+                </>
               )}
-              
-              <h2 className="text-2xl font-bold tracking-tight mb-6 text-stonehill-primary border-b border-slate-200 pb-4">About this Ministry</h2>
-              <div className="prose prose-lg max-w-none prose-headings:text-stonehill-primary prose-p:text-slate-900/80 prose-a:text-stonehill-accent hover:prose-a:text-stonehill-accent/80 leading-relaxed">
-                <div className="whitespace-pre-wrap">
-                  {ministry.longDescription}
-                </div>
-              </div>
             </div>
 
             {/* Sidebar */}

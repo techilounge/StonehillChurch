@@ -35,6 +35,8 @@ export default async function PagesEditPage({ params }: { params: Promise<{ id: 
         initialData={initialData}
         canPublish={canPublish}
         spacingTokens={spacingTokens}
+        module="pages"
+        role={session.role}
       />
     </div>
   );

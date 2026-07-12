@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useSortable, SortableContext, verticalListSortingStrategy, rectSortingStrategy } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Plus } from "lucide-react";
 import { PageBuilderSection, BlockType } from "@/types/pageBuilder";
@@ -116,6 +117,71 @@ const COLUMN_ALIGN_CLASS: Record<string, string> = {
   stretch: "md:items-stretch",
 };
 
+function SortableColumn({
+  column,
+  colIndex,
+  colPct,
+  sectionId,
+  selectedElementId,
+  setSelectedElementId,
+  canModifyLayout,
+  handleAddBlock,
+  renderBlockFn,
+  devicePreview,
+}: any) {
+  const { setNodeRef } = useDroppable({
+    id: column.id,
+    data: { type: "column", sectionId, columnId: column.id },
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      data-pb-id={column.id}
+      data-column-id={column.id}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedElementId(column.id);
+      }}
+      className={`responsive-col flex flex-col min-h-[100px] border border-dashed rounded-lg p-3 bg-white/10 transition-colors cursor-pointer ${
+        selectedElementId === column.id
+          ? "border-stonehill-accent ring-1 ring-stonehill-accent"
+          : "border-slate-300/50 hover:border-slate-400"
+      }`}
+      style={{
+        "--col-width": `${colPct}%`,
+        ...previewSpacingStyle(devicePreview, column.style),
+      } as React.CSSProperties}
+    >
+      <div className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider flex justify-between items-center">
+        <span className="opacity-70">Column {colIndex + 1}</span>
+        <span className="bg-slate-200/50 text-slate-600 px-1.5 py-0.5 rounded text-[9px] tabular-nums">
+          {Math.round(colPct)}%
+        </span>
+      </div>
+      <SortableContext
+        items={column.blocks?.map((b: any) => b.id) || []}
+        strategy={rectSortingStrategy}
+      >
+        <div className="space-y-3 flex-grow mb-4">
+          {column.blocks && column.blocks.length > 0 ? (
+            column.blocks.map((block: any, i: number) =>
+              renderBlockFn(block, i, column.blocks!.length, column.id)
+            )
+          ) : (
+            <div className="flex flex-col items-center justify-center text-slate-400 h-full py-4 opacity-50">
+              <span className="text-xs">Empty Column</span>
+            </div>
+          )}
+        </div>
+      </SortableContext>
+      {canModifyLayout && (
+        <AddBlockMenu onAdd={(type) => handleAddBlock(sectionId, type, column.id)} />
+      )}
+    </div>
+  );
+}
+
 interface SortableSectionProps {
   section: PageBuilderSection;
   index: number;
@@ -136,7 +202,23 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
     handleDuplicateRow,
     handleReorderRows,
     devicePreview,
+    canModifyLayout,
   } = usePageBuilder();
+  
+  const renderBlockFn = React.useCallback(
+    (b: any, i: number, total: number, colId: string) => (
+      <SortableBlock
+        key={b.id}
+        block={b}
+        sectionId={section.id}
+        columnId={colId}
+        index={i}
+        totalBlocks={total}
+        renderBlock={renderBlockFn}
+      />
+    ),
+    [section.id]
+  );
   
   const {
     attributes,
@@ -174,64 +256,68 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
         setSelectedElementId(section.id);
       }}
     >
-      <div 
-        className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 p-1.5 bg-white border border-slate-200 rounded-md shadow-sm cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label="Drag to reorder section"
-        title="Drag to reorder section"
-        {...attributes}
-        {...listeners}
-      >
-        <GripVertical className="h-4 w-4 text-slate-400" />
-      </div>
+      {canModifyLayout && (
+        <div 
+          className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 p-1.5 bg-white border border-slate-200 rounded-md shadow-sm cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="Drag to reorder section"
+          title="Drag to reorder section"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 text-slate-400" />
+        </div>
+      )}
 
-      <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center gap-1">
-        <button 
-          className="h-7 w-7 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 transition-colors disabled:opacity-30"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleReorderSections(index, index - 1);
-          }}
-          disabled={index === 0}
-          title="Move section up"
-          aria-label="Move section up"
-        >
-          <ChevronUp className="h-4 w-4" />
-        </button>
-        <button 
-          className="h-7 w-7 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 transition-colors disabled:opacity-30"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleReorderSections(index, index + 1);
-          }}
-          disabled={index === totalSections - 1}
-          title="Move section down"
-          aria-label="Move section down"
-        >
-          <ChevronDown className="h-4 w-4" />
-        </button>
-        <button 
-          className="h-7 w-7 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDuplicateSection(section.id);
-          }}
-          title="Duplicate section"
-          aria-label="Duplicate section"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </button>
-        <button 
-          className="h-7 w-7 flex items-center justify-center rounded bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-slate-200 hover:border-red-100 transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRemoveSection(section.id);
-          }}
-          title="Remove section"
-          aria-label="Remove section"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </div>
+      {canModifyLayout && (
+        <div className="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center gap-1">
+          <button 
+            className="h-7 w-7 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 transition-colors disabled:opacity-30"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleReorderSections(index, index - 1);
+            }}
+            disabled={index === 0}
+            title="Move section up"
+            aria-label="Move section up"
+          >
+            <ChevronUp className="h-4 w-4" />
+          </button>
+          <button 
+            className="h-7 w-7 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 transition-colors disabled:opacity-30"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleReorderSections(index, index + 1);
+            }}
+            disabled={index === totalSections - 1}
+            title="Move section down"
+            aria-label="Move section down"
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
+          <button 
+            className="h-7 w-7 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDuplicateSection(section.id);
+            }}
+            title="Duplicate section"
+            aria-label="Duplicate section"
+          >
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+          <button 
+            className="h-7 w-7 flex items-center justify-center rounded bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-slate-200 hover:border-red-100 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveSection(section.id);
+            }}
+            title="Remove section"
+            aria-label="Remove section"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
 
       <div className="p-6">
         <div className="flex items-center gap-2 mb-4">
@@ -287,50 +373,52 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                   return o ? <div aria-hidden="true" style={o} className="absolute inset-0 pointer-events-none" /> : null;
                 })()}
                 {/* Row toolbar */}
-                <div className="absolute top-1 right-1 z-10 flex items-center gap-1 opacity-0 group-hover/row:opacity-100 focus-within:opacity-100 transition-opacity">
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handleReorderRows(section.id, rowIndex, rowIndex - 1); }}
-                    disabled={rowIndex === 0}
-                    title="Move row up"
-                    aria-label="Move row up"
-                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
-                  >
-                    <ChevronUp className="h-3 w-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handleReorderRows(section.id, rowIndex, rowIndex + 1); }}
-                    disabled={rowIndex === totalRows - 1}
-                    title="Move row down"
-                    aria-label="Move row down"
-                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
-                  >
-                    <ChevronDown className="h-3 w-3" />
-                  </button>
-                  <span className="text-[10px] bg-slate-800 text-white px-1.5 py-0.5 rounded shadow-sm opacity-80 uppercase tracking-wider font-mono">
-                    Row
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handleDuplicateRow(section.id, row.id); }}
-                    title="Duplicate row"
-                    aria-label="Duplicate row"
-                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors"
-                  >
-                    <Copy className="h-3 w-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handleRemoveRow(section.id, row.id); }}
-                    disabled={totalRows <= 1}
-                    title={totalRows <= 1 ? "A section needs at least one row" : "Remove row"}
-                    aria-label="Remove row"
-                    className="h-6 w-6 flex items-center justify-center rounded bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-slate-200 hover:border-red-100 shadow-sm transition-colors disabled:opacity-30"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
+                {canModifyLayout && (
+                  <div className="absolute top-1 right-1 z-10 flex items-center gap-1 opacity-0 group-hover/row:opacity-100 focus-within:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleReorderRows(section.id, rowIndex, rowIndex - 1); }}
+                      disabled={rowIndex === 0}
+                      title="Move row up"
+                      aria-label="Move row up"
+                      className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleReorderRows(section.id, rowIndex, rowIndex + 1); }}
+                      disabled={rowIndex === totalRows - 1}
+                      title="Move row down"
+                      aria-label="Move row down"
+                      className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </button>
+                    <span className="text-[10px] bg-slate-800 text-white px-1.5 py-0.5 rounded shadow-sm opacity-80 uppercase tracking-wider font-mono">
+                      Row
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleDuplicateRow(section.id, row.id); }}
+                      title="Duplicate row"
+                      aria-label="Duplicate row"
+                      className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors"
+                    >
+                      <Copy className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleRemoveRow(section.id, row.id); }}
+                      disabled={totalRows <= 1}
+                      title={totalRows <= 1 ? "A section needs at least one row" : "Remove row"}
+                      aria-label="Remove row"
+                      className="h-6 w-6 flex items-center justify-center rounded bg-white text-red-500 hover:bg-red-50 hover:text-red-700 border border-slate-200 hover:border-red-100 shadow-sm transition-colors disabled:opacity-30"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Row's columns */}
                 <div
@@ -350,54 +438,18 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
                             columns={row.columns}
                           />
                         )}
-                        <div
-                          data-pb-id={column.id}
-                          data-column-id={column.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedElementId(column.id);
-                          }}
-                          className={`responsive-col flex flex-col min-h-[100px] border border-dashed rounded-lg p-3 bg-white/10 transition-colors cursor-pointer ${
-                            selectedElementId === column.id
-                              ? "border-stonehill-accent ring-1 ring-stonehill-accent"
-                              : "border-slate-300/50 hover:border-slate-400"
-                          }`}
-                          style={{
-                            "--col-width": `${colPct}%`,
-                            ...previewSpacingStyle(devicePreview, column.style),
-                          } as React.CSSProperties}
-                        >
-                          <div className="text-[10px] uppercase font-bold text-slate-400 mb-3 tracking-wider flex justify-between items-center">
-                            <span className="opacity-70">Column {colIndex + 1}</span>
-                            <span className="bg-slate-200/50 text-slate-600 px-1.5 py-0.5 rounded text-[9px] tabular-nums">
-                              {Math.round(colPct)}%
-                            </span>
-                          </div>
-                          <SortableContext
-                            items={column.blocks?.map((b) => b.id) || []}
-                            strategy={rectSortingStrategy}
-                          >
-                            <div className="space-y-3 flex-1 mb-4">
-                              {column.blocks && column.blocks.length > 0 ? (
-                                column.blocks.map((block, i) => (
-                                  <SortableBlock
-                                    key={block.id}
-                                    block={block}
-                                    sectionId={section.id}
-                                    columnId={column.id}
-                                    index={i}
-                                    totalBlocks={column.blocks!.length}
-                                  />
-                                ))
-                              ) : (
-                                <div className="flex flex-col items-center justify-center text-slate-400 h-full py-4 opacity-50">
-                                  <span className="text-xs">Empty Column</span>
-                                </div>
-                              )}
-                            </div>
-                          </SortableContext>
-                          <AddBlockMenu onAdd={(type) => handleAddBlock(section.id, type, column.id)} />
-                        </div>
+                        <SortableColumn
+                          column={column}
+                          colIndex={colIndex}
+                          colPct={colPct}
+                          sectionId={section.id}
+                          selectedElementId={selectedElementId}
+                          setSelectedElementId={setSelectedElementId}
+                          canModifyLayout={canModifyLayout}
+                          handleAddBlock={handleAddBlock}
+                          renderBlockFn={renderBlockFn}
+                          devicePreview={devicePreview}
+                        />
                       </React.Fragment>
                     );
                   })}
@@ -407,16 +459,18 @@ export function SortableSection({ section, index, totalSections }: SortableSecti
           })}
 
           {/* Add Row button */}
-          <div className="flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); handleAddRow(section.id); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 bg-white border border-dashed border-slate-300 rounded-md hover:border-stonehill-accent hover:text-stonehill-accent transition-colors shadow-sm"
-            >
-              <Plus className="h-3 w-3" />
-              Add Row
-            </button>
-          </div>
+          {canModifyLayout && (
+            <div className="flex justify-center pt-2">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); handleAddRow(section.id); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 bg-white border border-dashed border-slate-300 rounded-md hover:border-stonehill-accent hover:text-stonehill-accent transition-colors shadow-sm"
+              >
+                <Plus className="h-3 w-3" />
+                Add Row
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -427,7 +481,7 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const basicBlocks: BlockType[] = ["heading", "paragraph", "image", "button", "divider", "spacer"];
-  const advancedBlocks: BlockType[] = ["video", "card", "gallery", "carousel", "iconText", "iconBox", "googleMap", "countdown", "cta"];
+  const advancedBlocks: BlockType[] = ["video", "card", "gallery", "carousel", "iconText", "iconBox", "googleMap", "countdown", "cta", "html"];
 
   if (!isOpen) {
     return (
@@ -503,7 +557,7 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
   );
 }
 
-function SortableBlock({ block, sectionId, columnId, index, totalBlocks }: { block: any, sectionId: string, columnId?: string, index: number, totalBlocks: number }) {
+function SortableBlock({ block, sectionId, columnId, index, totalBlocks, renderBlock }: { block: any, sectionId: string, columnId?: string, index: number, totalBlocks: number, renderBlock?: any }) {
   const { 
     selectedElementId, 
     setSelectedElementId, 
@@ -555,6 +609,7 @@ function SortableBlock({ block, sectionId, columnId, index, totalBlocks }: { blo
           e.stopPropagation();
           handleRemoveBlock(sectionId, block.id, columnId);
         }}
+        renderBlock={renderBlock}
       />
     </div>
   );

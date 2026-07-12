@@ -18,7 +18,7 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { Layout, Plus, Monitor, Tablet, Smartphone } from "lucide-react";
 import { Button } from "@/components/shared/Button";
-import { usePageBuilder } from "./PageBuilderContext";
+import { usePageBuilder, getColumnBlocks } from "./PageBuilderContext";
 import { SortableSection } from "./SortableSection";
 import { PatternPickerModal } from "./PatternPickerModal";
 
@@ -38,9 +38,11 @@ export function BuilderCanvas() {
     handleReorderSections,
     handleReorderBlocks,
     handleInsertTemplate,
+    handleMoveBlock,
     devicePreview,
     setDevicePreview,
     spacingTokens,
+    canModifyLayout,
   } = usePageBuilder();
   const builderData = formData.builderData || { version: "1.0", sections: [] };
   const [activeDragType, setActiveDragType] = React.useState<"section" | "block" | null>(null);
@@ -64,32 +66,58 @@ export function BuilderCanvas() {
     setActiveDragType(null);
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
-      if (active.data.current?.type === "block" && over.data.current?.type === "block") {
-        const sectionId = active.data.current.sectionId;
-        const columnId = active.data.current.columnId;
-        if (sectionId === over.data.current.sectionId && columnId === over.data.current.columnId) {
-          const section = builderData.sections.find((s: any) => s.id === sectionId);
+    if (!over || active.id === over.id) return;
+
+    if (active.data.current?.type === "block") {
+      const fromSectionId = active.data.current.sectionId;
+      const fromColumnId = active.data.current.columnId;
+
+      if (over.data.current?.type === "block") {
+        const toSectionId = over.data.current.sectionId;
+        const toColumnId = over.data.current.columnId;
+
+        if (fromSectionId === toSectionId && fromColumnId === toColumnId) {
+          const section = builderData.sections.find((s: any) => s.id === fromSectionId);
           if (section) {
-            if (columnId && section.columns) {
-              const column = section.columns.find((c: any) => c.id === columnId);
-              if (column && column.blocks) {
-                const oldIndex = column.blocks.findIndex((b: any) => b.id === active.id);
-                const newIndex = column.blocks.findIndex((b: any) => b.id === over.id);
-                handleReorderBlocks(sectionId, oldIndex, newIndex, columnId);
-              }
-            } else if (section.blocks) {
-              const oldIndex = section.blocks.findIndex((b: any) => b.id === active.id);
-              const newIndex = section.blocks.findIndex((b: any) => b.id === over.id);
-              handleReorderBlocks(sectionId, oldIndex, newIndex);
+            const blocks = getColumnBlocks(section, fromColumnId);
+            const oldIndex = blocks.findIndex((b: any) => b.id === active.id);
+            const newIndex = blocks.findIndex((b: any) => b.id === over.id);
+            if (oldIndex !== -1 && newIndex !== -1) {
+              handleReorderBlocks(fromSectionId, oldIndex, newIndex, fromColumnId);
             }
           }
+        } else {
+          // Cross-section or cross-column drag and drop
+          const section = builderData.sections.find((s: any) => s.id === toSectionId);
+          if (section) {
+            const blocks = getColumnBlocks(section, toColumnId);
+            const newIndex = blocks.findIndex((b: any) => b.id === over.id);
+            handleMoveBlock(
+              fromSectionId,
+              toSectionId,
+              active.id as string,
+              fromColumnId,
+              toColumnId,
+              newIndex !== -1 ? newIndex : undefined
+            );
+          }
         }
-      } else if (active.data.current?.type === "section" && over.data.current?.type === "section") {
-        const oldIndex = builderData.sections.findIndex((s: any) => s.id === active.id);
-        const newIndex = builderData.sections.findIndex((s: any) => s.id === over.id);
-        handleReorderSections(oldIndex, newIndex);
+      } else if (over.data.current?.type === "column") {
+        const toSectionId = over.data.current.sectionId;
+        const toColumnId = over.data.current.columnId;
+
+        handleMoveBlock(
+          fromSectionId,
+          toSectionId,
+          active.id as string,
+          fromColumnId,
+          toColumnId
+        );
       }
+    } else if (active.data.current?.type === "section" && over.data.current?.type === "section") {
+      const oldIndex = builderData.sections.findIndex((s: any) => s.id === active.id);
+      const newIndex = builderData.sections.findIndex((s: any) => s.id === over.id);
+      handleReorderSections(oldIndex, newIndex);
     }
   }
 
@@ -163,15 +191,19 @@ export function BuilderCanvas() {
           <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">
             Add a section to begin creating your layout, or start with a pre-built template.
           </p>
-          <div className="flex gap-3">
-            <Button variant="primary" onClick={handleAddSection}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Section
-            </Button>
-            <Button variant="outline" onClick={() => setIsPatternPickerOpen(true)}>
-              Insert Template
-            </Button>
-          </div>
+          {canModifyLayout ? (
+            <div className="flex gap-3">
+              <Button variant="primary" onClick={handleAddSection}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Section
+              </Button>
+              <Button variant="outline" onClick={() => setIsPatternPickerOpen(true)}>
+                Insert Template
+              </Button>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400">Layout edits are disabled for Editor accounts.</p>
+          )}
         </div>
       ) : !isMounted ? (
         <div className="space-y-4">
@@ -199,15 +231,17 @@ export function BuilderCanvas() {
                 <SortableSection key={section.id} section={section} index={index} totalSections={builderData.sections.length} />
               ))}
               
-              <div className="flex justify-center gap-3 pt-4 pb-12">
-                <Button variant="outline" onClick={handleAddSection}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Section
-                </Button>
-                <Button variant="outline" onClick={() => setIsPatternPickerOpen(true)}>
-                  Insert Template
-                </Button>
-              </div>
+              {canModifyLayout && (
+                <div className="flex justify-center gap-3 pt-4 pb-12">
+                  <Button variant="outline" onClick={handleAddSection}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Section
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsPatternPickerOpen(true)}>
+                    Insert Template
+                  </Button>
+                </div>
+              )}
             </div>
           </SortableContext>
         </DndContext>

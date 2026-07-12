@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { PageContent } from "@/types/content";
+import { PageContent, Ministry } from "@/types/content";
 import {
   DevicePreview,
   PageBlock,
@@ -11,6 +11,7 @@ import {
   PageColumn,
   PatternTemplate,
   RowLayout,
+  RowBlockColumn,
 } from "@/types/pageBuilder";
 import { DEFAULT_SPACING_TOKENS, type SpacingTokens } from "@/types/settings";
 import {
@@ -20,8 +21,8 @@ import {
 } from "@/lib/page-builder-rows";
 
 interface PageBuilderContextType {
-  formData: Partial<PageContent>;
-  setFormData: React.Dispatch<React.SetStateAction<Partial<PageContent>>>;
+  formData: Partial<PageContent & Ministry>;
+  setFormData: React.Dispatch<React.SetStateAction<Partial<PageContent & Ministry>>>;
   selectedElementId: string | null;
   setSelectedElementId: (id: string | null) => void;
 
@@ -63,8 +64,25 @@ interface PageBuilderContextType {
   handleRemoveBlock: (sectionId: string, blockId: string, columnId?: string) => void;
   handleUpdateBlock: (sectionId: string, blockId: string, updates: Partial<PageBlock>, columnId?: string) => void;
   handleReorderBlocks: (sectionId: string, oldIndex: number, newIndex: number, columnId?: string) => void;
+  handleMoveBlock: (
+    fromSectionId: string,
+    toSectionId: string,
+    blockId: string,
+    fromColumnId?: string,
+    toColumnId?: string,
+    targetIndex?: number,
+  ) => void;
+  handleAddNestedColumn: (sectionId: string, rowBlockId: string) => void;
+  handleRemoveNestedColumn: (sectionId: string, rowBlockId: string, columnId: string) => void;
+  handleUpdateNestedColumn: (
+    sectionId: string,
+    rowBlockId: string,
+    columnId: string,
+    updates: Partial<RowBlockColumn>,
+  ) => void;
 
   handleInsertTemplate: (template: PatternTemplate) => void;
+  canModifyLayout: boolean;
 }
 
 export const PageBuilderContext = React.createContext<PageBuilderContextType | null>(null);
@@ -82,8 +100,38 @@ function genId(prefix: string) {
 }
 
 /** Migrate every section in a document to the rows shape (idempotent). */
-function migrateDocument(doc: PageBuilderDocument | undefined): PageBuilderDocument {
+function migrateDocument(doc: PageBuilderDocument | undefined, legacyContent?: string): PageBuilderDocument {
   const base = doc ?? { version: "1.0" as const, sections: [] };
+  if ((!base.sections || base.sections.length === 0) && legacyContent && legacyContent.trim()) {
+    return {
+      version: "1.0",
+      sections: [
+        {
+          id: genId("sec"),
+          type: "section",
+          style: { padding: "py-12", backgroundColor: "#ffffff" },
+          rows: [
+            {
+              id: genId("row"),
+              layout: "1-col",
+              columns: [
+                {
+                  id: genId("col"),
+                  blocks: [
+                    {
+                      id: genId("blk"),
+                      type: "html",
+                      content: { html: legacyContent },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
   return { ...base, sections: base.sections.map(ensureSectionUsesRows) };
 }
 
@@ -120,17 +168,119 @@ function withRows(
  * rows shape and the legacy section.columns / section.blocks shapes so this
  * helper works regardless of when migration has happened.
  */
+function transformBlocksRecursively(
+  blocks: PageBlock[],
+  targetColumnId: string | undefined,
+  targetBlockId: string | undefined,
+  transform: (blocks: PageBlock[]) => PageBlock[],
+  transformBlockSingle?: (block: PageBlock) => PageBlock,
+): PageBlock[] {
+  if (targetColumnId) {
+    return blocks.map((b) => {
+      if (b.type === "row" && b.content?.columns) {
+        const columns = b.content.columns.map((col: any) => {
+          if (col.id === targetColumnId) {
+            return { ...col, blocks: transform(col.blocks || []) };
+          }
+          return {
+            ...col,
+            blocks: transformBlocksRecursively(col.blocks || [], targetColumnId, targetBlockId, transform, transformBlockSingle),
+          };
+        });
+        return {
+          ...b,
+          content: {
+            ...b.content,
+            columns,
+          },
+        };
+      }
+      return b;
+    });
+  }
+
+  if (targetBlockId) {
+    const hasBlock = blocks.some((b) => b.id === targetBlockId);
+    if (hasBlock) {
+      if (transformBlockSingle) {
+        return blocks.map((b) => (b.id === targetBlockId ? transformBlockSingle(b) : b));
+      }
+      return transform(blocks);
+    }
+    return blocks.map((b) => {
+      if (b.type === "row" && b.content?.columns) {
+        return {
+          ...b,
+          content: {
+            ...b.content,
+            columns: b.content.columns.map((col: any) => ({
+              ...col,
+              blocks: transformBlocksRecursively(col.blocks || [], targetColumnId, targetBlockId, transform, transformBlockSingle),
+            })),
+          },
+        };
+      }
+      return b;
+    });
+  }
+
+  return transform(blocks);
+}
+
+function findColumnBlocks(blocks: PageBlock[], columnId: string): PageBlock[] | null {
+  for (const b of blocks) {
+    if (b.type === "row" && b.content?.columns) {
+      const col = b.content.columns.find((c: any) => c.id === columnId);
+      if (col) return col.blocks || [];
+      for (const c of b.content.columns) {
+        const found = findColumnBlocks(c.blocks || [], columnId);
+        if (found) return found;
+      }
+    }
+  }
+  return null;
+}
+
+export function getColumnBlocks(section: PageBuilderSection, columnId: string | undefined): PageBlock[] {
+  if (!columnId) {
+    if (section.rows && section.rows.length === 1 && section.rows[0].columns.length === 1) {
+      return section.rows[0].columns[0].blocks || [];
+    }
+    return section.blocks || [];
+  }
+  
+  if (section.rows) {
+    for (const row of section.rows) {
+      const topCol = row.columns.find((c) => c.id === columnId);
+      if (topCol) return topCol.blocks || [];
+      
+      for (const col of row.columns) {
+        const found = findColumnBlocks(col.blocks || [], columnId);
+        if (found) return found;
+      }
+    }
+  }
+  
+  if (section.columns) {
+    const col = section.columns.find((c) => c.id === columnId);
+    if (col) return col.blocks || [];
+  }
+  
+  return [];
+}
+
 function updateColumnBlocks(
   section: PageBuilderSection,
   columnId: string | undefined,
   transform: (blocks: PageBlock[]) => PageBlock[],
+  blockId?: string,
+  transformBlockSingle?: (block: PageBlock) => PageBlock,
 ): PageBuilderSection {
   if (section.rows) {
     return {
       ...section,
       rows: section.rows.map((row) => {
-        if (columnId) {
-          if (!row.columns.some((c) => c.id === columnId)) return row;
+        if (columnId && row.columns.some((c) => c.id === columnId)) {
           return {
             ...row,
             columns: row.columns.map((col) =>
@@ -138,15 +288,19 @@ function updateColumnBlocks(
             ),
           };
         }
-        // No columnId given (legacy single-block section): only apply when the
-        // row has exactly one column, otherwise we can't know which to target.
-        if (row.columns.length === 1) {
-          return {
-            ...row,
-            columns: [{ ...row.columns[0], blocks: transform(row.columns[0].blocks ?? []) }],
-          };
-        }
-        return row;
+        return {
+          ...row,
+          columns: row.columns.map((col) => ({
+            ...col,
+            blocks: transformBlocksRecursively(
+              col.blocks ?? [],
+              columnId,
+              blockId,
+              transform,
+              transformBlockSingle
+            ),
+          })),
+        };
       }),
     };
   }
@@ -177,21 +331,27 @@ export function PageBuilderProvider({
   children,
   initialData,
   spacingTokens,
+  canModifyLayout = true,
 }: {
   children: React.ReactNode;
-  initialData: Partial<PageContent>;
+  initialData: Partial<PageContent & Ministry>;
   spacingTokens?: SpacingTokens;
+  canModifyLayout?: boolean;
 }) {
   const resolvedSpacingTokens = spacingTokens ?? DEFAULT_SPACING_TOKENS;
-  const [formData, setFormData] = React.useState<Partial<PageContent>>(() => ({
-    ...initialData,
-    builderData: migrateDocument(initialData?.builderData),
-  }));
+  const [formData, setFormData] = React.useState<Partial<PageContent & Ministry>>(() => {
+    const legacyContent = initialData?.content || (initialData as any)?.longDescription;
+    return {
+      ...initialData,
+      builderData: migrateDocument(initialData?.builderData, legacyContent),
+    };
+  });
   const [selectedElementId, setSelectedElementId] = React.useState<string | null>(null);
   const [devicePreview, setDevicePreview] = React.useState<DevicePreview>("desktop");
 
   // Section actions ─────────────────────────────────────────────────────────
   const handleAddSection = () => {
+    if (!canModifyLayout) return;
     const newSection: PageBuilderSection = {
       id: genId("sec"),
       type: "section",
@@ -209,6 +369,7 @@ export function PageBuilderProvider({
   };
 
   const handleRemoveSection = (id: string) => {
+    if (!canModifyLayout) return;
     setFormData((prev) => {
       const current = prev.builderData ?? { version: "1.0" as const, sections: [] };
       return {
@@ -220,6 +381,7 @@ export function PageBuilderProvider({
   };
 
   const handleReorderSections = (oldIndex: number, newIndex: number) => {
+    if (!canModifyLayout) return;
     setFormData((prev) => {
       const current = prev.builderData ?? { version: "1.0" as const, sections: [] };
       const sections = [...current.sections];
@@ -230,6 +392,7 @@ export function PageBuilderProvider({
   };
 
   const handleDuplicateSection = (id: string) => {
+    if (!canModifyLayout) return;
     setFormData((prev) => {
       const current = prev.builderData ?? { version: "1.0" as const, sections: [] };
       const sections = [...current.sections];
@@ -254,6 +417,7 @@ export function PageBuilderProvider({
   // section's first row. The inspector hides this control when a section has
   // rows, but the handler stays for any legacy callers.
   const handleChangeSectionLayout = (id: string, newLayout: RowLayout) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withRows(prev, id, (rows) =>
         rows.length > 0
@@ -265,12 +429,14 @@ export function PageBuilderProvider({
 
   // Row actions ─────────────────────────────────────────────────────────────
   const handleAddRow = (sectionId: string) => {
+    if (!canModifyLayout) return;
     const newRow = makeEmptyRow("1-col");
     setFormData((prev) => withRows(prev, sectionId, (rows) => [...rows, newRow]));
     setSelectedElementId(newRow.id);
   };
 
   const handleRemoveRow = (sectionId: string, rowId: string) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withRows(prev, sectionId, (rows) => {
         const filtered = rows.filter((r) => r.id !== rowId);
@@ -282,6 +448,7 @@ export function PageBuilderProvider({
   };
 
   const handleDuplicateRow = (sectionId: string, rowId: string) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withRows(prev, sectionId, (rows) => {
         const index = rows.findIndex((r) => r.id === rowId);
@@ -295,6 +462,7 @@ export function PageBuilderProvider({
   };
 
   const handleReorderRows = (sectionId: string, oldIndex: number, newIndex: number) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withRows(prev, sectionId, (rows) => {
         if (
@@ -321,6 +489,7 @@ export function PageBuilderProvider({
   };
 
   const handleChangeRowLayout = (sectionId: string, rowId: string, newLayout: RowLayout) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withRows(prev, sectionId, (rows) =>
         rows.map((r) => (r.id === rowId ? convertRowLayout(r, newLayout) : r)),
@@ -339,6 +508,7 @@ export function PageBuilderProvider({
     updates: Partial<PageColumn>,
     _rowId?: string,
   ) => {
+    if (!canModifyLayout) return;
     void _rowId; // accepted for callsite clarity; lookup walks both shapes
     setFormData((prev) =>
       withSection(prev, sectionId, (s) => {
@@ -360,6 +530,7 @@ export function PageBuilderProvider({
 
   // Block actions ───────────────────────────────────────────────────────────
   const handleAddBlock = (sectionId: string, blockType: PageBlock["type"], columnId?: string) => {
+    if (!canModifyLayout) return;
     const newBlock: PageBlock = {
       id: genId("blk"),
       type: blockType,
@@ -372,9 +543,10 @@ export function PageBuilderProvider({
   };
 
   const handleRemoveBlock = (sectionId: string, blockId: string, columnId?: string) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withSection(prev, sectionId, (s) =>
-        updateColumnBlocks(s, columnId, (blocks) => blocks.filter((b) => b.id !== blockId)),
+        updateColumnBlocks(s, columnId, (blocks) => blocks.filter((b) => b.id !== blockId), blockId),
       ),
     );
     if (selectedElementId === blockId) setSelectedElementId(sectionId);
@@ -388,8 +560,12 @@ export function PageBuilderProvider({
   ) => {
     setFormData((prev) =>
       withSection(prev, sectionId, (s) =>
-        updateColumnBlocks(s, columnId, (blocks) =>
-          blocks.map((b) => (b.id === blockId ? { ...b, ...updates } : b)),
+        updateColumnBlocks(
+          s,
+          columnId,
+          (blocks) => blocks.map((b) => (b.id === blockId ? { ...b, ...updates } : b)),
+          blockId,
+          (b) => ({ ...b, ...updates })
         ),
       ),
     );
@@ -401,6 +577,7 @@ export function PageBuilderProvider({
     newIndex: number,
     columnId?: string,
   ) => {
+    if (!canModifyLayout) return;
     setFormData((prev) =>
       withSection(prev, sectionId, (s) =>
         updateColumnBlocks(s, columnId, (blocks) => {
@@ -417,8 +594,152 @@ export function PageBuilderProvider({
           const [moved] = next.splice(oldIndex, 1);
           next.splice(newIndex, 0, moved);
           return next;
-        }),
+        }, undefined),
       ),
+    );
+  };
+
+  const handleMoveBlock = (
+    fromSectionId: string,
+    toSectionId: string,
+    blockId: string,
+    fromColumnId?: string,
+    toColumnId?: string,
+    targetIndex?: number,
+  ) => {
+    if (!canModifyLayout) return;
+    setFormData((prev) => {
+      let movedBlock: PageBlock | null = null;
+      const nextSourceSection = withSection(prev, fromSectionId, (s) =>
+        updateColumnBlocks(s, fromColumnId, (blocks) => {
+          const found = blocks.find((b) => b.id === blockId);
+          if (found) movedBlock = found;
+          return blocks.filter((b) => b.id !== blockId);
+        }, blockId)
+      );
+
+      if (!movedBlock) return prev;
+
+      let updatedData = nextSourceSection.builderData;
+      if (!updatedData) return prev;
+
+      const targetSectionIndex = updatedData.sections.findIndex((s) => s.id === toSectionId);
+      if (targetSectionIndex === -1) return prev;
+
+      const targetSection = updatedData.sections[targetSectionIndex];
+      const updatedTargetSection = updateColumnBlocks(targetSection, toColumnId, (blocks) => {
+        const next = [...blocks];
+        const insertIndex = typeof targetIndex === "number" && targetIndex >= 0 ? targetIndex : next.length;
+        next.splice(insertIndex, 0, movedBlock!);
+        return next;
+      });
+
+      return {
+        ...prev,
+        builderData: {
+          ...updatedData,
+          sections: updatedData.sections.map((s) => (s.id === toSectionId ? updatedTargetSection : s)),
+        },
+      };
+    });
+  };
+
+  const handleAddNestedColumn = (sectionId: string, rowBlockId: string) => {
+    if (!canModifyLayout) return;
+    setFormData((prev) =>
+      withSection(prev, sectionId, (s) =>
+        updateColumnBlocks(
+          s,
+          undefined,
+          (blocks) => blocks,
+          rowBlockId,
+          (b) => {
+            if (b.type === "row" && b.content?.columns) {
+              const currentCols = b.content.columns;
+              if (currentCols.length >= 4) return b;
+              const newCol = { id: genId("col"), width: "50%", blocks: [] };
+              const updatedCols = [...currentCols, newCol];
+              const equalWidth = `${100 / updatedCols.length}%`;
+              updatedCols.forEach((c: any) => {
+                c.width = equalWidth;
+              });
+              return {
+                ...b,
+                content: {
+                  ...b.content,
+                  columns: updatedCols,
+                },
+              };
+            }
+            return b;
+          }
+        )
+      )
+    );
+  };
+
+  const handleRemoveNestedColumn = (sectionId: string, rowBlockId: string, columnId: string) => {
+    if (!canModifyLayout) return;
+    setFormData((prev) =>
+      withSection(prev, sectionId, (s) =>
+        updateColumnBlocks(
+          s,
+          undefined,
+          (blocks) => blocks,
+          rowBlockId,
+          (b) => {
+            if (b.type === "row" && b.content?.columns) {
+              const currentCols = b.content.columns;
+              if (currentCols.length <= 1) return b;
+              const updatedCols = currentCols.filter((c: any) => c.id !== columnId);
+              const equalWidth = `${100 / updatedCols.length}%`;
+              updatedCols.forEach((c: any) => {
+                c.width = equalWidth;
+              });
+              return {
+                ...b,
+                content: {
+                  ...b.content,
+                  columns: updatedCols,
+                },
+              };
+            }
+            return b;
+          }
+        )
+      )
+    );
+  };
+
+  const handleUpdateNestedColumn = (
+    sectionId: string,
+    rowBlockId: string,
+    columnId: string,
+    updates: Partial<RowBlockColumn>,
+  ) => {
+    setFormData((prev) =>
+      withSection(prev, sectionId, (s) =>
+        updateColumnBlocks(
+          s,
+          undefined,
+          (blocks) => blocks,
+          rowBlockId,
+          (b) => {
+            if (b.type === "row" && b.content?.columns) {
+              return {
+                ...b,
+                content: {
+                  ...b.content,
+                  columns: b.content.columns.map((c: any) =>
+                    c.id === columnId ? { ...c, ...updates } : c
+                  ),
+                },
+              };
+            }
+            return b;
+          }
+        )
+      )
     );
   };
 
@@ -479,7 +800,12 @@ export function PageBuilderProvider({
         handleRemoveBlock,
         handleUpdateBlock,
         handleReorderBlocks,
+        handleMoveBlock,
+        handleAddNestedColumn,
+        handleRemoveNestedColumn,
+        handleUpdateNestedColumn,
         handleInsertTemplate,
+        canModifyLayout,
       }}
     >
       {children}
@@ -575,6 +901,22 @@ function getInitialBlockContent(type: PageBlock["type"]) {
         buttonLabel: "Action",
         buttonUrl: "#",
         backgroundStyle: "navy",
+      };
+    case "html":
+      return {
+        html: "<div><p>Enter custom HTML here...</p></div>",
+      };
+    case "row":
+      return {
+        columns: [
+          { id: genId("col"), width: "50%", blocks: [] },
+          { id: genId("col"), width: "50%", blocks: [] },
+        ],
+        responsive: {
+          desktop: "horizontal",
+          tablet: "auto",
+          mobile: "stacked",
+        },
       };
     default:
       return {};

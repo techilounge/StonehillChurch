@@ -8,7 +8,7 @@ import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { SelectInput } from "@/components/forms/SelectInput";
 import { createDocumentAction, updateDocumentAction } from "@/app/admin/cms/actions";
-import { PageContent } from "@/types/content";
+import { PageContent, Ministry } from "@/types/content";
 import { PUBLISHED } from "@/types/shared";
 import { PageBuilderProvider, usePageBuilder } from "./PageBuilderContext";
 import { BackgroundPanel } from "./BackgroundPanel";
@@ -20,14 +20,39 @@ import { getUnsafeUrlsInDocument, sanitizeDocumentStyles } from "@/lib/pageBuild
 import type { SpacingTokens } from "@/types/settings";
 
 interface PageBuilderShellProps {
-  initialData: (PageContent & { id?: string }) | null;
+  initialData: (Partial<PageContent & Ministry> & { id?: string }) | null;
   canPublish: boolean;
   /** Server-fetched spacing tokens used by Page Builder spacing controls. */
   spacingTokens?: SpacingTokens;
+  module?: "pages" | "ministries";
+  role?: string;
 }
 
-export function PageBuilderShell({ initialData, canPublish, spacingTokens }: PageBuilderShellProps) {
-  const defaultData: Partial<PageContent> = {
+export function PageBuilderShell({ initialData, canPublish, spacingTokens, module = "pages", role }: PageBuilderShellProps) {
+  const defaultData: Partial<PageContent & Ministry> = module === "ministries" ? {
+    name: "",
+    slug: "",
+    category: "service",
+    shortDescription: "",
+    longDescription: "",
+    leaderName: "",
+    leaderEmail: "",
+    meetingTime: "",
+    imageUrl: "",
+    imageAlt: "",
+    ctaLabel: "Get Involved",
+    ctaHref: "/contact",
+    openInNewTab: false,
+    featured: false,
+    status: "draft",
+    sortOrder: 0,
+    seoTitle: "",
+    seoDescription: "",
+    builderData: {
+      version: "1.0",
+      sections: [],
+    },
+  } as any : {
     title: "",
     slug: "",
     content: "",
@@ -40,14 +65,26 @@ export function PageBuilderShell({ initialData, canPublish, spacingTokens }: Pag
     },
   };
 
+  const canModifyLayout = role !== "EDITOR";
+
   return (
-    <PageBuilderProvider initialData={initialData || defaultData} spacingTokens={spacingTokens}>
-      <PageBuilderEditor isNew={!initialData} canPublish={canPublish} initialData={initialData} />
+    <PageBuilderProvider initialData={initialData || defaultData} spacingTokens={spacingTokens} canModifyLayout={canModifyLayout}>
+      <PageBuilderEditor isNew={!initialData} canPublish={canPublish} initialData={initialData} module={module} />
     </PageBuilderProvider>
   );
 }
 
-function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean; canPublish: boolean; initialData: (PageContent & { id?: string }) | null }) {
+function PageBuilderEditor({
+  isNew,
+  canPublish,
+  initialData,
+  module,
+}: {
+  isNew: boolean;
+  canPublish: boolean;
+  initialData: (Partial<PageContent & Ministry> & { id?: string }) | null;
+  module: "pages" | "ministries";
+}) {
   const router = useRouter();
   const { formData, setFormData } = usePageBuilder();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -55,7 +92,7 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[]>>({});
   const [isPreviewMode, setIsPreviewMode] = React.useState(false);
 
-  const handleFieldChange = (name: keyof PageContent, value: any) => {
+  const handleFieldChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -94,16 +131,18 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
       payload.status = forceStatus as any;
     }
 
+    const routePath = module === "ministries" ? "ministries" : "pages";
+
     try {
       const response = isNew
-        ? await createDocumentAction("pages", payload)
-        : await updateDocumentAction("pages", initialData!.id!, payload);
+        ? await createDocumentAction(module, payload)
+        : await updateDocumentAction(module, initialData!.id!, payload);
 
       if (response.ok) {
-        router.push(`/admin/pages`);
+        router.push(`/admin/${routePath}`);
         router.refresh();
       } else {
-        setServerError(response.error.message || "Failed to save page.");
+        setServerError(response.error.message || `Failed to save ${module === "ministries" ? "ministry" : "page"}.`);
         if (response.error.fieldErrors) {
           setFieldErrors(response.error.fieldErrors);
         }
@@ -121,13 +160,15 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
       {/* Top Action Bar */}
       <header className="flex-none h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => router.push(`/admin/pages`)} className="shrink-0">
+          <Button variant="outline" size="sm" onClick={() => router.push(`/admin/${module === "ministries" ? "ministries" : "pages"}`)} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <div className="h-4 w-px bg-slate-200 hidden sm:block" />
           <h1 className="text-lg font-bold text-slate-900 hidden sm:block">
-            {isNew ? "New Page" : formData.title || "Untitled Page"}
+            {isNew 
+              ? (module === "ministries" ? "New Ministry" : "New Page") 
+              : (module === "ministries" ? formData.name : formData.title) || "Untitled"}
           </h1>
         </div>
 
@@ -189,135 +230,301 @@ function PageBuilderEditor({ isNew, canPublish, initialData }: { isNew: boolean;
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
               <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
                 <Settings className="h-4 w-4 text-slate-500" />
-                <h2 className="font-semibold text-slate-900 text-sm">Page Settings</h2>
+                <h2 className="font-semibold text-slate-900 text-sm">
+                  {module === "ministries" ? "Ministry Settings" : "Page Settings"}
+                </h2>
               </div>
               <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-900">Page Title *</label>
-                  <TextInput 
-                    value={formData.title || ""} 
-                    onChange={(e) => handleFieldChange("title", e.target.value)} 
-                    placeholder="e.g. Our Beliefs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-900">URL Slug *</label>
-                  <TextInput 
-                    value={formData.slug || ""} 
-                    onChange={(e) => handleFieldChange("slug", e.target.value)} 
-                    placeholder="e.g. our-beliefs"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-900">SEO Title</label>
-                  <TextInput
-                    value={formData.seoTitle || ""}
-                    onChange={(e) => handleFieldChange("seoTitle", e.target.value)}
-                  />
-                  <CharCounter value={formData.seoTitle || ""} limit={70} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-slate-900">Status</label>
-                  <SelectInput 
-                    value={formData.status || "draft"} 
-                    onChange={(e) => handleFieldChange("status", e.target.value)}
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </SelectInput>
-                </div>
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-sm font-semibold text-slate-900">SEO Description</label>
-                  <TextArea
-                    value={formData.seoDescription || ""}
-                    onChange={(e) => handleFieldChange("seoDescription", e.target.value)}
-                    rows={2}
-                  />
-                  <CharCounter value={formData.seoDescription || ""} limit={160} />
-                </div>
-                <div className="md:col-span-2 pt-2 border-t border-slate-100">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <input
-                      type="checkbox"
-                      checked={!!formData.heroEnabled}
-                      onChange={(e) => handleFieldChange("heroEnabled", e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
-                    />
-                    Show page hero banner
-                  </label>
-                  <p className="text-xs text-slate-500 mt-1 ml-6">
-                    Adds the dark-navy banner with the Page Title in white, matching pages like <code>/our-beliefs</code> and <code>/about</code>.
-                  </p>
-                  {formData.heroEnabled && (
-                    <div className="mt-3 ml-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Subtitle (handwritten gold)</label>
-                        <TextInput
-                          value={formData.heroSubtitle || ""}
-                          onChange={(e) => handleFieldChange("heroSubtitle", e.target.value)}
-                          placeholder="e.g. What we believe about God, humanity, and salvation."
-                        />
-                      </div>
-                      <div className="space-y-1.5 md:col-span-2">
-                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background image URL (optional)</label>
-                        <TextInput
-                          value={formData.heroImageUrl || ""}
-                          onChange={(e) => handleFieldChange("heroImageUrl", e.target.value)}
-                          placeholder="https://… (a dark overlay is added automatically)"
-                        />
-                      </div>
+                {module === "ministries" ? (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Ministry Name *</label>
+                      <TextInput 
+                        value={formData.name || ""} 
+                        onChange={(e) => handleFieldChange("name", e.target.value)} 
+                        placeholder="e.g. Youth Ministry"
+                      />
                     </div>
-                  )}
-                </div>
-
-                <div className="md:col-span-2 pt-2 border-t border-slate-100">
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <input
-                      type="checkbox"
-                      checked={!!formData.backLinkEnabled}
-                      onChange={(e) => handleFieldChange("backLinkEnabled", e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
-                    />
-                    Show a Back link at the top of the page
-                  </label>
-                  <p className="text-xs text-slate-500 mt-1 ml-6">
-                    Adds a small &ldquo;← {formData.backLinkLabel || "Back to Home"}&rdquo; link above the page content, matching pages like <code>/resources</code>.
-                  </p>
-                  {formData.backLinkEnabled && (
-                    <div className="mt-3 ml-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Label</label>
-                        <TextInput
-                          value={formData.backLinkLabel || ""}
-                          onChange={(e) => handleFieldChange("backLinkLabel", e.target.value)}
-                          placeholder="Back to Home"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Link URL</label>
-                        <TextInput
-                          value={formData.backLinkHref || ""}
-                          onChange={(e) => handleFieldChange("backLinkHref", e.target.value)}
-                          placeholder="/"
-                        />
-                      </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">URL Slug *</label>
+                      <TextInput 
+                        value={formData.slug || ""} 
+                        onChange={(e) => handleFieldChange("slug", e.target.value)} 
+                        placeholder="e.g. youth-ministry"
+                      />
                     </div>
-                  )}
-                </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Category *</label>
+                      <SelectInput 
+                        value={formData.category || ""} 
+                        onChange={(e) => handleFieldChange("category", e.target.value)}
+                      >
+                        <option value="">Select a category...</option>
+                        <option value="children">Children</option>
+                        <option value="youth">Youth</option>
+                        <option value="adults">Adults</option>
+                        <option value="family">Family</option>
+                        <option value="outreach">Outreach</option>
+                        <option value="worship">Worship</option>
+                        <option value="service">Service</option>
+                        <option value="education">Education</option>
+                        <option value="health">Health</option>
+                      </SelectInput>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Status</label>
+                      <SelectInput 
+                        value={formData.status || "draft"} 
+                        onChange={(e) => handleFieldChange("status", e.target.value)}
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="archived">Archived</option>
+                      </SelectInput>
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-sm font-semibold text-slate-900">Short Description *</label>
+                      <TextArea
+                        value={formData.shortDescription || ""}
+                        onChange={(e) => handleFieldChange("shortDescription", e.target.value)}
+                        rows={2}
+                        placeholder="1-2 sentences shown on the card."
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Leader Name *</label>
+                      <TextInput 
+                        value={formData.leaderName || ""} 
+                        onChange={(e) => handleFieldChange("leaderName", e.target.value)} 
+                        placeholder="John Doe"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Leader Email *</label>
+                      <TextInput 
+                        value={formData.leaderEmail || ""} 
+                        type="email"
+                        onChange={(e) => handleFieldChange("leaderEmail", e.target.value)} 
+                        placeholder="leader@example.com"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Meeting Time</label>
+                      <TextInput 
+                        value={formData.meetingTime || ""} 
+                        onChange={(e) => handleFieldChange("meetingTime", e.target.value)} 
+                        placeholder="e.g. Saturdays at 10 AM"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Sort Order *</label>
+                      <TextInput 
+                        value={formData.sortOrder ?? ""} 
+                        type="number"
+                        onChange={(e) => handleFieldChange("sortOrder", e.target.value === "" ? 0 : Number(e.target.value))} 
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Button Label *</label>
+                      <TextInput 
+                        value={formData.ctaLabel || ""} 
+                        onChange={(e) => handleFieldChange("ctaLabel", e.target.value)} 
+                        placeholder="e.g. Get Involved"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Button URL *</label>
+                      <TextInput 
+                        value={formData.ctaHref || ""} 
+                        onChange={(e) => handleFieldChange("ctaHref", e.target.value)} 
+                        placeholder="e.g. /contact"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Image URL *</label>
+                      <TextInput 
+                        value={formData.imageUrl || ""} 
+                        onChange={(e) => handleFieldChange("imageUrl", e.target.value)} 
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Image Alt Text *</label>
+                      <TextInput 
+                        value={formData.imageAlt || ""} 
+                        onChange={(e) => handleFieldChange("imageAlt", e.target.value)} 
+                        placeholder="Describe the image"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">SEO Title</label>
+                      <TextInput 
+                        value={formData.seoTitle || ""} 
+                        onChange={(e) => handleFieldChange("seoTitle", e.target.value)} 
+                      />
+                      <CharCounter value={formData.seoTitle || ""} limit={70} />
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-sm font-semibold text-slate-900">SEO Description</label>
+                      <TextArea 
+                        value={formData.seoDescription || ""} 
+                        onChange={(e) => handleFieldChange("seoDescription", e.target.value)} 
+                        rows={2}
+                      />
+                      <CharCounter value={formData.seoDescription || ""} limit={160} />
+                    </div>
+                    <div className="md:col-span-2 pt-2 border-t border-slate-100 flex gap-6">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <input
+                          type="checkbox"
+                          checked={!!formData.openInNewTab}
+                          onChange={(e) => handleFieldChange("openInNewTab", e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                        />
+                        Open CTA in New Tab
+                      </label>
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <input
+                          type="checkbox"
+                          checked={!!formData.featured}
+                          onChange={(e) => handleFieldChange("featured", e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                        />
+                        Mark as Featured
+                      </label>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Page Title *</label>
+                      <TextInput 
+                        value={formData.title || ""} 
+                        onChange={(e) => handleFieldChange("title", e.target.value)} 
+                        placeholder="e.g. Our Beliefs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">URL Slug *</label>
+                      <TextInput 
+                        value={formData.slug || ""} 
+                        onChange={(e) => handleFieldChange("slug", e.target.value)} 
+                        placeholder="e.g. our-beliefs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">SEO Title</label>
+                      <TextInput
+                        value={formData.seoTitle || ""}
+                        onChange={(e) => handleFieldChange("seoTitle", e.target.value)}
+                      />
+                      <CharCounter value={formData.seoTitle || ""} limit={70} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-semibold text-slate-900">Status</label>
+                      <SelectInput 
+                        value={formData.status || "draft"} 
+                        onChange={(e) => handleFieldChange("status", e.target.value)}
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="published">Published</option>
+                        <option value="archived">Archived</option>
+                      </SelectInput>
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-sm font-semibold text-slate-900">SEO Description</label>
+                      <TextArea
+                        value={formData.seoDescription || ""}
+                        onChange={(e) => handleFieldChange("seoDescription", e.target.value)}
+                        rows={2}
+                      />
+                      <CharCounter value={formData.seoDescription || ""} limit={160} />
+                    </div>
+                    <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <input
+                          type="checkbox"
+                          checked={!!formData.heroEnabled}
+                          onChange={(e) => handleFieldChange("heroEnabled", e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                        />
+                        Show page hero banner
+                      </label>
+                      <p className="text-xs text-slate-500 mt-1 ml-6">
+                        Adds the dark-navy banner with the Page Title in white, matching pages like <code>/our-beliefs</code> and <code>/about</code>.
+                      </p>
+                      {formData.heroEnabled && (
+                        <div className="mt-3 ml-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1.5 md:col-span-2">
+                            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Subtitle (handwritten gold)</label>
+                            <TextInput
+                              value={formData.heroSubtitle || ""}
+                              onChange={(e) => handleFieldChange("heroSubtitle", e.target.value)}
+                              placeholder="e.g. What we believe about God, humanity, and salvation."
+                            />
+                          </div>
+                          <div className="space-y-1.5 md:col-span-2">
+                            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Background image URL (optional)</label>
+                            <TextInput
+                              value={formData.heroImageUrl || ""}
+                              onChange={(e) => handleFieldChange("heroImageUrl", e.target.value)}
+                              placeholder="https://… (a dark overlay is added automatically)"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                <div className="md:col-span-2 pt-2 border-t border-slate-100">
-                  <label className="block text-sm font-semibold text-slate-900 mb-1">Page background</label>
-                  <p className="text-xs text-slate-500 mb-3">
-                    Fills the entire page behind the hero and builder sections. Section-level backgrounds layer on top.
-                  </p>
-                  <BackgroundPanel
-                    value={formData.pageBackground as any}
-                    onChange={(nextStyle) =>
-                      handleFieldChange("pageBackground", Object.keys(nextStyle ?? {}).length > 0 ? nextStyle : undefined)
-                    }
-                  />
-                </div>
+                    <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                        <input
+                          type="checkbox"
+                          checked={!!formData.backLinkEnabled}
+                          onChange={(e) => handleFieldChange("backLinkEnabled", e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-stonehill-accent focus:ring-stonehill-accent"
+                        />
+                        Show a Back link at the top of the page
+                      </label>
+                      <p className="text-xs text-slate-500 mt-1 ml-6">
+                        Adds a small &ldquo;← {formData.backLinkLabel || "Back to Home"}&rdquo; link above the page content, matching pages like <code>/resources</code>.
+                      </p>
+                      {formData.backLinkEnabled && (
+                        <div className="mt-3 ml-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Label</label>
+                            <TextInput
+                              value={formData.backLinkLabel || ""}
+                              onChange={(e) => handleFieldChange("backLinkLabel", e.target.value)}
+                              placeholder="Back to Home"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Link URL</label>
+                            <TextInput
+                              value={formData.backLinkHref || ""}
+                              onChange={(e) => handleFieldChange("backLinkHref", e.target.value)}
+                              placeholder="/"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="md:col-span-2 pt-2 border-t border-slate-100">
+                      <label className="block text-sm font-semibold text-slate-900 mb-1">Page background</label>
+                      <p className="text-xs text-slate-500 mb-3">
+                        Fills the entire page behind the hero and builder sections. Section-level backgrounds layer on top.
+                      </p>
+                      <BackgroundPanel
+                        value={formData.pageBackground as any}
+                        onChange={(nextStyle) =>
+                          handleFieldChange("pageBackground", Object.keys(nextStyle ?? {}).length > 0 ? nextStyle : undefined)
+                        }
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

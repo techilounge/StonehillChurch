@@ -133,6 +133,7 @@ export type Ministry = AuditFields & {
   sortOrder: number;
   seoTitle: string;
   seoDescription: string;
+  builderData?: PageBuilderDocument;
 };
 
 export type Leader = {

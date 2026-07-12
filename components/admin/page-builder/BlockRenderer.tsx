@@ -1,10 +1,244 @@
 import * as React from "react";
-import { PageBlock } from "@/types/pageBuilder";
+import { PageBlock, BlockType } from "@/types/pageBuilder";
 import { usePageBuilder } from "./PageBuilderContext";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Plus } from "lucide-react";
+import { useDroppable } from "@dnd-kit/core";
 import { isValidSafeUrl, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from "@/lib/youtube";
 import { BlockResizer } from "./BlockResizer";
+
+function spacingShorthand(
+  v: { top: number; right: number; bottom: number; left: number; unit?: string; token?: string } | undefined,
+): string | null {
+  if (!v) return null;
+  if (v.token && ["xs", "sm", "md", "lg", "xl"].includes(v.token)) {
+    const ref = `var(--pb-space-${v.token})`;
+    return `${ref} ${ref} ${ref} ${ref}`;
+  }
+  const u = v.unit ?? "px";
+  return `${v.top}${u} ${v.right}${u} ${v.bottom}${u} ${v.left}${u}`;
+}
+
+function effectiveSpacing(
+  device: string,
+  desktop: any,
+  tablet: any,
+  mobile: any,
+): any {
+  if (device === "mobile") return mobile ?? tablet ?? desktop;
+  if (device === "tablet") return tablet ?? desktop;
+  return desktop;
+}
+
+function previewSpacingStyle(
+  device: string,
+  style: any,
+): React.CSSProperties {
+  if (!style) return {};
+  const p = spacingShorthand(
+    effectiveSpacing(device, style.paddingValues, style.paddingValuesTablet, style.paddingValuesMobile),
+  );
+  const m = spacingShorthand(
+    effectiveSpacing(device, style.marginValues, style.marginValuesTablet, style.marginValuesMobile),
+  );
+  return {
+    ...(p ? { padding: p } : {}),
+    ...(m ? { margin: m } : {}),
+  };
+}
+
+function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const basicBlocks: BlockType[] = ["heading", "paragraph", "image", "button", "divider", "spacer"];
+  const advancedBlocks: BlockType[] = ["video", "card", "gallery", "carousel", "iconText", "iconBox", "googleMap", "countdown", "cta", "html"];
+
+  if (!isOpen) {
+    return (
+      <div className="flex justify-center mt-2 pt-4 border-t border-slate-200/50 border-dashed opacity-60 hover:opacity-100 transition-opacity">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 bg-white border border-slate-200 rounded-md hover:border-stonehill-accent hover:text-stonehill-accent transition-colors shadow-sm"
+        >
+          <Plus className="h-3 w-3" />
+          Add Block
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-4 pt-4 border-t border-slate-200/50 border-dashed animate-in fade-in slide-in-from-top-2 duration-200" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Add New Block</span>
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="text-xs text-slate-400 hover:text-slate-600 font-medium"
+          >
+            Cancel
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <span className="text-[10px] uppercase font-bold text-slate-400 mb-2 block">Basic</span>
+            <div className="flex flex-wrap gap-2">
+              {basicBlocks.map(type => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    onAdd(type);
+                    setIsOpen(false);
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium border border-slate-200 text-slate-700 rounded-md hover:border-stonehill-accent hover:text-stonehill-accent bg-slate-50 hover:bg-white transition-all flex items-center gap-1.5 capitalize"
+                >
+                  <Plus className="h-3 w-3 text-slate-400" />
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          <div>
+            <span className="text-[10px] uppercase font-bold text-slate-400 mb-2 block">Advanced</span>
+            <div className="flex flex-wrap gap-2">
+              {advancedBlocks.map(type => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    onAdd(type);
+                    setIsOpen(false);
+                  }}
+                  className="px-3 py-1.5 text-xs font-medium border border-slate-200 text-slate-700 rounded-md hover:border-stonehill-accent hover:text-stonehill-accent bg-slate-50 hover:bg-white transition-all flex items-center gap-1.5 capitalize"
+                >
+                  <Plus className="h-3 w-3 text-slate-400" />
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NestedDroppableColumn({
+  col,
+  colIdx,
+  cols,
+  sectionId,
+  rowBlockId,
+  selectedElementId,
+  setSelectedElementId,
+  canModifyLayout,
+  handleRemoveNestedColumn,
+  handleAddBlock,
+  renderBlock,
+  isMobileStacked,
+  devicePreview,
+}: any) {
+  const { setNodeRef } = useDroppable({
+    id: col.id,
+    data: { type: "column", sectionId, columnId: col.id },
+  });
+  
+  const width = col.width || `${100 / cols.length}%`;
+  const isColSelected = selectedElementId === col.id;
+
+  return (
+    <div
+      ref={setNodeRef}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedElementId(col.id);
+      }}
+      className={`relative flex-grow flex flex-col min-h-[100px] border border-dashed rounded p-3 transition-colors pointer-events-auto cursor-pointer md:w-auto ${
+        isMobileStacked ? "w-full md:flex-none" : "flex-none"
+      } ${
+        isColSelected
+          ? "border-stonehill-accent bg-stonehill-accent/5 ring-1 ring-stonehill-accent"
+          : "border-slate-200 hover:border-slate-350 bg-slate-50/30"
+      }`}
+      style={{
+        width: isMobileStacked ? undefined : width,
+        flexBasis: isMobileStacked ? undefined : width,
+        color: col.style?.textColor,
+        ...previewBgFillStyle(col.style),
+        ...previewSpacingStyle(devicePreview, col.style),
+      } as React.CSSProperties}
+    >
+      <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold uppercase mb-2">
+        <span>Col {colIdx + 1} ({width})</span>
+        {canModifyLayout && cols.length > 1 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveNestedColumn(sectionId, rowBlockId, col.id);
+            }}
+            className="text-red-500 hover:text-red-700 hover:underline cursor-pointer"
+          >
+            Remove
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-3 flex-grow mb-3">
+        {col.blocks && col.blocks.length > 0 ? (
+          col.blocks.map((nestedBlock: any, nestedIdx: number) => (
+            <React.Fragment key={nestedBlock.id}>
+              {renderBlock ? renderBlock(nestedBlock, nestedIdx, col.blocks.length, col.id) : null}
+            </React.Fragment>
+          ))
+        ) : (
+          <div className="flex items-center justify-center text-slate-400/60 py-6 border border-dashed border-slate-200/60 rounded bg-white/50">
+            <span className="text-[10px]">Empty Column</span>
+          </div>
+        )}
+      </div>
+
+      {canModifyLayout && (
+        <div className="pointer-events-auto">
+          <AddBlockMenu onAdd={(type) => handleAddBlock(sectionId, type, col.id)} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function previewBgType(style: any): "none" | "color" | "image" | "gradient" {
+  if (style?.backgroundType) return style.backgroundType;
+  if (style?.backgroundGradient) return "gradient";
+  if (style?.backgroundImage) return "image";
+  if (style?.backgroundColor) return "color";
+  return "none";
+}
+
+function previewBgFillStyle(style: any): React.CSSProperties {
+  const type = previewBgType(style);
+  if (type === "color" && style?.backgroundColor && style.backgroundColor !== "#ffffff") {
+    return { backgroundColor: style.backgroundColor };
+  }
+  if (type === "image" && style?.backgroundImage && isValidSafeUrl(style.backgroundImage)) {
+    return {
+      backgroundImage: `url(${style.backgroundImage})`,
+      backgroundSize: style.backgroundSize ?? "cover",
+      backgroundPosition: style.backgroundPosition ?? "center center",
+      backgroundRepeat: style.backgroundRepeat ?? "no-repeat",
+      backgroundAttachment: "scroll",
+    };
+  }
+  if (type === "gradient" && style?.backgroundGradient) {
+    const g = style.backgroundGradient;
+    return { backgroundImage: `linear-gradient(${g.angle}deg, ${g.from}, ${g.to})` };
+  }
+  return {};
+}
 
 interface BlockRendererProps {
   block: PageBlock;
@@ -15,10 +249,20 @@ interface BlockRendererProps {
   columnId?: string;
   onClick: (e: React.MouseEvent) => void;
   onRemove: (e: React.MouseEvent) => void;
+  renderBlock?: (block: PageBlock, index: number, totalBlocks: number, columnId: string) => React.ReactNode;
 }
 
-export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId, columnId, onClick, onRemove }: BlockRendererProps) {
-  const { handleReorderBlocks } = usePageBuilder();
+export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId, columnId, onClick, onRemove, renderBlock }: BlockRendererProps) {
+  const { 
+    handleReorderBlocks, 
+    canModifyLayout,
+    devicePreview,
+    selectedElementId,
+    setSelectedElementId,
+    handleAddBlock,
+    handleAddNestedColumn,
+    handleRemoveNestedColumn,
+  } = usePageBuilder();
   // Safe extraction of properties depending on the block type.
   const { content } = block;
 
@@ -51,42 +295,44 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
       style={containerStyle}
       onClick={onClick}
     >
-      {hasMedia && (
+      {hasMedia && canModifyLayout && (
         <BlockResizer block={block} sectionId={sectionId} columnId={columnId} isSelected={isSelected} />
       )}
 
       {/* Editor overlay handles */}
-      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-10 flex gap-2">
-        <button 
-          onClick={(e) => { e.stopPropagation(); handleReorderBlocks(sectionId, index, index - 1, columnId); }}
-          className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
-          title="Move block up"
-          aria-label="Move block up"
-          disabled={index === 0}
-        >
-          <ChevronUp className="h-3 w-3" />
-        </button>
-        <button 
-          onClick={(e) => { e.stopPropagation(); handleReorderBlocks(sectionId, index, index + 1, columnId); }}
-          className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
-          title="Move block down"
-          aria-label="Move block down"
-          disabled={index === totalBlocks - 1}
-        >
-          <ChevronDown className="h-3 w-3" />
-        </button>
-        <span className="text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow-sm opacity-80 uppercase tracking-wider font-mono flex items-center">
-          {block.type}
-        </span>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onRemove(e); }}
-          className="text-[10px] bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 shadow-sm transition-colors font-medium"
-          title="Remove block"
-          aria-label="Remove block"
-        >
-          Remove
-        </button>
-      </div>
+      {canModifyLayout && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-10 flex gap-2">
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleReorderBlocks(sectionId, index, index - 1, columnId); }}
+            className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
+            title="Move block up"
+            aria-label="Move block up"
+            disabled={index === 0}
+          >
+            <ChevronUp className="h-3 w-3" />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleReorderBlocks(sectionId, index, index + 1, columnId); }}
+            className="h-6 w-6 flex items-center justify-center rounded bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 border border-slate-200 shadow-sm transition-colors disabled:opacity-30"
+            title="Move block down"
+            aria-label="Move block down"
+            disabled={index === totalBlocks - 1}
+          >
+            <ChevronDown className="h-3 w-3" />
+          </button>
+          <span className="text-[10px] bg-slate-800 text-white px-2 py-1 rounded shadow-sm opacity-80 uppercase tracking-wider font-mono flex items-center">
+            {block.type}
+          </span>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onRemove(e); }}
+            className="text-[10px] bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 shadow-sm transition-colors font-medium"
+            title="Remove block"
+            aria-label="Remove block"
+          >
+            Remove
+          </button>
+        </div>
+      )}
       
       {/* Block Content (pointer-events-none so click bubbles to the container to select it) */}
       <div className={`pointer-events-none p-4 ${fixedHeight ? "h-full flex flex-col" : ""}`}>
@@ -134,6 +380,24 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
               {!hasText && (
                 <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
                   ⚠️ Paragraph is empty
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {block.type === "html" && (() => {
+          const hasHtml = !!(content.html && content.html.trim());
+          return (
+            <div>
+              {hasHtml ? (
+                <div
+                  className="prose prose-sm max-w-none custom-html-content"
+                  dangerouslySetInnerHTML={{ __html: content.html }}
+                />
+              ) : (
+                <div className="bg-slate-50 border border-slate-200 p-4 rounded text-slate-400 text-xs font-mono text-center">
+                  &lt;Custom HTML Block (Empty)&gt;
                 </div>
               )}
             </div>
@@ -609,6 +873,60 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
                   ⚠️ CTA button label is required for link
                 </div>
               )}
+            </div>
+          );
+        })()}
+
+        {block.type === "row" && (() => {
+          const cols = content.columns || [];
+          const responsive = content.responsive || { desktop: "horizontal", tablet: "auto", mobile: "stacked" };
+          const isMobileStacked = responsive.mobile !== "horizontal";
+          
+          return (
+            <div className="w-full space-y-4">
+              {canModifyLayout && (
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2 pointer-events-auto">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Row Columns ({cols.length})</span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddNestedColumn(sectionId, block.id);
+                      }}
+                      disabled={cols.length >= 4}
+                      className="px-2 py-1 text-[10px] font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors disabled:opacity-50"
+                    >
+                      + Add Col
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div
+                className={`flex gap-4 w-full ${
+                  isMobileStacked ? "flex-col md:flex-row" : "flex-row"
+                }`}
+              >
+                {cols.map((col: any, colIdx: number) => (
+                  <NestedDroppableColumn
+                    key={col.id || colIdx}
+                    col={col}
+                    colIdx={colIdx}
+                    cols={cols}
+                    sectionId={sectionId}
+                    rowBlockId={block.id}
+                    selectedElementId={selectedElementId}
+                    setSelectedElementId={setSelectedElementId}
+                    canModifyLayout={canModifyLayout}
+                    handleRemoveNestedColumn={handleRemoveNestedColumn}
+                    handleAddBlock={handleAddBlock}
+                    renderBlock={renderBlock}
+                    isMobileStacked={isMobileStacked}
+                    devicePreview={devicePreview}
+                  />
+                ))}
+              </div>
             </div>
           );
         })()}

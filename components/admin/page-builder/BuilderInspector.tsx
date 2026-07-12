@@ -440,11 +440,17 @@ function ColumnInspector({
         }
         tooltip="Per-side margin for this column (negative values allowed)."
       />
+
+      <BackgroundPanel
+        value={column.style}
+        onChange={(nextStyle) => onChange({ style: nextStyle })}
+      />
     </>
   );
 }
 
 function BlockInspector({
+  sectionId,
   block,
   onChange,
   onOpenMediaSelector
@@ -1514,6 +1520,148 @@ function BlockInspector({
           </div>
         </>
       )}
+
+      {block.type === "row" && (() => {
+        const { handleAddNestedColumn, handleRemoveNestedColumn } = usePageBuilder();
+        const cols = block.content.columns || [];
+        const responsive = block.content.responsive || { desktop: "horizontal", tablet: "auto", mobile: "stacked" };
+        
+        return (
+          <>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Columns ({cols.length})</label>
+                <button
+                  type="button"
+                  onClick={() => handleAddNestedColumn(sectionId, block.id)}
+                  disabled={cols.length >= 4}
+                  className="px-2 py-1 text-xs font-semibold bg-stonehill-accent hover:bg-stonehill-accent/90 text-white rounded transition-colors disabled:opacity-50"
+                >
+                  + Add Column
+                </button>
+              </div>
+
+              {cols.length === 0 ? (
+                <p className="text-xs text-slate-500 italic">No columns in this row.</p>
+              ) : (
+                <div className="space-y-3">
+                  {cols.map((col: any, colIdx: number) => (
+                    <div key={col.id || colIdx} className="p-2 border border-slate-200 rounded-md bg-slate-50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700">Column {colIdx + 1}</span>
+                        {cols.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveNestedColumn(sectionId, block.id, col.id)}
+                            className="text-xs text-red-655 hover:underline text-red-500 hover:text-red-700"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase font-bold text-slate-400">Width</span>
+                        <TextInput
+                          value={col.width || ""}
+                          onChange={(e) => {
+                            const nextCols = cols.map((c: any) =>
+                              c.id === col.id ? { ...c, width: e.target.value } : c
+                            );
+                            onChange({
+                              content: {
+                                ...block.content,
+                                columns: nextCols,
+                              }
+                            });
+                          }}
+                          placeholder="e.g. 50%"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextCols = cols.map((c: any) => ({ ...c, width: `${100 / cols.length}%` }));
+                      onChange({
+                        content: {
+                          ...block.content,
+                          columns: nextCols,
+                        }
+                      });
+                    }}
+                    className="text-xs font-semibold text-stonehill-accent hover:underline"
+                  >
+                    Equalize column widths
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3 border-t border-slate-100 pt-4">
+              <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Responsive Layout Options</h4>
+
+              <div className="space-y-1.5">
+                <InspectorLabel tooltip="Layout direction on large screens (desktop).">Desktop</InspectorLabel>
+                <SelectInput
+                  value={responsive.desktop || "horizontal"}
+                  onChange={(e) => onChange({
+                    content: {
+                      ...block.content,
+                      responsive: {
+                        ...responsive,
+                        desktop: e.target.value
+                      }
+                    }
+                  })}
+                >
+                  <option value="horizontal">Side by Side (Horizontal)</option>
+                  <option value="stacked">Stacked (Vertical)</option>
+                </SelectInput>
+              </div>
+
+              <div className="space-y-1.5">
+                <InspectorLabel tooltip="Layout direction on medium screens (tablet). Auto inherits from desktop.">Tablet</InspectorLabel>
+                <SelectInput
+                  value={responsive.tablet || "auto"}
+                  onChange={(e) => onChange({
+                    content: {
+                      ...block.content,
+                      responsive: {
+                        ...responsive,
+                        tablet: e.target.value
+                      }
+                    }
+                  })}
+                >
+                  <option value="auto">Auto (Responsive)</option>
+                  <option value="horizontal">Side by Side (Horizontal)</option>
+                  <option value="stacked">Stacked (Vertical)</option>
+                </SelectInput>
+              </div>
+
+              <div className="space-y-1.5">
+                <InspectorLabel tooltip="Layout direction on small screens (mobile). Stacked is recommended.">Mobile</InspectorLabel>
+                <SelectInput
+                  value={responsive.mobile || "stacked"}
+                  onChange={(e) => onChange({
+                    content: {
+                      ...block.content,
+                      responsive: {
+                        ...responsive,
+                        mobile: e.target.value
+                      }
+                    }
+                  })}
+                >
+                  <option value="stacked">Stacked (Vertical)</option>
+                  <option value="horizontal">Side by Side (Horizontal)</option>
+                </SelectInput>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {block.type === "divider" && (
         <div className="text-sm text-slate-500 py-4 text-center border-t border-slate-100 font-sans">

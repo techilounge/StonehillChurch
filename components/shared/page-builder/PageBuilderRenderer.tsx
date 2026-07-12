@@ -111,16 +111,37 @@ function buildResponsiveCss(document: PageBuilderDocument): string {
     if (pM || mM) mobile.push({ id, padding: pM ?? undefined, margin: mM ?? undefined });
   };
 
+  const visitBlocks = (blocks: PageBlock[]) => {
+    if (!blocks) return;
+    for (const b of blocks) {
+      if (b.type === "row" && b.content?.columns) {
+        for (const col of b.content.columns) {
+          visit(col.id, col.style);
+          visitBlocks(col.blocks || []);
+        }
+      }
+    }
+  };
+
   for (const section of document.sections) {
     visit(section.id, section.style);
     if (section.rows) {
       for (const row of section.rows) {
         visit(row.id, row.style);
-        for (const col of row.columns) visit(col.id, col.style);
+        for (const col of row.columns) {
+          visit(col.id, col.style);
+          visitBlocks(col.blocks || []);
+        }
       }
     }
     if (section.columns) {
-      for (const col of section.columns) visit(col.id, col.style);
+      for (const col of section.columns) {
+        visit(col.id, col.style);
+        visitBlocks(col.blocks || []);
+      }
+    }
+    if (section.blocks) {
+      visitBlocks(section.blocks);
     }
   }
 
@@ -473,6 +494,61 @@ function BlockRenderer({ block }: { block: PageBlock }) {
           className={`${textAlignClass} leading-relaxed paragraph-content`}
           dangerouslySetInnerHTML={{ __html: formatParagraphHtml(content?.text) }}
         />
+      );
+    }
+    case "html": {
+      return (
+        <div
+          style={inlineStyles}
+          className="custom-html-content"
+          dangerouslySetInnerHTML={{ __html: content?.html || "" }}
+        />
+      );
+    }
+    case "row": {
+      const cols = content?.columns || [];
+      const responsive = content?.responsive || { desktop: "horizontal", tablet: "auto", mobile: "stacked" };
+      const isMobileStacked = responsive.mobile !== "horizontal";
+      
+      return (
+        <div style={inlineStyles} className="w-full">
+          <div
+            className={`flex gap-4 w-full ${
+              isMobileStacked ? "flex-col md:flex-row" : "flex-row"
+            }`}
+          >
+            {cols.map((col: any, colIdx: number) => {
+              const width = col.width || `${100 / cols.length}%`;
+              
+              const colStyle: React.CSSProperties = {
+                width: isMobileStacked ? undefined : width,
+                flexBasis: isMobileStacked ? undefined : width,
+                color: col.style?.textColor,
+                backgroundColor: col.style?.backgroundColor,
+                // Margin / Padding
+                padding: col.style?.padding,
+                margin: col.style?.margin,
+              };
+              
+              return (
+                <div
+                  key={col.id || colIdx}
+                  data-pb-id={col.id}
+                  style={colStyle}
+                  className={`flex-grow flex flex-col md:w-auto ${
+                    isMobileStacked ? "w-full md:flex-none" : "flex-none"
+                  }`}
+                >
+                  <div className="space-y-3 flex-grow">
+                    {col.blocks?.map((nestedBlock: PageBlock, nestedIdx: number) => (
+                      <BlockRenderer key={nestedBlock.id || nestedIdx} block={nestedBlock} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       );
     }
     case "image": {

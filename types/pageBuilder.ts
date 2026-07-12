@@ -13,7 +13,27 @@ export type BlockType =
   | "gallery"
   | "carousel"
   | "countdown"
-  | "cta";
+  | "cta"
+  | "html"
+  | "row";
+
+export type RowBlockResponsive = {
+  desktop?: "horizontal" | "stacked";
+  tablet?: "horizontal" | "stacked" | "auto";
+  mobile?: "horizontal" | "stacked";
+};
+
+export type RowBlockColumn = {
+  id: string;
+  width: string; // e.g. "50%", "25%"
+  blocks: PageBlock[];
+  style?: BlockStyle;
+};
+
+export type RowBlockContent = {
+  columns: RowBlockColumn[];
+  responsive?: RowBlockResponsive;
+};
 
 export type BlockStyle = {
   // Common styling props

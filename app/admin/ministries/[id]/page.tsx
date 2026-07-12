@@ -2,8 +2,8 @@ import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { hasPermission } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 import { getCmsDocument } from "@/lib/data/adminCms";
-import { CmsModuleForm } from "@/components/admin/cms/CmsModuleForm";
-import { AdminPageShell } from "@/components/admin/AdminPageShell";
+import { PageBuilderShell } from "@/components/admin/page-builder/PageBuilderShell";
+import { getSpacingTokens } from "@/lib/data/siteSettings";
 
 export const metadata = {
   title: "Edit ministries | Admin",
@@ -18,7 +18,7 @@ export default async function MinistriesEditPage({ params }: { params: Promise<{
 
   const canPublish = hasPermission(session, "content:publish");
 
-  let initialData = null;
+  let initialData: any = null;
   if (!isNew) {
     initialData = await getCmsDocument("ministries", id, session);
     if (!initialData) {
@@ -26,13 +26,17 @@ export default async function MinistriesEditPage({ params }: { params: Promise<{
     }
   }
 
+  const spacingTokens = await getSpacingTokens();
+
   return (
-    <AdminPageShell title="" description="">
-      <CmsModuleForm 
-        module="ministries" 
-        initialData={initialData} 
+    <div className="min-h-screen bg-slate-50">
+      <PageBuilderShell
+        initialData={initialData}
         canPublish={canPublish}
+        spacingTokens={spacingTokens}
+        module="ministries"
+        role={session.role}
       />
-    </AdminPageShell>
+    </div>
   );
 }

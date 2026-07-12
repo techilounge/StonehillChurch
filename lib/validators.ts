@@ -191,27 +191,7 @@ export const eventSchema = z
     { message: "endDateTime must be on or after startDateTime", path: ["endDateTime"] },
   );
 
-// ministries
-export const ministrySchema = z.object({
-  name: z.string().min(2).max(120),
-  slug: slugSchema,
-  category: ministryCategorySchema,
-  shortDescription: z.string().min(10).max(280),
-  longDescription: z.string().max(4000).optional(),
-  leaderName: z.string().min(2).max(120),
-  leaderEmail: emailSchema,
-  meetingTime: z.string().max(160).optional(),
-  imageUrl: urlSchema,
-  imageAlt: z.string().min(2).max(200),
-  ctaLabel: z.string().min(1).max(40),
-  ctaHref: z.string().min(1).max(300),
-  openInNewTab: z.boolean().optional().default(false),
-  featured: z.boolean().optional(),
-  status: contentStatusSchema,
-  sortOrder: z.number().int().min(0),
-  seoTitle: z.string().max(70).optional(),
-  seoDescription: z.string().max(160).optional(),
-});
+// ministries schema moved below pageBuilderDocumentSchema to fix declaration order
 
 // leaders
 export const leaderSchema = z.object({
@@ -484,6 +464,8 @@ export const blockTypeSchema = z.enum([
   "gallery",
   "carousel",
   "countdown",
+  "html",
+  "row",
 ]);
 
 const paddingValuesValidator = z
@@ -621,6 +603,29 @@ export const patternTemplateSchema = z.object({
 export const pageBuilderDocumentSchema = z.object({
   version: z.literal("1.0"),
   sections: z.array(pageBuilderSectionSchema),
+});
+
+// ministries
+export const ministrySchema = z.object({
+  name: z.string().min(2).max(120),
+  slug: slugSchema,
+  category: ministryCategorySchema,
+  shortDescription: z.string().min(10).max(280),
+  longDescription: z.string().max(4000).optional(),
+  leaderName: z.string().min(2).max(120),
+  leaderEmail: emailSchema,
+  meetingTime: z.string().max(160).optional(),
+  imageUrl: urlSchema,
+  imageAlt: z.string().min(2).max(200),
+  ctaLabel: z.string().min(1).max(40),
+  ctaHref: z.string().min(1).max(300),
+  openInNewTab: z.boolean().optional().default(false),
+  featured: z.boolean().optional(),
+  status: contentStatusSchema,
+  sortOrder: z.number().int().min(0),
+  seoTitle: z.string().max(70).optional(),
+  seoDescription: z.string().max(160).optional(),
+  builderData: pageBuilderDocumentSchema.optional(),
 });
 
 // pages
