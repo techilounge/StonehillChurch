@@ -464,7 +464,8 @@ function BlockRenderer({ block }: { block: PageBlock }) {
     fontFamily: getFontFamilyVar(cleanStyle.fontFamily),
   };
 
-  const textAlignClass = cleanStyle.textAlign ? `text-${cleanStyle.textAlign}` : "";
+  const align = cleanStyle.textAlign || content?.alignment || "";
+  const textAlignClass = align ? `text-${align}` : "";
 
   switch (type) {
     case "heading": {
@@ -612,8 +613,10 @@ function BlockRenderer({ block }: { block: PageBlock }) {
         paddingBottom: pad.bottom ?? "8px",
         paddingLeft: pad.left ?? "16px",
       };
+      const btnAlign = cleanStyle.textAlign || content?.alignment || "left";
+      const justifyClass = btnAlign === "center" ? "justify-center" : btnAlign === "right" ? "justify-end" : "justify-start";
       return (
-        <div style={inlineStyles} className={`w-full flex ${cleanStyle.textAlign === 'center' ? 'justify-center' : cleanStyle.textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
+        <div style={inlineStyles} className={`w-full flex ${justifyClass}`}>
           <Button 
             variant={
               content?.variant === "secondary" ? "secondary" : 

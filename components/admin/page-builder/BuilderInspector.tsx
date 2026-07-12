@@ -13,6 +13,47 @@ import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialo
 import { isValidSafeUrl, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId } from "@/lib/youtube";
 
+function findBlockRecursively(
+  blocks: PageBlock[],
+  targetBlockId: string,
+): { block: PageBlock; columnId?: string } | null {
+  for (const b of blocks) {
+    if (b.id === targetBlockId) {
+      return { block: b };
+    }
+    if (b.type === "row" && b.content?.columns) {
+      for (const col of b.content.columns) {
+        const found = findBlockRecursively(col.blocks ?? [], targetBlockId);
+        if (found) {
+          return {
+            block: found.block,
+            columnId: found.columnId || col.id,
+          };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function findColumnRecursively(
+  blocks: PageBlock[],
+  targetColumnId: string,
+): PageColumn | null {
+  for (const b of blocks) {
+    if (b.type === "row" && b.content?.columns) {
+      for (const col of b.content.columns) {
+        if (col.id === targetColumnId) {
+          return col;
+        }
+        const found = findColumnRecursively(col.blocks ?? [], targetColumnId);
+        if (found) return found;
+      }
+    }
+  }
+  return null;
+}
+
 export function BuilderInspector() {
   const {
     formData,
@@ -49,11 +90,15 @@ export function BuilderInspector() {
       break outer;
     }
 
-    const directBlock = section.blocks?.find((b) => b.id === selectedElementId);
-    if (directBlock) {
-      selectedSection = section;
-      selectedBlock = directBlock;
-      break outer;
+    // Search direct blocks
+    if (section.blocks) {
+      const found = findBlockRecursively(section.blocks, selectedElementId || "");
+      if (found) {
+        selectedSection = section;
+        selectedBlock = found.block;
+        selectedColumnId = found.columnId;
+        break outer;
+      }
     }
 
     if (section.columns) {
@@ -64,11 +109,20 @@ export function BuilderInspector() {
           selectedColumnId = col.id;
           break outer;
         }
-        const cb = col.blocks?.find((b) => b.id === selectedElementId);
-        if (cb) {
+        
+        const nestedCol = findColumnRecursively(col.blocks ?? [], selectedElementId || "");
+        if (nestedCol) {
           selectedSection = section;
-          selectedBlock = cb;
-          selectedColumnId = col.id;
+          selectedColumn = nestedCol;
+          selectedColumnId = nestedCol.id;
+          break outer;
+        }
+
+        const found = findBlockRecursively(col.blocks ?? [], selectedElementId || "");
+        if (found) {
+          selectedSection = section;
+          selectedBlock = found.block;
+          selectedColumnId = found.columnId || col.id;
           break outer;
         }
       }
@@ -89,11 +143,22 @@ export function BuilderInspector() {
             selectedColumnId = col.id;
             break outer;
           }
-          const cb = col.blocks?.find((b) => b.id === selectedElementId);
-          if (cb) {
+
+          const nestedCol = findColumnRecursively(col.blocks ?? [], selectedElementId || "");
+          if (nestedCol) {
             selectedSection = section;
-            selectedBlock = cb;
-            selectedColumnId = col.id;
+            selectedRow = row;
+            selectedColumn = nestedCol;
+            selectedColumnId = nestedCol.id;
+            break outer;
+          }
+
+          const found = findBlockRecursively(col.blocks ?? [], selectedElementId || "");
+          if (found) {
+            selectedSection = section;
+            selectedRow = row;
+            selectedBlock = found.block;
+            selectedColumnId = found.columnId || col.id;
             break outer;
           }
         }
@@ -479,6 +544,26 @@ function BlockInspector({
         <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Block Type</label>
         <div className="text-sm font-medium capitalize">{block.type}</div>
       </div>
+
+      {["heading", "paragraph", "image", "button"].includes(block.type) && (
+        <div className="space-y-1.5">
+          <InspectorLabel tooltip="Horizontal alignment of this block within its column.">Block Alignment</InspectorLabel>
+          <SelectInput
+            value={block.style?.textAlign || block.content?.alignment || "left"}
+            onChange={(e) => onChange({
+              style: {
+                ...block.style,
+                textAlign: e.target.value as any
+              }
+            })}
+          >
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+            <option value="justify">Justify</option>
+          </SelectInput>
+        </div>
+      )}
 
       {block.type === "heading" && (
         <>

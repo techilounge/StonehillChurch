@@ -273,7 +273,7 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
   const locked = content?.lockAspectRatio !== false;
   const fixedHeight = isResizable && !locked && typeof content?.height === "number";
   const hasMedia = isResizable && !!content?.url;
-  const align = block.style?.textAlign;
+  const align = block.style?.textAlign || content?.alignment || "left";
   const cornerCss = isResizable ? sanitizeCornerRadius(content?.cornerRadius) : undefined;
   const containerStyle: React.CSSProperties | undefined = isResizable
     ? {
@@ -338,34 +338,37 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
       
       {/* Block Content (pointer-events-none so click bubbles to the container to select it) */}
       <div className={`pointer-events-none p-4 ${fixedHeight ? "h-full flex flex-col" : ""}`}>
-        {block.type === "heading" && (
-          <div>
-            {React.createElement(
-              content.level || "h2", 
-              { 
-                className: `font-display font-bold text-stonehill-dark ${
-                  content.level === "h1" ? "text-4xl md:text-5xl" :
-                  content.level === "h2" ? "text-3xl md:text-4xl" :
-                  content.level === "h3" ? "text-2xl md:text-3xl" :
-                  content.level === "h4" ? "text-xl md:text-2xl" :
-                  content.level === "h5" ? "text-lg md:text-xl" :
-                  "text-base md:text-lg"
-                } ${content.alignment === "center" ? "text-center" : content.alignment === "right" ? "text-right" : "text-left"}`
-              }, 
-              content.text || "Heading Text"
-            )}
-            {(!content.text || content.text.trim() === "") && (
-              <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
-                ⚠️ Empty heading text
-              </div>
-            )}
-          </div>
-        )}
+        {block.type === "heading" && (() => {
+          const hAlign = block.style?.textAlign || content.alignment || "left";
+          const alignClass = hAlign === "center" ? "text-center" : hAlign === "right" ? "text-right" : "text-left";
+          return (
+            <div>
+              {React.createElement(
+                content.level || "h2", 
+                { 
+                  className: `font-display font-bold text-stonehill-dark ${
+                    content.level === "h1" ? "text-4xl md:text-5xl" :
+                    content.level === "h2" ? "text-3xl md:text-4xl" :
+                    content.level === "h3" ? "text-2xl md:text-3xl" :
+                    content.level === "h4" ? "text-xl md:text-2xl" :
+                    content.level === "h5" ? "text-lg md:text-xl" :
+                    "text-base md:text-lg"
+                  } ${alignClass}`
+                }, 
+                content.text || "Heading Text"
+              )}
+              {(!content.text || content.text.trim() === "") && (
+                <div className="mt-2 bg-yellow-50 text-yellow-800 text-xs px-2.5 py-1 rounded border border-yellow-200 font-medium inline-flex items-center gap-1">
+                  ⚠️ Empty heading text
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {block.type === "paragraph" && (() => {
-          const alignClass =
-            content.alignment === "center" ? "text-center" :
-            content.alignment === "right" ? "text-right" : "text-left";
+          const pAlign = block.style?.textAlign || content.alignment || "left";
+          const alignClass = pAlign === "center" ? "text-center" : pAlign === "right" ? "text-right" : "text-left";
           const hasText = !!(content.text && content.text.trim());
           return (
             <div>
@@ -456,11 +459,11 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
             paddingBottom: pad.bottom ?? "8px",
             paddingLeft: pad.left ?? "16px",
           };
+          const btnAlign = block.style?.textAlign || content.alignment || "left";
+          const alignClass = btnAlign === "center" ? "justify-center" : btnAlign === "right" ? "justify-end" : "justify-start";
           return (
             <div>
-              <div className={`flex ${
-                content.alignment === "center" ? "justify-center" : content.alignment === "right" ? "justify-end" : "justify-start"
-              }`}>
+              <div className={`flex ${alignClass}`}>
                 <span 
                   className={`inline-block rounded-full font-sans font-medium transition-colors shadow-sm ${
                     content.variant === "outline" ? "border-2 border-stonehill-primary text-stonehill-primary bg-transparent" :
