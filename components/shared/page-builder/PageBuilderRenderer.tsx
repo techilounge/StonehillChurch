@@ -526,16 +526,18 @@ function BlockRenderer({ block }: { block: PageBlock }) {
           >
             {cols.map((col: any, colIdx: number) => {
               const width = col.width || `${100 / cols.length}%`;
+              const isResponsive = isMobileStacked;
               
               const colStyle: React.CSSProperties = {
-                width: isMobileStacked ? undefined : width,
-                flexBasis: isMobileStacked ? undefined : width,
                 color: col.style?.textColor,
                 backgroundColor: col.style?.backgroundColor,
                 textAlign: col.style?.textAlign,
                 // Margin / Padding
                 padding: col.style?.padding,
                 margin: col.style?.margin,
+                ...(isResponsive
+                  ? ({ "--col-width": width } as any)
+                  : { width, flexBasis: width }),
               };
               
               return (
@@ -544,7 +546,7 @@ function BlockRenderer({ block }: { block: PageBlock }) {
                   data-pb-id={col.id}
                   style={colStyle}
                   className={`flex-grow flex flex-col md:w-auto ${
-                    isMobileStacked ? "w-full md:flex-none" : "flex-none"
+                    isResponsive ? "responsive-col w-full md:flex-none" : "flex-none"
                   }`}
                 >
                   <div className="space-y-3 flex-grow">

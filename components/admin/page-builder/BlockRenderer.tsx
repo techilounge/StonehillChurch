@@ -149,6 +149,7 @@ function NestedDroppableColumn({
   
   const width = col.width || `${100 / cols.length}%`;
   const isColSelected = selectedElementId === col.id;
+  const isStackedInPreview = devicePreview === "mobile" && isMobileStacked;
 
   return (
     <div
@@ -165,8 +166,8 @@ function NestedDroppableColumn({
           : "border-slate-200 hover:border-slate-350 bg-slate-50/30"
       }`}
       style={{
-        width: isMobileStacked ? undefined : width,
-        flexBasis: isMobileStacked ? undefined : width,
+        width: isStackedInPreview ? undefined : width,
+        flexBasis: isStackedInPreview ? undefined : width,
         color: col.style?.textColor,
         textAlign: col.style?.textAlign,
         ...previewBgFillStyle(col.style),

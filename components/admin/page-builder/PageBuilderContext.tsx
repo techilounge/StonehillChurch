@@ -327,6 +327,33 @@ function regenerateRowIds(row: PageBuilderRow): PageBuilderRow {
   };
 }
 
+function updateColumnRecursively(
+  columns: PageColumn[],
+  targetColumnId: string,
+  updates: Partial<PageColumn>,
+): PageColumn[] {
+  return columns.map((col) => {
+    if (col.id === targetColumnId) {
+      return { ...col, ...updates };
+    }
+    return {
+      ...col,
+      blocks: (col.blocks ?? []).map((b) => {
+        if (b.type === "row" && b.content?.columns) {
+          return {
+            ...b,
+            content: {
+              ...b.content,
+              columns: updateColumnRecursively(b.content.columns, targetColumnId, updates),
+            },
+          };
+        }
+        return b;
+      }),
+    };
+  });
+}
+
 export function PageBuilderProvider({
   children,
   initialData,
@@ -512,16 +539,20 @@ export function PageBuilderProvider({
     void _rowId; // accepted for callsite clarity; lookup walks both shapes
     setFormData((prev) =>
       withSection(prev, sectionId, (s) => {
-        const mapCol = (c: PageColumn): PageColumn =>
-          c.id === columnId ? { ...c, ...updates } : c;
         if (s.rows && s.rows.length > 0) {
           return {
             ...s,
-            rows: s.rows.map((r) => ({ ...r, columns: r.columns.map(mapCol) })),
+            rows: s.rows.map((r) => ({
+              ...r,
+              columns: updateColumnRecursively(r.columns, columnId, updates),
+            })),
           };
         }
         if (s.columns) {
-          return { ...s, columns: s.columns.map(mapCol) };
+          return {
+            ...s,
+            columns: updateColumnRecursively(s.columns, columnId, updates),
+          };
         }
         return s;
       }),
