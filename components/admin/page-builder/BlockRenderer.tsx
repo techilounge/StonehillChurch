@@ -51,7 +51,7 @@ function AddBlockMenu({ onAdd }: { onAdd: (type: BlockType) => void }) {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const basicBlocks: BlockType[] = ["heading", "paragraph", "image", "button", "divider", "spacer"];
-  const advancedBlocks: BlockType[] = ["video", "card", "gallery", "carousel", "iconText", "iconBox", "googleMap", "countdown", "cta", "html"];
+  const advancedBlocks: BlockType[] = ["row", "video", "card", "gallery", "carousel", "iconText", "iconBox", "googleMap", "countdown", "cta", "html"];
 
   if (!isOpen) {
     return (
