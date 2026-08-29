@@ -141,21 +141,12 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    function validFormSubmissionWrite() {
-      return request.resource.data.keys().hasOnly(['formType', 'name', 'email', 'phone', 'subject', 'message', 'payloadJson', 'status', 'assignedTo', 'internalNotes', 'createdAt', 'updatedAt']) &&
-             request.resource.data.formType in ['contact', 'prayer_request', 'volunteer', 'announcement_request', 'membership_transfer', 'maintenance_request', 'plan_your_visit'] &&
-             request.resource.data.name is string && request.resource.data.name.size() <= 120 &&
-             (request.resource.data.email == null || (request.resource.data.email is string && request.resource.data.email.size() <= 254)) &&
-             (request.resource.data.phone == null || (request.resource.data.phone is string && request.resource.data.phone.size() <= 40)) &&
-             (request.resource.data.subject == null || (request.resource.data.subject is string && request.resource.data.subject.size() <= 200)) &&
-             request.resource.data.message is string && request.resource.data.message.size() <= 4000 &&
-             request.resource.data.status in ['new', 'in_review', 'completed', 'archived'] &&
-             (request.resource.data.assignedTo == null || request.resource.data.assignedTo is string) &&
-             request.resource.data.internalNotes is string;
-    }
-
+    // Public form submissions are written exclusively through the server-only
+    // /api/forms route (rate-limited + honeypot-checked + validated with the
+    // same zod schema that guards the Admin SDK write). Direct client writes
+    // are never used by the app and previously bypassed both protections.
     match /formSubmissions/{submissionId} {
-      allow create: if request.app_check_token != null && validFormSubmissionWrite();
+      allow create: if false;
       allow read, update: if adminOrHigher();
       allow delete: if superAdmin();
     }

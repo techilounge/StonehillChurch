@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbJsonLd, siteSettingsToSeoSettings } from "@/lib/seo";
 import { formatPageContent } from "@/lib/contentFormatting";
+import { sanitizeHtml } from "@/lib/pageBuilderSafety";
 
 export async function generateMetadata(): Promise<Metadata> {
   return createPublicPageMetadata({
@@ -81,7 +82,7 @@ export default async function AboutPage() {
             <div className="bg-white rounded-3xl shadow-sm p-8 md:p-12 border border-slate-200">
               <div
                 className="prose prose-lg max-w-none prose-headings:text-stonehill-primary prose-h2:text-3xl prose-p:text-slate-900/80 prose-a:text-stonehill-accent hover:prose-a:text-stonehill-accent/80 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: formatPageContent(pageContent.content) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(formatPageContent(pageContent.content)) }}
               />
             </div>
           ) : (

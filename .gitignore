@@ -28,3 +28,6 @@ Thumbs.db
 # Misc
 *.tsbuildinfo
 vercel.json.local
+
+# Claude Code local-only settings (per-developer tool permissions)
+.claude/settings.local.json

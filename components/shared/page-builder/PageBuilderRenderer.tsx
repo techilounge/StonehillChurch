@@ -501,7 +501,7 @@ function BlockRenderer({ block }: { block: PageBlock }) {
         <div
           style={inlineStyles}
           className="custom-html-content"
-          dangerouslySetInnerHTML={{ __html: content?.html || "" }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(content?.html) }}
         />
       );
     }

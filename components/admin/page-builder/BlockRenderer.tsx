@@ -3,7 +3,7 @@ import { PageBlock, BlockType } from "@/types/pageBuilder";
 import { usePageBuilder } from "./PageBuilderContext";
 import { ChevronUp, ChevronDown, Plus } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
-import { isValidSafeUrl, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, sanitizeCornerRadius, sanitizeHtml, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from "@/lib/youtube";
 import { BlockResizer } from "./BlockResizer";
 
@@ -393,7 +393,7 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
               {hasHtml ? (
                 <div
                   className="prose prose-sm max-w-none custom-html-content"
-                  dangerouslySetInnerHTML={{ __html: content.html }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.html) }}
                 />
               ) : (
                 <div className="bg-slate-50 border border-slate-200 p-4 rounded text-slate-400 text-xs font-mono text-center">

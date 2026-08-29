@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPageBySlug } from "@/lib/data/pages";
 import { getCachedSpacingTokens } from "@/lib/data/siteSettings";
-import { isValidSafeUrl } from "@/lib/pageBuilderSafety";
+import { isValidSafeUrl, sanitizeHtml } from "@/lib/pageBuilderSafety";
 import { PageHero } from "@/components/public/PageHero";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import type { PageBackground } from "@/types/content";
@@ -117,7 +117,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
           {backLink}
           <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6">
             <h1 className="text-4xl font-bold mb-6 font-display text-stonehill-primary">{page.title}</h1>
-            <div dangerouslySetInnerHTML={{ __html: page.content || "" }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }} />
           </div>
         </div>
       </div>

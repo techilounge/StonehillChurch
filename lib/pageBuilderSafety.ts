@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import { PageBlock, PageBuilderSection } from "@/types/pageBuilder";
 
 // Approved style presets
@@ -151,27 +152,36 @@ export function isValidGoogleMapsEmbedUrl(url: string | null | undefined): boole
   );
 }
 
+// Allow-list for CMS-authored "custom HTML" and rich-text blocks. Deliberately
+// excludes script/style/iframe/object/embed/form/svg and all event-handler
+// attributes — DOMPurify strips anything not on this list rather than trying
+// to blocklist dangerous patterns (the previous regex-based approach here was
+// bypassable via HTML-entity-encoded attribute values, e.g. `jav&#97;script:`).
+const CUSTOM_HTML_ALLOWED_TAGS = [
+  "a", "abbr", "b", "blockquote", "br", "caption", "code", "div", "em",
+  "figcaption", "figure", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i",
+  "img", "li", "ol", "p", "pre", "small", "span", "strong", "sub", "sup",
+  "table", "tbody", "td", "th", "thead", "tr", "u", "ul",
+];
+
+const CUSTOM_HTML_ALLOWED_ATTR = [
+  "href", "src", "alt", "title", "class", "target", "rel",
+  "colspan", "rowspan", "width", "height",
+];
+
 /**
- * Strips script tags, unsafe onload/onerror handlers, iframe/object tags, and javascript: links to prevent script injection.
+ * Sanitizes CMS-authored HTML before it is injected via
+ * `dangerouslySetInnerHTML`. Uses DOMPurify against an explicit tag/attribute
+ * allow-list rather than trying to blocklist dangerous patterns.
  */
 export function sanitizeHtml(html: string | null | undefined): string {
   if (!html) return "";
-  
-  // Remove script tags and their contents
-  let clean = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
-  
-  // Remove onmouseover, onload, onerror, etc. attributes
-  clean = clean.replace(/on\w+\s*=\s*(['"])(.*?)\1/gi, "");
-  clean = clean.replace(/on\w+\s*=\s*([^>\s]+)/gi, "");
-  
-  // Remove javascript: and data: URLs inside href or src
-  clean = clean.replace(/(href|src)\s*=\s*(['"])\s*(javascript|data):.*?\2/gi, '$1="#"');
-  
-  // Remove iframe/object/embed/applet tags to prevent external execution
-  clean = clean.replace(/<(iframe|object|embed|applet)\b[^<]*(?:(?!<\/\1>)<[^<]*)*<\/\1>/gi, "");
-  clean = clean.replace(/<(iframe|object|embed|applet)[^>]*>/gi, "");
-  
-  return clean;
+
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: CUSTOM_HTML_ALLOWED_TAGS,
+    ALLOWED_ATTR: CUSTOM_HTML_ALLOWED_ATTR,
+    ALLOW_DATA_ATTR: false,
+  }).toString();
 }
 
 /**
