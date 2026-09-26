@@ -6,6 +6,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { isValidSafeUrl, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from "@/lib/youtube";
 import { BlockResizer } from "./BlockResizer";
+import { getAutoFocalPoint } from "@/lib/mediaHandling";
 
 function spacingShorthand(
   v: { top: number; right: number; bottom: number; left: number; unit?: string; token?: string } | undefined,
@@ -413,18 +414,50 @@ export function BlockRenderer({ block, isSelected, index, totalBlocks, sectionId
           <div className={`relative ${fixedHeight ? "flex flex-col flex-1 min-h-0" : ""}`}>
             {content.url ? (
               <>
-                <div
-                  className={`relative rounded overflow-hidden border border-slate-200 ${fixedHeight ? "flex-1 min-h-0" : ""}`}
-                  style={cornerCss ? { borderRadius: cornerCss } : undefined}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={content.url} alt={content.alt || ""} className={`block w-full ${fixedHeight ? (content.objectFit === "cover" ? "h-full object-cover" : "h-full object-contain") : "h-auto"}`} />
-                  {(!content.alt || content.alt.trim() === "") && (
-                    <div className="absolute top-2 left-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded shadow border border-yellow-300 font-medium">
-                      ⚠️ Missing alt text
+                {(() => {
+                  const hasRatio = content.aspectRatio && content.aspectRatio !== "auto" && content.aspectRatio !== "default";
+                  const ratioVal = hasRatio ? content.aspectRatio.replace(":", " / ") : undefined;
+                  
+                  let fx = 50;
+                  let fy = 50;
+                  if (typeof content.focalPointX === "number" && typeof content.focalPointY === "number" && content.focalPointAuto !== true) {
+                    fx = content.focalPointX;
+                    fy = content.focalPointY;
+                  } else {
+                    const autoPt = getAutoFocalPoint(content.url);
+                    fx = autoPt.x;
+                    fy = autoPt.y;
+                  }
+                  
+                  return (
+                    <div
+                      className={`relative rounded overflow-hidden border border-slate-200 ${fixedHeight ? "flex-1 min-h-0" : ""}`}
+                      style={{
+                        ...(cornerCss ? { borderRadius: cornerCss } : {}),
+                        aspectRatio: ratioVal,
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={content.url}
+                        alt={content.alt || ""}
+                        className={`block w-full ${
+                          hasRatio || fixedHeight 
+                            ? "h-full object-cover" 
+                            : "h-auto"
+                        }`}
+                        style={{
+                          objectPosition: `${fx}% ${fy}%`,
+                        }}
+                      />
+                      {(!content.alt || content.alt.trim() === "") && (
+                        <div className="absolute top-2 left-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded shadow border border-yellow-300 font-medium">
+                          ⚠️ Missing alt text
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  );
+                })()}
                 {content.caption && (
                   <div className="bg-slate-50 text-slate-500 text-xs p-2 text-center border border-t-0 border-slate-200 rounded-b">
                     {content.caption}

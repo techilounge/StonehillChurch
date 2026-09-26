@@ -28,3 +28,9 @@ Thumbs.db
 # Misc
 *.tsbuildinfo
 vercel.json.local
+
+# Scratch & test scripts
+scripts/query-adventurers.js
+scripts/test-update.ts
+scripts/test-validation.ts
+scripts/test-*

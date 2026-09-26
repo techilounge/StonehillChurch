@@ -2,6 +2,8 @@ import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
+import { getAutoFocalPoint } from "@/lib/mediaHandling";
+
 interface PageHeroProps {
   title: string;
   subtitle?: string | null;
@@ -10,6 +12,9 @@ interface PageHeroProps {
   className?: string;
   headingAs?: "h1" | "h2";
   hasOverlap?: boolean;
+  focalPointX?: number | null;
+  focalPointY?: number | null;
+  focalPointAuto?: boolean | null;
 }
 
 export function PageHero({
@@ -20,6 +25,9 @@ export function PageHero({
   className,
   headingAs = "h1",
   hasOverlap = false,
+  focalPointX,
+  focalPointY,
+  focalPointAuto,
 }: PageHeroProps) {
   const Heading = headingAs;
 
@@ -33,6 +41,17 @@ export function PageHero({
         minHeight: "calc(300px + var(--overlap-h, 64px))",
       }
     : {};
+
+  let fx = 50;
+  let fy = 50;
+  if (typeof focalPointX === "number" && typeof focalPointY === "number" && focalPointAuto !== true) {
+    fx = focalPointX;
+    fy = focalPointY;
+  } else if (imageUrl) {
+    const autoPt = getAutoFocalPoint(imageUrl);
+    fx = autoPt.x;
+    fy = autoPt.y;
+  }
 
   return (
     <section 
@@ -51,6 +70,7 @@ export function PageHero({
             alt={imageAlt || title}
             fill
             className="object-cover"
+            style={{ objectPosition: `${fx}% ${fy}%` }}
             priority
           />
           {/* Overlay for guaranteed text readability against arbitrary photos */}

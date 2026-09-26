@@ -8,11 +8,12 @@ import {
   PageColumn,
   PageBlock,
 } from "@/types/pageBuilder";
-import { DEFAULT_SPACING_TOKENS, type SpacingTokens } from "@/types/settings";
+import { DEFAULT_SPACING_TOKENS, type SpacingTokens, DEFAULT_MEDIA_SETTINGS, type MediaSettings } from "@/types/settings";
 import { Button } from "@/components/shared/Button";
 import { Card } from "@/components/shared/Card";
 import { isValidSafeUrl, sanitizeHtml, sanitizeStyle, sanitizeCornerRadius, formatParagraphHtml, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId, getYouTubeEmbedUrl, getYouTubeThumbnailUrl } from "@/lib/youtube";
+import { getAutoFocalPoint } from "@/lib/mediaHandling";
 
 interface PageBuilderRendererProps {
   document: PageBuilderDocument;
@@ -23,6 +24,7 @@ interface PageBuilderRendererProps {
    * keep working without a code change.
    */
   spacingTokens?: SpacingTokens;
+  mediaSettings?: MediaSettings;
 }
 
 /**
@@ -37,7 +39,9 @@ const COLUMN_ALIGN_CLASS: Record<string, string> = {
   stretch: "md:items-stretch",
 };
 
-export function PageBuilderRenderer({ document, spacingTokens }: PageBuilderRendererProps) {
+export const MediaSettingsContext = React.createContext<MediaSettings>(DEFAULT_MEDIA_SETTINGS);
+
+export function PageBuilderRenderer({ document, spacingTokens, mediaSettings }: PageBuilderRendererProps) {
   if (!document || !document.sections || !Array.isArray(document.sections)) {
     return null;
   }
@@ -56,21 +60,23 @@ export function PageBuilderRenderer({ document, spacingTokens }: PageBuilderRend
   };
 
   return (
-    <div className="page-builder-content" style={tokenVars}>
-      {responsiveCss && (
-        // One <style> block per page collects every section/row/column's
-        // tablet + mobile padding/margin overrides. Selectors use the
-        // [data-pb-id] attribute applied below so we never collide with
-        // user-authored class names.
-        <style
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: responsiveCss }}
-        />
-      )}
-      {document.sections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
-      ))}
-    </div>
+    <MediaSettingsContext.Provider value={mediaSettings || DEFAULT_MEDIA_SETTINGS}>
+      <div className="page-builder-content" style={tokenVars}>
+        {responsiveCss && (
+          // One <style> block per page collects every section/row/column's
+          // tablet + mobile padding/margin overrides. Selectors use the
+          // [data-pb-id] attribute applied below so we never collide with
+          // user-authored class names.
+          <style
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: responsiveCss }}
+          />
+        )}
+        {document.sections.map((section) => (
+          <SectionRenderer key={section.id} section={section} />
+        ))}
+      </div>
+    </MediaSettingsContext.Provider>
   );
 }
 
@@ -441,6 +447,7 @@ function SafeYouTubePlayer({ url, title, fixedHeight }: { url: string; title?: s
 }
 
 function BlockRenderer({ block }: { block: PageBlock }) {
+  const mediaSettings = React.useContext(MediaSettingsContext);
   const { type, content, style = {} } = block;
 
   const getFontFamilyVar = (family?: string) => {
@@ -569,6 +576,24 @@ function BlockRenderer({ block }: { block: PageBlock }) {
       const imgHeight = !imgLocked && typeof content?.height === "number" ? content.height : undefined;
       const imgAlign = cleanStyle.textAlign;
       const imgCornerCss = sanitizeCornerRadius(content?.cornerRadius);
+
+      const finalRatio = content?.aspectRatio && content.aspectRatio !== "default" 
+        ? content.aspectRatio 
+        : (mediaSettings?.defaultRatios?.pageBuilder || "auto");
+      const hasRatio = finalRatio && finalRatio !== "auto";
+      const ratioVal = hasRatio ? finalRatio.replace(":", " / ") : undefined;
+
+      let fx = 50;
+      let fy = 50;
+      if (typeof content?.focalPointX === "number" && typeof content?.focalPointY === "number" && content?.focalPointAuto !== true) {
+        fx = content.focalPointX;
+        fy = content.focalPointY;
+      } else if (safeImgUrl) {
+        const autoPt = getAutoFocalPoint(safeImgUrl);
+        fx = autoPt.x;
+        fy = autoPt.y;
+      }
+
       return (
         <div
           style={{
@@ -583,13 +608,19 @@ function BlockRenderer({ block }: { block: PageBlock }) {
           {safeImgUrl ? (
             <>
               <div
-                className={`overflow-hidden w-full ${imgHeight ? 'flex-1 min-h-0 flex' : ''} ${content?.shadow ? 'shadow-md' : ''}`}
-                style={imgCornerCss ? { borderRadius: imgCornerCss } : undefined}
+                className={`overflow-hidden w-full ${imgHeight || hasRatio ? 'flex-1 min-h-0 flex' : ''} ${content?.shadow ? 'shadow-md' : ''}`}
+                style={{
+                  ...(imgCornerCss ? { borderRadius: imgCornerCss } : {}),
+                  aspectRatio: ratioVal,
+                }}
               >
                 <img
                   src={safeImgUrl}
                   alt={content?.alt || ""}
-                  className={`block w-full ${imgHeight ? 'h-full object-cover' : 'h-auto'}`}
+                  className={`block w-full ${imgHeight || hasRatio ? 'h-full object-cover' : 'h-auto'}`}
+                  style={{
+                    objectPosition: `${fx}% ${fy}%`,
+                  }}
                 />
               </div>
               {content?.caption && (

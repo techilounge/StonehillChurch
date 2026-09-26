@@ -12,6 +12,7 @@ import { PageBlock, PageBuilderRow, PageBuilderSection, PageColumn } from "@/typ
 import { MediaSelectorDialog } from "@/components/admin/media/MediaSelectorDialog";
 import { isValidSafeUrl, isValidGoogleMapsEmbedUrl } from "@/lib/pageBuilderSafety";
 import { extractYouTubeVideoId } from "@/lib/youtube";
+import { FocalPointPicker } from "@/components/admin/shared/FocalPointPicker";
 
 function findBlockRecursively(
   blocks: PageBlock[],
@@ -730,6 +731,27 @@ function BlockInspector({
             content={block.content}
             onContentChange={(u) => onChange({ content: { ...block.content, ...u } })}
           />
+
+          {block.content.url && (
+            <div className="space-y-1.5 pt-2 border-t border-slate-100 mt-2">
+              <FocalPointPicker
+                imageUrl={block.content.url}
+                focalPointX={block.content.focalPointX}
+                focalPointY={block.content.focalPointY}
+                focalPointAuto={block.content.focalPointAuto}
+                aspectRatio={block.content.aspectRatio}
+                defaultAspectRatio="auto"
+                onChange={(updates) => {
+                  onChange({
+                    content: {
+                      ...block.content,
+                      ...updates,
+                    },
+                  });
+                }}
+              />
+            </div>
+          )}
         </>
       )}
 

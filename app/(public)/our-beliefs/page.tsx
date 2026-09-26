@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import { getPageBySlug } from "@/lib/data/pages";
-import { getCachedSpacingTokens } from "@/lib/data/siteSettings";
+import { getCachedSpacingTokens, getCachedMediaSettings } from "@/lib/data/siteSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { Book, Cross, RefreshCcw, HeartHandshake } from "lucide-react";
 import { buttonVariants } from "@/lib/buttonVariants";
@@ -21,9 +21,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function OurBeliefsPage() {
-  const [pageContent, spacingTokens] = await Promise.all([
+  const [pageContent, spacingTokens, mediaSettings] = await Promise.all([
     getPageBySlug("our-beliefs"),
     getCachedSpacingTokens(),
+    getCachedMediaSettings(),
   ]);
   // Prefer the Page Builder document when the admin has authored one; fall
   // back to legacy HTML content, then to the hardcoded layout.
@@ -37,7 +38,7 @@ export default async function OurBeliefsPage() {
       />
 
       {hasBuilder ? (
-        <PageBuilderRenderer document={pageContent!.builderData!} spacingTokens={spacingTokens} />
+        <PageBuilderRenderer document={pageContent!.builderData!} spacingTokens={spacingTokens} mediaSettings={mediaSettings} />
       ) : (
         <section className="py-16 md:py-24 bg-white overflow-hidden">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

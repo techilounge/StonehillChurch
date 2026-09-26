@@ -8,7 +8,8 @@ export type SiteSettingsGroup =
   | "service_times"
   | "seo"
   | "design"
-  | "notifications";
+  | "notifications"
+  | "media";
 
 // Global spacing scale exposed to the Page Builder via CSS custom properties
 // (`--pb-space-${name}`). Admins edit these in Site Settings → Design Tokens;
@@ -75,5 +76,25 @@ export const DEFAULT_HOMEPAGE_SLIDES_CONFIG: HomepageSlidesConfig = {
     preset: "medium",
     customValue: "600",
     unit: "px",
+  },
+};
+
+export type AspectRatioPreset = "16:9" | "4:3" | "1:1" | "auto";
+
+export interface MediaSettings {
+  defaultRatios: {
+    ministries: AspectRatioPreset;
+    homepageSlides: AspectRatioPreset;
+    pageBuilder: AspectRatioPreset;
+    resources: AspectRatioPreset;
+  };
+}
+
+export const DEFAULT_MEDIA_SETTINGS: MediaSettings = {
+  defaultRatios: {
+    ministries: "auto",
+    homepageSlides: "auto",
+    pageBuilder: "auto",
+    resources: "auto",
   },
 };

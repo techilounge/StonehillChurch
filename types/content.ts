@@ -31,6 +31,10 @@ export type HomepageSlide = AuditFields & {
   imageAlt: string;
   imageAlignment?: string;
   focalPointZoom?: number;
+  focalPointX?: number;
+  focalPointY?: number;
+  focalPointAuto?: boolean;
+  aspectRatio?: string;
   primaryCtaLabel: string;
   primaryCtaHref: string;
   secondaryCtaLabel: string | null;
@@ -85,6 +89,10 @@ export type ChurchEvent = AuditFields & {
   description: string;
   imageUrl: string;
   imageAlt: string;
+  focalPointX?: number;
+  focalPointY?: number;
+  focalPointAuto?: boolean;
+  aspectRatio?: string;
   registrationUrl: string | null;
   // Defaults to true (existing behavior) when undefined. Set false to keep
   // the Register button in the same tab.
@@ -125,6 +133,10 @@ export type Ministry = AuditFields & {
   meetingTime: string;
   imageUrl: string;
   imageAlt: string;
+  focalPointX?: number;
+  focalPointY?: number;
+  focalPointAuto?: boolean;
+  aspectRatio?: string;
   ctaLabel: string;
   ctaHref: string;
   openInNewTab?: boolean;
@@ -141,6 +153,10 @@ export type Leader = {
   title: string;
   photoUrl: string;
   photoAlt: string;
+  focalPointX?: number;
+  focalPointY?: number;
+  focalPointAuto?: boolean;
+  aspectRatio?: string;
   bio: string;
   email: string;
   sortOrder: number;

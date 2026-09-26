@@ -7,9 +7,11 @@ import {
   DEFAULT_SPACING_TOKENS,
   SPACING_TOKEN_NAMES,
   DEFAULT_HOMEPAGE_SLIDES_CONFIG,
+  DEFAULT_MEDIA_SETTINGS,
   type SiteSettingDoc,
   type SpacingTokens,
   type HomepageSlidesConfig,
+  type MediaSettings,
 } from "@/types/settings";
 import { logDataFallback, withReadTimeout } from "./utils";
 
@@ -159,5 +161,42 @@ export async function getHomepageSlidesConfig(): Promise<HomepageSlidesConfig> {
 export const getCachedHomepageSlidesConfig = unstable_cache(
   getHomepageSlidesConfig,
   ["site-settings", "homepage-slides-config"],
+  { revalidate: 300, tags: ["site-settings"] },
+);
+
+/**
+ * Reads the configured global Media default aspect ratios.
+ * Returns defaults when nothing has been saved or any field is invalid.
+ */
+export async function getMediaSettings(): Promise<MediaSettings> {
+  try {
+    const db = getAdminFirestore();
+    const snapshot = await withReadTimeout(
+      db.collection(collections.siteSettings).where("key", "==", "media").limit(1).get()
+    );
+    
+    if (snapshot.empty) return { ...DEFAULT_MEDIA_SETTINGS };
+    const data = snapshot.docs[0].data() as SiteSettingDoc;
+    const value = isPlainObject(data.value) ? (data.value as Record<string, unknown>) : null;
+    const rawRatios = value && isPlainObject(value.defaultRatios) ? (value.defaultRatios as Record<string, unknown>) : null;
+    if (!rawRatios) return { ...DEFAULT_MEDIA_SETTINGS };
+
+    return {
+      defaultRatios: {
+        ministries: (rawRatios.ministries as any) || "auto",
+        homepageSlides: (rawRatios.homepageSlides as any) || "auto",
+        pageBuilder: (rawRatios.pageBuilder as any) || "auto",
+        resources: (rawRatios.resources as any) || "auto",
+      },
+    };
+  } catch (error) {
+    logDataFallback("getMediaSettings", error);
+    return { ...DEFAULT_MEDIA_SETTINGS };
+  }
+}
+
+export const getCachedMediaSettings = unstable_cache(
+  getMediaSettings,
+  ["site-settings", "media-settings"],
   { revalidate: 300, tags: ["site-settings"] },
 );

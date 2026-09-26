@@ -390,6 +390,19 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
     }));
   };
 
+  const handleMediaRatioChange = (field: string, val: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      media: {
+        ...prev.media,
+        defaultRatios: {
+          ...(prev.media?.defaultRatios || { ministries: "auto", homepageSlides: "auto", pageBuilder: "auto", resources: "auto" }),
+          [field]: val,
+        },
+      },
+    }));
+  };
+
   return (
     <div className="flex flex-col gap-8 pb-12">
       {message && (
@@ -429,6 +442,82 @@ export function SettingsEditor({ initialSettings, canEdit }: SettingsEditorProps
           <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
             <Button disabled={isSubmitting} onClick={() => handleSave("general", "general", settings["general"] || {})}>
               <Save className="h-4 w-4 mr-2" /> Save Branding
+            </Button>
+          </div>
+        )}
+      </section>
+
+      {/* Media Handling Group */}
+      <section className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50/30">
+          <h3 className="text-lg font-semibold text-slate-900">Media Handling</h3>
+          <p className="text-sm text-slate-500">Configure global default aspect ratios for different modules.</p>
+        </div>
+        <div className="p-6 flex flex-col gap-6">
+          <h4 className="text-sm font-semibold text-slate-900">Aspect Ratio Presets</h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Ministry Pages Default</label>
+              <select
+                value={settings["media"]?.defaultRatios?.ministries || "auto"}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleMediaRatioChange("ministries", e.target.value)}
+                className="flex min-h-[44px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+              >
+                <option value="auto">Auto (No enforced ratio)</option>
+                <option value="16:9">16:9 (Wide hero)</option>
+                <option value="4:3">4:3 (Standard)</option>
+                <option value="1:1">1:1 (Square)</option>
+              </select>
+            </div>
+            
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Homepage Slides Default</label>
+              <select
+                value={settings["media"]?.defaultRatios?.homepageSlides || "auto"}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleMediaRatioChange("homepageSlides", e.target.value)}
+                className="flex min-h-[44px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+              >
+                <option value="auto">Auto (No enforced ratio)</option>
+                <option value="16:9">16:9 (Wide hero)</option>
+                <option value="4:3">4:3 (Standard)</option>
+                <option value="1:1">1:1 (Square)</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Page Builder Blocks Default</label>
+              <select
+                value={settings["media"]?.defaultRatios?.pageBuilder || "auto"}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleMediaRatioChange("pageBuilder", e.target.value)}
+                className="flex min-h-[44px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+              >
+                <option value="auto">Auto (No enforced ratio)</option>
+                <option value="16:9">16:9 (Wide hero)</option>
+                <option value="4:3">4:3 (Standard)</option>
+                <option value="1:1">1:1 (Square)</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-slate-700">Resource Pages Default</label>
+              <select
+                value={settings["media"]?.defaultRatios?.resources || "auto"}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleMediaRatioChange("resources", e.target.value)}
+                className="flex min-h-[44px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stonehill-accent focus-visible:ring-offset-2"
+              >
+                <option value="auto">Auto (No enforced ratio)</option>
+                <option value="16:9">16:9 (Wide hero)</option>
+                <option value="4:3">4:3 (Standard)</option>
+                <option value="1:1">1:1 (Square)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        {canEdit && (
+          <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-200 flex justify-end">
+            <Button disabled={isSubmitting} onClick={() => handleSave("media", "media", settings["media"] || {})}>
+              <Save className="h-4 w-4 mr-2" /> Save Media Handling
             </Button>
           </div>
         )}

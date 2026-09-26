@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getMinistryBySlug } from "@/lib/data/ministries";
-import { getSiteSettings, getSpacingTokens } from "@/lib/data/siteSettings";
+import { getSiteSettings, getSpacingTokens, getCachedMediaSettings } from "@/lib/data/siteSettings";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import {
   breadcrumbJsonLd,
@@ -43,10 +43,11 @@ export async function generateMetadata({ params }: MinistryPageProps): Promise<M
 
 export default async function MinistryDetailPage({ params }: MinistryPageProps) {
   const { slug } = await params;
-  const [ministry, siteSettings, spacingTokens] = await Promise.all([
+  const [ministry, siteSettings, spacingTokens, mediaSettings] = await Promise.all([
     getMinistryBySlug(slug),
     getSiteSettings(),
     getSpacingTokens(),
+    getCachedMediaSettings(),
   ]);
 
   if (!ministry) {
@@ -92,7 +93,7 @@ export default async function MinistryDetailPage({ params }: MinistryPageProps) 
             {/* Main Content */}
             <div className="p-8 md:p-10 flex-grow overflow-hidden">
               {ministry.builderData?.sections?.length ? (
-                <PageBuilderRenderer document={ministry.builderData} spacingTokens={spacingTokens} />
+                <PageBuilderRenderer document={ministry.builderData} spacingTokens={spacingTokens} mediaSettings={mediaSettings} />
               ) : (
                 <>
                   {ministry.imageUrl && (

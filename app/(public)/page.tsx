@@ -5,7 +5,7 @@ import {
 } from "@/lib/data/homepage";
 import { getUpcomingEvents } from "@/lib/data/events";
 import { getFeaturedMinistries } from "@/lib/data/ministries";
-import { getCachedSiteSettings, getCachedHomepageSlidesConfig } from "@/lib/data/siteSettings";
+import { getCachedSiteSettings, getCachedHomepageSlidesConfig, getCachedMediaSettings } from "@/lib/data/siteSettings";
 import { getLatestSermon } from "@/lib/data/sermons";
 import { getLeaders } from "@/lib/data/leaders";
 
@@ -39,7 +39,8 @@ export default async function HomePage() {
     featuredMinistries,
     siteSettings,
     leaders,
-    homepageSlidesConfig
+    homepageSlidesConfig,
+    mediaSettings
   ] = await Promise.all([
     getHomepageSlides(),
     getLatestSermon(),
@@ -48,11 +49,12 @@ export default async function HomePage() {
     getCachedSiteSettings(),
     getLeaders(),
     getCachedHomepageSlidesConfig(),
+    getCachedMediaSettings(),
   ]);
 
   return (
     <>
-      <HeroCarousel slides={slides} isLive={!!latestSermon?.isLive} heightConfig={homepageSlidesConfig} />
+      <HeroCarousel slides={slides} isLive={!!latestSermon?.isLive} heightConfig={homepageSlidesConfig} mediaSettings={mediaSettings} />
       <QuickActions isLive={!!latestSermon?.isLive} />
       <WelcomeSection settings={siteSettings} leaders={leaders} />
       <ThisSabbath settings={siteSettings} />

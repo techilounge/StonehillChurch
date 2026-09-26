@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PageHero } from "@/components/public/PageHero";
 import { PageBuilderRenderer } from "@/components/shared/page-builder/PageBuilderRenderer";
 import { getPageBySlug } from "@/lib/data/pages";
-import { getCachedSpacingTokens, getSiteSettings } from "@/lib/data/siteSettings";
+import { getCachedSpacingTokens, getSiteSettings, getCachedMediaSettings } from "@/lib/data/siteSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import { BookOpen, Heart, Globe, Users, ArrowLeft } from "lucide-react";
 import { buttonVariants } from "@/lib/buttonVariants";
@@ -23,10 +23,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const [pageContent, siteSettings, spacingTokens] = await Promise.all([
+  const [pageContent, siteSettings, spacingTokens, mediaSettings] = await Promise.all([
     getPageBySlug("about"),
     getSiteSettings(),
     getCachedSpacingTokens(),
+    getCachedMediaSettings(),
   ]);
   const seoSettings = siteSettingsToSeoSettings(siteSettings);
   // Prefer the Page Builder document when the admin has authored one; fall
@@ -61,7 +62,7 @@ export default async function AboutPage() {
               Back to Home
             </Link>
           </div>
-          <PageBuilderRenderer document={pageContent!.builderData!} spacingTokens={spacingTokens} />
+          <PageBuilderRenderer document={pageContent!.builderData!} spacingTokens={spacingTokens} mediaSettings={mediaSettings} />
         </div>
       ) : (
         <section className="py-16 md:py-24 bg-white overflow-hidden -mt-16 md:-mt-24 relative z-20">

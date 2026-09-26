@@ -3,6 +3,15 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.8.6] - 2026-09-26
+
+### Added
+- **Media Focal Point Picker & Aspect Ratio Controls:** Added interactive image focal point selection (`FocalPointPicker`) allowing admins to click on images to define the visual subject area (X/Y coordinates) with real-time crop preview.
+- **Smart Auto-Focal Detection:** Implemented heuristic focal detection fallback (`getAutoFocalPoint`) prioritizing faces and subject centers based on media context.
+- **Aspect Ratio Presets & Overrides:** Added configurable aspect ratios (16:9, 4:3, 1:1, auto) across CMS forms, homepage hero slides, and page builder images.
+- **Site-Wide Media Defaults:** Added a new "Media & Image Defaults" settings section in Admin Settings (`SettingsEditor`) to define global aspect ratios for Ministries, Homepage Slides, Page Builder, and Resources.
+- **Public Rendering Support:** Wired `objectPosition` and dynamic aspect ratio styling across Hero Carousel, Page Hero, Page Builder blocks, and public pages.
+
 ## [0.8.5] - 2026-07-12
 
 ### Added

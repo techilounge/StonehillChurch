@@ -16,6 +16,7 @@ import { createDocumentAction, updateDocumentAction } from "@/app/admin/cms/acti
 import { MediaSelectorDialog } from "../media/MediaSelectorDialog";
 import Image from "next/image";
 import { PUBLISHED } from "@/types/shared";
+import { FocalPointPicker } from "@/components/admin/shared/FocalPointPicker";
 
 interface CmsModuleFormProps {
   module: Exclude<CmsModule, "siteSettings">;
@@ -443,28 +444,52 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                 ) : field.type === "media" ? (
                   <div className="flex flex-col gap-3">
                     {value ? (
-                      <div className="relative w-full max-w-sm aspect-video rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex flex-col">
-                        {isImageUrl(value) ? (
-                          <Image src={value} alt="Selected media" fill className="object-cover" />
-                        ) : (
-                          <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-50/50 text-center break-all text-xs font-medium text-slate-900">
-                            <span className="mb-2 p-2 bg-white rounded-full shadow-sm">
-                              📄 Document
-                            </span>
-                            {value.split('/').pop()}
+                      <>
+                        <div className="relative w-full max-w-sm aspect-video rounded-lg overflow-hidden border border-slate-200 bg-slate-50 flex flex-col">
+                          {isImageUrl(value) ? (
+                            <Image src={value} alt="Selected media" fill className="object-cover" />
+                          ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center p-4 bg-slate-50/50 text-center break-all text-xs font-medium text-slate-900">
+                              <span className="mb-2 p-2 bg-white rounded-full shadow-sm">
+                                📄 Document
+                              </span>
+                              {value.split('/').pop()}
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button type="button" variant="primary" size="sm" onClick={() => openMediaSelector(field.name)}>
+                              Change
+                            </Button>
+                            {!field.required && (
+                              <Button type="button" variant="outline" size="sm" onClick={() => handleFieldChange(field.name, null)}>
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {isImageUrl(value) && (
+                          <div className="mt-2">
+                            <FocalPointPicker
+                              imageUrl={value}
+                              focalPointX={formData.focalPointX}
+                              focalPointY={formData.focalPointY}
+                              focalPointAuto={formData.focalPointAuto}
+                              aspectRatio={formData.aspectRatio}
+                              defaultAspectRatio={
+                                module === "homepageSlides" ? "16:9" :
+                                module === "leaders" ? "1:1" :
+                                "auto"
+                              }
+                              onChange={(updates) => {
+                                Object.entries(updates).forEach(([k, v]) => {
+                                  handleFieldChange(k, v);
+                                });
+                              }}
+                            />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <Button type="button" variant="primary" size="sm" onClick={() => openMediaSelector(field.name)}>
-                            Change
-                          </Button>
-                          {!field.required && (
-                            <Button type="button" variant="outline" size="sm" onClick={() => handleFieldChange(field.name, null)}>
-                              Remove
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                      </>
                     ) : (
                       <div 
                         className={`flex flex-col items-center justify-center w-full max-w-sm aspect-video rounded-lg border-2 border-dashed ${hasError ? "border-red-400 bg-red-50" : "border-slate-200 bg-slate-50/30 hover:bg-slate-50/50 cursor-pointer transition-colors"}`}

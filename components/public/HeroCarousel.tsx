@@ -12,12 +12,15 @@ import { cn } from "@/lib/utils";
 import type { Serialized } from "@/lib/data/homepage";
 import type { HomepageSlide } from "@/types/content";
 import { useLiveStatus } from "@/components/public/LiveStatusProvider";
-import type { HomepageSlidesConfig } from "@/types/settings";
+import type { HomepageSlidesConfig, MediaSettings } from "@/types/settings";
+import { DEFAULT_MEDIA_SETTINGS } from "@/types/settings";
+import { getAutoFocalPoint } from "@/lib/mediaHandling";
 
 interface HeroCarouselProps {
   slides: Serialized<HomepageSlide>[];
   isLive?: boolean;
   heightConfig?: HomepageSlidesConfig;
+  mediaSettings?: MediaSettings;
 }
 
 const isWatchLive = (label?: string | null) => label?.toLowerCase().trim() === "watch live";
@@ -29,7 +32,7 @@ function normalizeOverlayOpacity(value: number | null | undefined) {
   return Math.min(Math.max(decimal, 0.25), 0.85);
 }
 
-export function HeroCarousel({ slides, heightConfig }: HeroCarouselProps) {
+export function HeroCarousel({ slides, heightConfig, mediaSettings }: HeroCarouselProps) {
   const { isLive } = useLiveStatus();
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -235,27 +238,50 @@ export function HeroCarousel({ slides, heightConfig }: HeroCarouselProps) {
       `}</style>
       <div className="overflow-hidden" ref={emblaRef}>
         <div className="flex touch-pan-y" aria-live="polite" aria-atomic="true">
-          {slides.map((slide, index) => (
-            <div 
-              key={slide.id} 
-              className="relative flex-[0_0_100%] min-w-0 bg-stonehill-primary hero-slide"
-              style={resolvedHeightStyle}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`Slide ${index + 1} of ${slides.length}`}
-            >
-              {slide.imageUrl ? (
-                <Image
-                  src={slide.imageUrl}
-                  alt={slide.imageAlt || slide.title}
-                  fill
-                  priority={index === 0}
-                  className="object-cover"
-                  sizes="100vw"
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-stonehill-primary via-stonehill-primary to-slate-900" />
-              )}
+          {slides.map((slide, index) => {
+            const finalRatio = slide.aspectRatio && slide.aspectRatio !== "default"
+              ? slide.aspectRatio
+              : (mediaSettings?.defaultRatios?.homepageSlides || "auto");
+            const hasRatio = finalRatio && finalRatio !== "auto";
+            const ratioVal = hasRatio ? finalRatio.replace(":", " / ") : undefined;
+
+            let fx = 50;
+            let fy = 50;
+            if (typeof slide.focalPointX === "number" && typeof slide.focalPointY === "number" && slide.focalPointAuto !== true) {
+              fx = slide.focalPointX;
+              fy = slide.focalPointY;
+            } else if (slide.imageUrl) {
+              const autoPt = getAutoFocalPoint(slide.imageUrl);
+              fx = autoPt.x;
+              fy = autoPt.y;
+            }
+
+            return (
+              <div 
+                key={slide.id} 
+                className="relative flex-[0_0_100%] min-w-0 bg-stonehill-primary hero-slide"
+                style={{
+                  ...resolvedHeightStyle,
+                  aspectRatio: ratioVal,
+                  ...(hasRatio ? { height: "auto", minHeight: "auto" } : {}),
+                }}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`Slide ${index + 1} of ${slides.length}`}
+              >
+                {slide.imageUrl ? (
+                  <Image
+                    src={slide.imageUrl}
+                    alt={slide.imageAlt || slide.title}
+                    fill
+                    priority={index === 0}
+                    className="object-cover"
+                    style={{ objectPosition: `${fx}% ${fy}%` }}
+                    sizes="100vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-stonehill-primary via-stonehill-primary to-slate-900" />
+                )}
               <div 
                 className="absolute inset-0 z-10" 
                 style={{ backgroundColor: `rgba(0, 0, 0, ${normalizeOverlayOpacity(slide.overlayOpacity)})` }}
@@ -325,8 +351,9 @@ export function HeroCarousel({ slides, heightConfig }: HeroCarouselProps) {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
+      </div>
       </div>
 
       {slides.length > 1 && (
