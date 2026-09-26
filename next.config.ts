@@ -50,10 +50,8 @@ const nextConfig: NextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
           },
-          {
-            key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com https://www.recaptcha.net https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.googleusercontent.com https://i.ytimg.com https://images.unsplash.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://www.gstatic.com; frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.recaptcha.net https://maps.google.com https://www.google.com; connect-src 'self' https://*.googleapis.com https://www.recaptcha.net https://recaptchaenterprise.googleapis.com https://api.resend.com wss://*.firebaseio.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests;",
-          },
+          // Content-Security-Policy is set per-request in middleware.ts so it
+          // can carry a fresh nonce for script-src instead of 'unsafe-inline'.
         ],
       },
     ];

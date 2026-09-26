@@ -29,6 +29,9 @@ Thumbs.db
 *.tsbuildinfo
 vercel.json.local
 
+# Claude Code local-only settings (per-developer tool permissions)
+.claude/settings.local.json
+
 # Scratch & test scripts
 scripts/query-adventurers.js
 scripts/test-update.ts
