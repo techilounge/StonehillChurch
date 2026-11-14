@@ -46,6 +46,10 @@ jobs:
         run: npm run build
 
       - name: Runtime smoke test
+        # Vercel functions cannot require() ES modules, unlike plain Node 24.
+        # Disable it here so ESM-only transitive deps fail CI, not production.
+        env:
+          NODE_OPTIONS: --no-experimental-require-module
         run: bash scripts/smokeTest.sh
 
       - name: Audit production dependencies (critical)
