@@ -3,6 +3,20 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.3] - 2026-11-14
+
+### Security
+- **zod 3 → 4.6.7.** Clears the high-severity memory-exhaustion advisory (GHSA-mrhx-c7xc-m3w5) on public form validation.
+
+### Changed
+- Form and CMS validation messages are now plain language ("This field is required.", "Enter a valid email address.", "Must be at least 10 characters.") instead of zod defaults.
+
+### Fixed (caught before release)
+- zod 4 applies `.default()` values to omitted keys of partial objects and refuses `.partial()` on refined schemas. CMS partial updates now return only the fields that were sent and keep zod 3 pass-through behavior for refined schemas, so editing one field can no longer reset others (e.g. a slide focal point) and event/resource/popup updates do not crash.
+
+### Added
+- Characterization tests for every validator (seed documents, empty input, partial updates, public forms, standalone schemas), recorded under zod 3 before the upgrade.
+
 ## [0.9.2] - 2026-11-14
 
 ### Fixed

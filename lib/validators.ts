@@ -5,6 +5,48 @@ import {
   slugifyAnnouncementTitle,
 } from "@/lib/announcements";
 
+/**
+ * Plain-language default messages. These reach church visitors through public
+ * form errors and editors through CMS field errors. Messages written on an
+ * individual schema still take precedence; returning undefined falls back to
+ * zod's built-in message.
+ */
+z.config({
+  customError: (issue) => {
+    switch (issue.code) {
+      case "invalid_type":
+        if (issue.input === undefined || issue.input === null) return "This field is required.";
+        if (issue.expected === "int") return "Enter a whole number.";
+        return undefined;
+      case "too_small":
+        if (issue.origin === "string") {
+          return Number(issue.minimum) <= 1
+            ? "This field is required."
+            : `Must be at least ${issue.minimum} characters.`;
+        }
+        if (issue.origin === "number") return `Must be at least ${issue.minimum}.`;
+        if (issue.origin === "array") return `Choose at least ${issue.minimum}.`;
+        return undefined;
+      case "too_big":
+        if (issue.origin === "string") return `Must be at most ${issue.maximum} characters.`;
+        if (issue.origin === "number") return `Must be at most ${issue.maximum}.`;
+        if (issue.origin === "array") return `Choose at most ${issue.maximum}.`;
+        return undefined;
+      case "invalid_format":
+        if (issue.format === "email") return "Enter a valid email address.";
+        if (issue.format === "url") return "Enter a valid URL.";
+        return undefined;
+      case "invalid_value":
+        // zod 4 reports a missing enum/literal value here rather than as invalid_type.
+        return issue.input === undefined || issue.input === null
+          ? "This field is required."
+          : "Choose one of the available options.";
+      default:
+        return undefined;
+    }
+  },
+});
+
 export const emailSchema = z.string().email();
 
 export const slugSchema = z
@@ -356,6 +398,7 @@ export const mediaAssetSchema = z.object({
 export const formSubmissionPayloadSchema: z.ZodType<
   Record<string, string | number | boolean | string[] | null>
 > = z.record(
+  z.string(),
   z.union([
     z.string(),
     z.number(),
@@ -499,9 +542,10 @@ const siteSettingPrimitiveSchema = z.union([z.string(), z.number(), z.boolean(),
 // Allow up to two levels of nesting so structured configs
 // (e.g. { height: { mode, preset, customValue, unit } }) pass validation.
 const siteSettingNestedRecordSchema = z.record(
+  z.string(),
   z.union([
     siteSettingPrimitiveSchema,
-    z.record(siteSettingPrimitiveSchema),
+    z.record(z.string(), siteSettingPrimitiveSchema),
   ]),
 );
 
@@ -874,7 +918,7 @@ export const auditLogSchema = z.object({
   action: auditActionSchema,
   collection: z.string().min(1).max(80),
   documentId: z.string().min(1).max(200),
-  details: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).nullable(),
+  details: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).nullable(),
 });
 
 // menus
@@ -921,3 +965,39 @@ export const collectionSchemas = {
 } as const;
 
 export type CollectionSchemaName = keyof typeof collectionSchemas;
+
+/**
+ * Validates a CMS partial update (the patch) before it is merged over the
+ * existing document; the merged result is then validated in full.
+ *
+ * - Only keys present in the input are returned. zod 4 applies `.default()`
+ *   values even to omitted keys of a `.partial()` object, which would silently
+ *   overwrite stored values on merge (e.g. resetting a slide focal point).
+ * - Object schemas with refinements cannot be made partial in zod 4. As under
+ *   zod 3 (where refined schemas were not ZodObjects), their patch passes
+ *   through and relies on the full validation of the merged document.
+ */
+export function safeParsePartialUpdate(
+  schema: z.ZodTypeAny,
+  input: unknown,
+): z.ZodSafeParseResult<Record<string, unknown>> {
+  let partial: z.ZodTypeAny = z.looseObject({});
+  if (schema instanceof z.ZodObject) {
+    try {
+      partial = schema.partial();
+    } catch {
+      // Refined object schema: keep the pass-through behavior.
+    }
+  }
+
+  const result = partial.safeParse(input);
+  if (!result.success || typeof input !== "object" || input === null) {
+    return result as z.ZodSafeParseResult<Record<string, unknown>>;
+  }
+
+  const sent = new Set(Object.keys(input));
+  const data = Object.fromEntries(
+    Object.entries(result.data as Record<string, unknown>).filter(([key]) => sent.has(key)),
+  );
+  return { success: true, data };
+}

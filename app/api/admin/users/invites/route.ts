@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         error: {
           code: "VALIDATION_ERROR",
           message: "Invalid invite payload.",
-          fieldErrors: parsed.error.flatten().fieldErrors,
+          fieldErrors: z.flattenError(parsed.error).fieldErrors,
         },
       },
       { status: 400 },

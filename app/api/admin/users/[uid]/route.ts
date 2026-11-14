@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         error: {
           code: "VALIDATION_ERROR",
           message: "Invalid user update payload.",
-          fieldErrors: parsed.error.flatten().fieldErrors,
+          fieldErrors: z.flattenError(parsed.error).fieldErrors,
         },
       },
       { status: 400 },

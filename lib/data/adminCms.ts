@@ -22,6 +22,7 @@ import {
   resourceSchema,
   sermonSchema,
   siteSettingSchema,
+  safeParsePartialUpdate,
 } from "@/lib/validators";
 import { PUBLISHED } from "@/types/shared";
 import type { SiteSettingDoc } from "@/types/settings";
@@ -293,13 +294,13 @@ function validateFullData(
   if (!parsed.success) {
     console.error(`[CMS Validation Error] full validation failed for module: ${config.collection}`, {
       input: normalizedInput,
-      errors: parsed.error.flatten().fieldErrors
+      errors: z.flattenError(parsed.error).fieldErrors
     });
     throw new CmsAdminError(
       "VALIDATION_ERROR",
       "Some fields need attention before this form can be saved.",
       400,
-      cleanFieldErrors(parsed.error.flatten().fieldErrors),
+      cleanFieldErrors(z.flattenError(parsed.error).fieldErrors),
     );
   }
 
@@ -310,26 +311,23 @@ function validatePartialData(
   config: ModuleConfig,
   input: unknown,
 ): Record<string, unknown> {
-  const partialSchema =
-    config.schema instanceof z.ZodObject ? config.schema.partial() : z.object({}).passthrough();
-  
   const normalizedInput =
     typeof input === "object" && input !== null
       ? normalizeDateFields(input as Record<string, unknown>, config.dateFields)
       : input;
 
-  const parsed = partialSchema.safeParse(normalizedInput);
+  const parsed = safeParsePartialUpdate(config.schema, normalizedInput);
 
   if (!parsed.success) {
     console.error(`[CMS Validation Error] partial validation failed for module: ${config.collection}`, {
       input: normalizedInput,
-      errors: parsed.error.flatten().fieldErrors
+      errors: z.flattenError(parsed.error).fieldErrors
     });
     throw new CmsAdminError(
       "VALIDATION_ERROR",
       "Some fields need attention before this form can be saved.",
       400,
-      cleanFieldErrors(parsed.error.flatten().fieldErrors),
+      cleanFieldErrors(z.flattenError(parsed.error).fieldErrors),
     );
   }
 
