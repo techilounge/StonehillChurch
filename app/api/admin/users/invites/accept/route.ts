@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { acceptUserInviteWithPassword, InviteFlowError } from "@/lib/data/userInvites";
+import {
+  clientIpFromHeaders,
+  consumeRateLimit,
+  rateLimitHeaders,
+  type RateLimitRule,
+} from "@/lib/rateLimit";
 
 const acceptSchema = z.object({
   token: z.string().trim().min(20).max(200),
@@ -13,11 +19,29 @@ const acceptSchema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
 });
 
-function jsonError(code: string, message: string, status: number) {
-  return NextResponse.json({ ok: false, error: { code, message } }, { status });
+// Accepting an invite creates a verified Firebase Auth user on token possession
+// alone, so cap attempts per client to slow token guessing.
+const ACCEPT_RATE_LIMIT: RateLimitRule = {
+  scope: "invite-accept",
+  limit: 10,
+  windowMs: 15 * 60 * 1000,
+};
+
+function jsonError(code: string, message: string, status: number, headers?: HeadersInit) {
+  return NextResponse.json({ ok: false, error: { code, message } }, { status, headers });
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimit = await consumeRateLimit(ACCEPT_RATE_LIMIT, clientIpFromHeaders(request.headers));
+  if (!rateLimit.allowed) {
+    return jsonError(
+      "RATE_LIMITED",
+      "Too many attempts. Please wait a few minutes and try again.",
+      429,
+      rateLimitHeaders(rateLimit),
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
