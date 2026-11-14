@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, "ci/**"]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -44,6 +44,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Runtime smoke test
+        run: bash scripts/smokeTest.sh
 
       - name: Audit production dependencies (critical)
         run: npm audit --omit=dev --audit-level=critical
