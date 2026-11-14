@@ -3,10 +3,21 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.1] - 2026-11-14
+
+### Security
+- **App Check on public forms.** Public forms now send a Firebase App Check token (`X-Firebase-AppCheck`) and `POST /api/forms` verifies it with the Admin SDK. Rollout is controlled by `APPCHECK_FORMS_MODE` (`monitor` by default: log only, never block; `enforce`; `off`). See README → App Check on Public Forms.
+
+### Changed
+- Documented the media upload policy: admin media library uploads are auto-approved for every role; the storage rule remains as defense in depth for direct browser uploads.
+
 ## [0.9.0] - 2026-11-14
 
 ### Security
 - **Dependency patch release.** Upgraded `next` 15.5.18 → 15.5.29 (unauthenticated RCE in the Image Optimization API, RCE on Windows-hosted servers, SSG/ISR cache poisoning, Server Action DoS/SSRF), `sharp` 0.34 → 0.35.5 (libvips/libheif/librsvg CVEs) and `firebase-admin` 13 → 14.5.1, plus `npm audit fix` for transitive packages. Pinned `engines.node` to `24.x`.
+- **Shared rate limiting.** Form submissions (5 per 10 min) and the unauthenticated invite lookup (30 per 15 min) and accept (10 per 15 min) endpoints are limited through a Firestore-backed limiter that holds across Vercel instances. The old in-memory limiter reset on every cold start. 429 responses include `Retry-After` and `RateLimit-*` headers.
+- Removed the unused `/api/admin/invites/*` routes, whose validate endpoint revealed whether an invite was expired, accepted or revoked.
+- Unexpected CMS errors no longer send internal error details to the browser. The admin dashboard verifies the session itself.
 
 ### Added
 - **Announcement channels.** Each announcement now has independent *Publish to Website*, *Show in Announcement Bar* and *Feature on Homepage* toggles, plus slug, summary, category and SEO fields. Legacy announcements are normalized at read time; `npm run migrate:announcement-channels` optionally backfills the fields (dry-run by default).
@@ -14,8 +25,12 @@ All notable changes to the Stonehill Church website will be documented in this f
 - **Homepage Announcements section.** Up to three featured announcements (highest priority first) appear after Upcoming Events. The section is hidden when nothing is featured.
 - `/announcements` added to the sitemap and to the admin Menu Manager's route picker.
 
+- **Continuous integration.** GitHub Actions runs lint, typecheck, tests, a production build and a critical-severity dependency audit on every pull request and push to `main`. `npm run lint` uses the ESLint CLI, and lint errors fail the build again.
+
 ### Fixed
 - **Announcements disappeared a day early.** The admin date picker stores the end date as midnight at the *start* of the chosen day, so announcements vanished as their final day began. The end date is now inclusive of the whole day.
+- **Page builder crash when selecting a row block.** The block inspector called a React hook only for row blocks, which could throw "Rendered more hooks than during the previous render" when switching selection. The homepage sermon section had the same class of bug.
+- Media upload messages and the upload panel now state the real 2 MB limit (previously said 12 MB / 5 MB).
 
 
 ## [0.8.6] - 2026-09-26

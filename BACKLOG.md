@@ -29,14 +29,13 @@ Last reviewed: 2026-11-14.
 - **Status:** Optional
 - **How:** `npm run migrate:announcement-channels` (dry run), then `-- --apply`. Not required: legacy documents are normalized at read time.
 
+### OPS-005 — Switch App Check on forms to enforce mode
+
+- **Status:** Open — after about a week of monitoring
+- **Why:** `POST /api/forms` now verifies App Check tokens but runs in monitor mode (logs, never blocks) so a misconfiguration cannot stop real visitors.
+- **How:** Check Vercel function logs for `[appCheck] forms:` warnings. When real submissions are consistently verified, set `APPCHECK_FORMS_MODE=enforce` in Vercel production and redeploy. See README → App Check on Public Forms.
+
 ## P1 — Security and abuse prevention
-
-### SEC-002 — Verify Firebase App Check on the public forms API
-
-- **Status:** Open — needs a decision on production App Check configuration
-- **Evidence:** Browser App Check is initialized, but public form clients do not attach an App Check token and `POST /api/forms` does not verify one. The route writes through the Admin SDK, which bypasses Firestore rules and their App Check requirement.
-- **Resolution:** Attach the App Check token (`X-Firebase-AppCheck`) to form requests and verify it with `getAppCheck().verifyToken()` before accepting a submission. Roll out in "monitor" mode (log failures) before enforcing so a misconfigured site key cannot block real visitors. Define an explicit local/emulator bypass that cannot activate in production.
-- **Acceptance:** Missing or invalid production tokens are rejected, valid tokens succeed, local development is documented, route tests cover each case.
 
 ### SEC-004 — Upgrade zod 3 → 4
 
@@ -50,12 +49,6 @@ Last reviewed: 2026-11-14.
 - **Status:** Open
 - **Evidence:** `lib/data/adminCms.ts` maps every settings action to `settings:manage`; `settings:critical:manage` exists in `lib/permissions.ts` and `firestore.rules` but the Admin SDK path never checks it.
 - **Resolution:** Wire a real `critical` flag through the settings schema and gate it, or remove the permission and rule clause.
-
-### SEC-006 — Editor media self-approval
-
-- **Status:** Open — needs a product decision
-- **Evidence:** `lib/data/mediaAssets.ts` stores every upload as `public: true, status: "approved"` regardless of role; `storage.rules`' `editorCannotSelfApprovePublicMedia()` is bypassed by the Admin SDK.
-- **Resolution:** Decide whether EDITOR uploads need ADMIN approval before going public and enforce it server-side.
 
 ### SEC-007 — Invite tokens in URL query strings
 
@@ -143,3 +136,5 @@ Last reviewed: 2026-11-14.
 | Fix rules-of-hooks crashes in `BlockInspector` and `LatestSermonSection` | 2026-11-14 | `47d3219` | Lint clean |
 | Generic CMS error messages; dashboard session check; media size copy; dead `lib/storage.ts` and `app/api/media` | 2026-11-14 | `8c52069` | Lint, typecheck, tests |
 | Announcement channels, public pages, homepage section; announcements no longer end a day early | 2026-11-14 | `4c46b6a`, `6731fa6` | Unit tests; pages verified against production data |
+| SEC-002 App Check verification on `POST /api/forms` (monitor mode; enforcement is OPS-005) | 2026-11-14 | this change | Unit tests; monitor and enforce verified against Firebase with missing/forged tokens |
+| SEC-006 Editor media self-approval: decided to keep auto-approve; storage rule documented as direct-upload defense in depth | 2026-11-14 | this change | Decision by owner |

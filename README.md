@@ -144,6 +144,18 @@ App Check is initialized in the browser when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE
 
 Do not set `NEXT_PUBLIC_FIREBASE_APPCHECK_DEBUG_TOKEN` in production.
 
+### App Check on Public Forms
+
+`POST /api/forms` writes through the Admin SDK, which bypasses Firestore rules, so it verifies App Check itself. Public forms send the token in the `X-Firebase-AppCheck` header, and `lib/appCheck.ts` verifies it. `APPCHECK_FORMS_MODE` controls the rollout:
+
+| Mode | Behavior |
+| --- | --- |
+| `monitor` (default) | Verify; log `[appCheck] forms: missing/invalid token` warnings; never block. |
+| `enforce` | Reject submissions without a valid token with HTTP 401. |
+| `off` | Skip verification. |
+
+Rollout: deploy with the default, watch Vercel function logs for `[appCheck]` warnings for a week or so, then set `APPCHECK_FORMS_MODE=enforce` in Vercel production once real visitors' submissions are consistently verified. A few warnings from bots are expected and are the point.
+
 ## Firebase Emulator Setup
 
 Install the Firebase CLI if you do not already have it:

@@ -8,6 +8,7 @@ import { TextArea } from "@/components/forms/TextArea";
 import { CheckboxField } from "@/components/forms/CheckboxField";
 import { SubmitButton } from "@/components/forms/SubmitButton";
 import { FormStatusAlert } from "./FormStatusAlert";
+import { getAppCheckHeaders } from "@/lib/firebaseClient";
 
 const VOLUNTEER_AREAS = [
   "Children's Ministry",
@@ -41,7 +42,7 @@ export function VolunteerForm() {
     try {
       const res = await fetch("/api/forms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAppCheckHeaders()) },
         body: JSON.stringify(payload),
       });
 

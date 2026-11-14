@@ -7,6 +7,7 @@ import { TextInput } from "@/components/forms/TextInput";
 import { TextArea } from "@/components/forms/TextArea";
 import { SubmitButton } from "@/components/forms/SubmitButton";
 import { FormStatusAlert } from "./FormStatusAlert";
+import { getAppCheckHeaders } from "@/lib/firebaseClient";
 
 export function AnnouncementRequestForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -30,7 +31,7 @@ export function AnnouncementRequestForm() {
     try {
       const res = await fetch("/api/forms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAppCheckHeaders()) },
         body: JSON.stringify(payload),
       });
 

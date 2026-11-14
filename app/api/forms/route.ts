@@ -26,6 +26,7 @@ import {
   rateLimitHeaders,
   type RateLimitRule,
 } from "@/lib/rateLimit";
+import { checkAppCheckToken } from "@/lib/appCheck";
 
 type PublicFormSubmission = z.infer<typeof publicFormSubmissionSchema>;
 
@@ -165,6 +166,16 @@ export async function POST(request: NextRequest) {
 
   if (hasHoneypotValue(body)) {
     return jsonSuccess({ submission: null, accepted: true }, 202);
+  }
+
+  // Verified before the rate limiter so rejected bots do not cost Firestore writes.
+  const appCheck = await checkAppCheckToken(request.headers, { context: "forms" });
+  if (!appCheck.allowed) {
+    return jsonError(
+      "APP_CHECK_FAILED",
+      "We couldn't verify this submission. Please refresh the page and try again.",
+      401,
+    );
   }
 
   const rateLimit = await consumeRateLimit(FORM_RATE_LIMIT, clientIpFromHeaders(request.headers));

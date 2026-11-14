@@ -67,6 +67,11 @@ service firebase.storage {
         request.resource.metadata.altText.size() <= 200;
     }
 
+    // Policy (decided 2026-11-14): uploads made through the admin media
+    // library are auto-approved for every role. Those go through the Admin SDK
+    // (lib/data/mediaAssets.ts) and bypass these rules. This check only
+    // constrains direct-from-browser uploads, which the app does not use; it
+    // is kept as defense in depth, not as the approval workflow.
     function editorCannotSelfApprovePublicMedia() {
       return !hasRole(["EDITOR"]) ||
         (request.resource.metadata.public != "true" &&

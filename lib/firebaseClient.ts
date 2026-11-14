@@ -1,5 +1,6 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import {
+  getToken,
   initializeAppCheck,
   ReCaptchaV3Provider,
   type AppCheck,
@@ -75,6 +76,30 @@ export function initializeFirebaseAppCheck(): AppCheck | null {
   }
 
   return appCheckInstance;
+}
+
+const APP_CHECK_TOKEN_TIMEOUT_MS = 4000;
+
+/**
+ * Request headers for calls to first-party APIs that verify App Check
+ * (currently POST /api/forms). Never throws and never blocks for long: if App
+ * Check is not configured, or the token cannot be fetched in time, the header
+ * is simply omitted and the server decides what to do (see lib/appCheck.ts).
+ */
+export async function getAppCheckHeaders(): Promise<Record<string, string>> {
+  const appCheck = initializeFirebaseAppCheck();
+  if (!appCheck) return {};
+
+  try {
+    const result = await Promise.race([
+      getToken(appCheck, false),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), APP_CHECK_TOKEN_TIMEOUT_MS)),
+    ]);
+    return result?.token ? { "X-Firebase-AppCheck": result.token } : {};
+  } catch (error) {
+    console.warn("[firebase] Could not obtain an App Check token.", error);
+    return {};
+  }
 }
 
 export function getFirebaseAuth(): Auth {

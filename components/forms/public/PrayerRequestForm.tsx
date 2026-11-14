@@ -8,6 +8,7 @@ import { TextArea } from "@/components/forms/TextArea";
 import { RadioField } from "@/components/forms/RadioField";
 import { SubmitButton } from "@/components/forms/SubmitButton";
 import { FormStatusAlert } from "./FormStatusAlert";
+import { getAppCheckHeaders } from "@/lib/firebaseClient";
 
 export function PrayerRequestForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
@@ -31,7 +32,7 @@ export function PrayerRequestForm() {
     try {
       const res = await fetch("/api/forms", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(await getAppCheckHeaders()) },
         body: JSON.stringify(payload),
       });
 
