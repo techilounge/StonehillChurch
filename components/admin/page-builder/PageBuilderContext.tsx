@@ -651,7 +651,7 @@ export function PageBuilderProvider({
 
       if (!movedBlock) return prev;
 
-      let updatedData = nextSourceSection.builderData;
+      const updatedData = nextSourceSection.builderData;
       if (!updatedData) return prev;
 
       const targetSectionIndex = updatedData.sections.findIndex((s) => s.id === toSectionId);

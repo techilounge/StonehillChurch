@@ -132,7 +132,7 @@ export function LiveStatusProvider({
     // (see isLiveRef above) avoids the constant restart the previous
     // [isLive] dependency caused, which was double-charging YouTube quota
     // during transitions.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   return (

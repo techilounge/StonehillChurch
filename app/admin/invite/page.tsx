@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { AcceptInviteForm } from "@/components/admin/users/AcceptInviteForm";
 import { validateUserInviteToken, InviteFlowError } from "@/lib/data/userInvites";
@@ -62,12 +63,12 @@ export default async function AcceptInvitePage({ searchParams }: InvitePageProps
               <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
                 {errorMessage}
               </p>
-              <a
+              <Link
                 href="/admin/login"
                 className="inline-block text-sm font-medium text-stonehill-dark hover:underline"
               >
                 Go to sign in
-              </a>
+              </Link>
             </div>
           ) : preview ? (
             <AcceptInviteForm

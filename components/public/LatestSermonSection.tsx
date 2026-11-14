@@ -15,6 +15,9 @@ interface LatestSermonSectionProps {
 }
 
 export function LatestSermonSection({ sermon }: LatestSermonSectionProps) {
+  // Must run before any early return so the hook order is stable.
+  const { isLive } = useLiveStatus();
+
   if (!sermon) {
     return (
       <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">
@@ -29,8 +32,6 @@ export function LatestSermonSection({ sermon }: LatestSermonSectionProps) {
       </section>
     );
   }
-
-  const { isLive } = useLiveStatus();
 
   return (
     <section className="py-16 bg-slate-50 sm:py-24 overflow-hidden">

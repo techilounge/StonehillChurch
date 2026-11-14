@@ -68,7 +68,7 @@ export function PageBuilderRenderer({ document, spacingTokens, mediaSettings }: 
           // [data-pb-id] attribute applied below so we never collide with
           // user-authored class names.
           <style
-            // eslint-disable-next-line react/no-danger
+             
             dangerouslySetInnerHTML={{ __html: responsiveCss }}
           />
         )}

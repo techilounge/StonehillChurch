@@ -2,9 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Lint errors fail the build (and therefore the Vercel deploy); warnings do
+  // not. CI runs the same checks via `npm run lint`.
   images: {
     remotePatterns: [
       {

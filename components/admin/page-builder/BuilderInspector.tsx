@@ -539,6 +539,10 @@ function BlockInspector({
   onChange: (updates: Partial<PageBlock>) => void,
   onOpenMediaSelector: (field: string) => void
 }) {
+  // Called unconditionally: hooks must run in the same order on every render,
+  // and the inspector re-renders with different block types.
+  const { handleAddNestedColumn, handleRemoveNestedColumn } = usePageBuilder();
+
   return (
     <>
       <div className="space-y-1.5">
@@ -1642,7 +1646,6 @@ function BlockInspector({
       )}
 
       {block.type === "row" && (() => {
-        const { handleAddNestedColumn, handleRemoveNestedColumn } = usePageBuilder();
         const cols = block.content.columns || [];
         const responsive = block.content.responsive || { desktop: "horizontal", tablet: "auto", mobile: "stacked" };
         
@@ -1916,7 +1919,7 @@ function ButtonPaddingControl({
   };
 
   const setPad = (key: "top" | "right" | "bottom" | "left", value: string) => {
-    let cleanVal = value;
+    const cleanVal = value;
     
     if (linked) {
       onContentChange({
