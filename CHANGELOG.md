@@ -3,6 +3,21 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.0] - 2026-11-14
+
+### Security
+- **Dependency patch release.** Upgraded `next` 15.5.18 → 15.5.29 (unauthenticated RCE in the Image Optimization API, RCE on Windows-hosted servers, SSG/ISR cache poisoning, Server Action DoS/SSRF), `sharp` 0.34 → 0.35.5 (libvips/libheif/librsvg CVEs) and `firebase-admin` 13 → 14.5.1, plus `npm audit fix` for transitive packages. Pinned `engines.node` to `24.x`.
+
+### Added
+- **Announcement channels.** Each announcement now has independent *Publish to Website*, *Show in Announcement Bar* and *Feature on Homepage* toggles, plus slug, summary, category and SEO fields. Legacy announcements are normalized at read time; `npm run migrate:announcement-channels` optionally backfills the fields (dry-run by default).
+- **Public announcements pages.** `/announcements` lists active website announcements; `/announcements/[slug]` shows the full announcement with its call to action. Ended announcements stay reachable for shared links but show a notice and are marked `noindex`.
+- **Homepage Announcements section.** Up to three featured announcements (highest priority first) appear after Upcoming Events. The section is hidden when nothing is featured.
+- `/announcements` added to the sitemap and to the admin Menu Manager's route picker.
+
+### Fixed
+- **Announcements disappeared a day early.** The admin date picker stores the end date as midnight at the *start* of the chosen day, so announcements vanished as their final day began. The end date is now inclusive of the whole day.
+
+
 ## [0.8.6] - 2026-09-26
 
 ### Added

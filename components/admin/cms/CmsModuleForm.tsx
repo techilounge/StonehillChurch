@@ -17,6 +17,7 @@ import { MediaSelectorDialog } from "../media/MediaSelectorDialog";
 import Image from "next/image";
 import { PUBLISHED } from "@/types/shared";
 import { FocalPointPicker } from "@/components/admin/shared/FocalPointPicker";
+import { normalizeAnnouncement, slugifyAnnouncementTitle } from "@/lib/announcements";
 
 interface CmsModuleFormProps {
   module: Exclude<CmsModule, "siteSettings">;
@@ -34,9 +35,21 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
   const router = useRouter();
   const config = CMS_CONFIG[module];
   const isNew = !initialData;
+  const slugManuallyEdited = React.useRef(!isNew);
 
   const [formData, setFormData] = React.useState<Record<string, any>>(() => {
-    if (initialData) return initialData;
+    if (initialData) {
+      if (module === "announcements") {
+        const normalized = normalizeAnnouncement(initialData);
+        return {
+          ...normalized,
+          seoTitle: typeof normalized.seoTitle === "string" ? normalized.seoTitle : "",
+          seoDescription:
+            typeof normalized.seoDescription === "string" ? normalized.seoDescription : "",
+        };
+      }
+      return initialData;
+    }
     // Seed the new-doc form with the per-field defaults declared in
     // CmsConfig. This is how a new popup lands pre-configured with sane
     // animation/backdrop/size values that the user can still override.
@@ -64,7 +77,22 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
   const routePath = module.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 
   const handleFieldChange = (name: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (module === "announcements" && isNew && name === "slug") {
+      slugManuallyEdited.current = true;
+    }
+
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (
+        module === "announcements" &&
+        isNew &&
+        name === "title" &&
+        !slugManuallyEdited.current
+      ) {
+        next.slug = slugifyAnnouncementTitle(value);
+      }
+      return next;
+    });
     // Clear error for this field
     if (fieldErrors[name]) {
       const newErrors = { ...fieldErrors };
@@ -77,7 +105,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
     const errorMessages = fieldErrors[fieldName];
     if (!errorMessages || errorMessages.length === 0) return null;
     return (
-      <div className="flex items-center gap-1.5 mt-1.5 text-xs text-red-600 font-medium">
+      <div id={`field-error-${fieldName}`} className="flex items-center gap-1.5 mt-1.5 text-xs text-red-600 font-medium">
         <AlertCircle className="h-3.5 w-3.5 shrink-0" />
         <span>{errorMessages.join(", ")}</span>
       </div>
@@ -192,8 +220,8 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl pb-12">
-      <div className="flex items-center gap-4">
+    <div className="flex min-w-0 max-w-4xl flex-col gap-6 pb-12">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <Button variant="outline" size="sm" onClick={() => router.push(`/admin/${routePath}`)} className="shrink-0">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
@@ -216,16 +244,35 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
       )}
 
       <form className="bg-white border border-slate-200 shadow-sm rounded-xl" onSubmit={(e) => handleSubmit(e)}>
-        <div className="p-6 sm:p-8 flex flex-col gap-6">
-          {config.fields.map((field) => {
+        <div className="flex flex-col gap-6 p-4 sm:p-8">
+          {config.fields.map((field, fieldIndex) => {
             if (field.showWhen && !field.showWhen(formData)) return null;
             const errorMessages = fieldErrors[field.name];
             const hasError = !!errorMessages && errorMessages.length > 0;
             const value = formData[field.name];
+            const fieldInputId = `cms-${module}-${field.name}`;
+            const fieldDescriptionId = field.description
+              ? `field-description-${field.name}`
+              : undefined;
+            const fieldErrorId = hasError ? `field-error-${field.name}` : undefined;
+            const describedBy = [fieldDescriptionId, fieldErrorId].filter(Boolean).join(" ") || undefined;
+
+            const showSectionHeading =
+              field.section && config.fields[fieldIndex - 1]?.section !== field.section;
 
             return (
-              <div key={field.name} id={`field-container-${field.name}`} className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
+              <React.Fragment key={field.name}>
+                {showSectionHeading && (
+                  <div
+                    className={`border-b border-slate-200 pb-2 ${fieldIndex === 0 ? "" : "pt-3"}`}
+                  >
+                    <h2 className="font-display text-xl text-stonehill-primary">
+                      {field.section}
+                    </h2>
+                  </div>
+                )}
+              <div id={`field-container-${field.name}`} className="flex min-w-0 flex-col gap-1.5">
+                <label htmlFor={fieldInputId} className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
                   <span className="inline-flex items-center gap-1">
                     {field.label}
                     {field.required && <span className="text-red-500">*</span>}
@@ -240,30 +287,38 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                   )}
                 </label>
                 {field.description && (
-                  <p className="text-xs text-slate-900/60 mb-1">{field.description}</p>
+                  <p id={fieldDescriptionId} className="text-xs text-slate-900/60 mb-1">{field.description}</p>
                 )}
 
                 {field.type === "text" || field.type === "slug" || field.type === "url" || field.type === "email" ? (
                   <>
                     <TextInput
+                      id={fieldInputId}
                       type={field.type === "email" ? "email" : field.type === "url" ? "url" : "text"}
                       value={value || ""}
                       onChange={(e) => handleFieldChange(field.name, e.target.value)}
                       placeholder={field.placeholder}
                       required={field.required}
                       hasError={hasError}
+                      aria-describedby={describedBy}
+                      aria-invalid={hasError}
+                      maxLength={field.type === "slug" ? 120 : field.name === "seoTitle" ? 70 : undefined}
                     />
                     {renderFieldError(field.name)}
                   </>
                 ) : field.type === "textarea" || field.type === "richText" ? (
                   <>
                     <TextArea
+                      id={fieldInputId}
                       value={value || ""}
                       onChange={(e) => handleFieldChange(field.name, e.target.value)}
                       placeholder={field.placeholder}
                       required={field.required}
                       hasError={hasError}
                       rows={field.type === "richText" ? 10 : 4}
+                      aria-describedby={describedBy}
+                      aria-invalid={hasError}
+                      maxLength={field.name === "summary" ? 300 : field.name === "seoDescription" ? 160 : undefined}
                     />
                     {field.name === "seoDescription" && (() => {
                       const text = value || "";
@@ -291,30 +346,39 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                 ) : field.type === "number" ? (
                   <>
                     <TextInput
+                      id={fieldInputId}
                       type="number"
                       value={value ?? ""}
                       onChange={(e) => handleFieldChange(field.name, e.target.value === "" ? null : Number(e.target.value))}
                       required={field.required}
                       hasError={hasError}
+                      aria-describedby={describedBy}
+                      aria-invalid={hasError}
                     />
                     {renderFieldError(field.name)}
                   </>
                 ) : field.type === "boolean" ? (
                   <>
                     <CheckboxField
+                      id={fieldInputId}
                       checked={!!value}
                       onChange={(e) => handleFieldChange(field.name, e.target.checked)}
-                      label={`Enable ${field.label}`}
+                      label={field.label}
+                      hasError={hasError}
+                      aria-describedby={describedBy}
                     />
                     {renderFieldError(field.name)}
                   </>
                 ) : field.type === "select" ? (
                   <>
                     <SelectInput
+                      id={fieldInputId}
                       value={value || ""}
                       onChange={(e) => handleFieldChange(field.name, e.target.value)}
                       required={field.required}
                       hasError={hasError}
+                      aria-describedby={describedBy}
+                      aria-invalid={hasError}
                     >
                       <option value="">Select an option...</option>
                       {(dynamicOptions?.[field.name] && dynamicOptions[field.name].length > 0
@@ -329,6 +393,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                 ) : field.type === "date" || field.type === "datetime" ? (
                   <>
                     <TextInput
+                      id={fieldInputId}
                       type={field.type === "date" ? "date" : "datetime-local"}
                       value={
                         value
@@ -360,6 +425,8 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                       }}
                       required={field.required}
                       hasError={hasError}
+                      aria-describedby={describedBy}
+                      aria-invalid={hasError}
                     />
                     {renderFieldError(field.name)}
                   </>
@@ -398,12 +465,15 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                 ) : field.type === "videoUpload" ? (
                   <div className="flex flex-col gap-2">
                     <TextInput
+                      id={fieldInputId}
                       type="url"
                       value={value || ""}
                       onChange={(e) => handleFieldChange(field.name, e.target.value)}
                       placeholder="https://youtu.be/... or https://vimeo.com/..."
                       required={field.required}
                       hasError={hasError}
+                      aria-describedby={describedBy}
+                      aria-invalid={hasError}
                     />
                     <div className="flex items-center gap-3">
                       <label className="inline-flex items-center gap-2 cursor-pointer rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition">
@@ -505,11 +575,12 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                   </div>
                 ) : null}
               </div>
+              </React.Fragment>
             );
           })}
         </div>
 
-        <div className="p-6 sm:p-8 border-t border-slate-200 bg-slate-50/30 flex items-center justify-end gap-3 shrink-0">
+        <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50/30 p-4 sm:flex-row sm:items-center sm:justify-end sm:p-8">
           {/* If the schema requires a status, we assume we can Save Draft or Publish. Otherwise just Save. */}
           {formData.status !== undefined || isNew ? (
             <>
@@ -518,6 +589,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                 variant="outline" 
                 disabled={isSubmitting}
                 onClick={(e) => handleSubmit(e, "draft")}
+                className="w-full sm:w-auto"
               >
                 <Save className="h-4 w-4 mr-2" />
                 Save Draft
@@ -528,6 +600,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
                   variant="primary" 
                   disabled={isSubmitting}
                   onClick={(e) => handleSubmit(e, PUBLISHED)}
+                  className="w-full sm:w-auto"
                 >
                   <Globe className="h-4 w-4 mr-2" />
                   {isNew ? "Publish" : "Save & Publish"}
@@ -539,6 +612,7 @@ export function CmsModuleForm({ module, initialData, canPublish, dynamicOptions 
               type="submit" 
               variant="primary" 
               disabled={isSubmitting}
+              className="w-full sm:w-auto"
             >
               <Save className="h-4 w-4 mr-2" />
               Save Changes

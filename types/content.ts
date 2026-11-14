@@ -179,12 +179,30 @@ export type LeaderCategory = {
 
 export type AnnouncementPriority = "low" | "normal" | "high" | "urgent";
 
+export type AnnouncementCategory =
+  | "general"
+  | "worship"
+  | "ministry"
+  | "school"
+  | "community"
+  | "prayer"
+  | "health"
+  | "service"
+  | "special"
+  | "other";
+
 export type Announcement = {
   title: string;
+  slug?: string;
+  summary?: string;
   body: string;
+  category?: AnnouncementCategory;
   startDate: FirestoreTimestampLike;
   endDate: FirestoreTimestampLike;
   priority: AnnouncementPriority;
+  publishToWebsite?: boolean;
+  showInAnnouncementBar?: boolean;
+  showOnHomepage?: boolean;
   ctaLabel: string | null;
   ctaHref: string | null;
   // When true the Action URL opens in a new browser tab with safe rel attrs.
@@ -192,6 +210,9 @@ export type Announcement = {
   imageUrl: string | null;
   imageAlt: string | null;
   status: ContentStatus;
+  seoTitle?: string;
+  seoDescription?: string;
+  publishedAt?: FirestoreTimestampLike;
   createdAt: FirestoreTimestampLike;
   updatedAt: FirestoreTimestampLike;
 };

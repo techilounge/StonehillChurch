@@ -73,6 +73,9 @@ function revalidateCmsModule(module: CmsModule, data?: Record<string, unknown> |
     case "announcements":
       // TopAnnouncementBar lives in the public layout, so flush at layout level.
       revalidatePath("/", "layout");
+      revalidatePath("/"); // homepage AnnouncementsPreview
+      revalidatePath("/announcements");
+      revalidatePath("/announcements/[slug]", "page");
       break;
 
     case "sermons":

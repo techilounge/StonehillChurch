@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getPublicAnnouncements } from "@/lib/data/announcements";
 import { getPublishedEventsForSitemap } from "@/lib/data/events";
 import { getMinistries } from "@/lib/data/ministries";
 import { getSermons } from "@/lib/data/sermons";
@@ -17,6 +18,7 @@ const staticRoutes: Array<{
   { path: "/plan-your-visit", changeFrequency: "monthly", priority: 0.8 },
   { path: "/sermons", changeFrequency: "weekly", priority: 0.8 },
   { path: "/events", changeFrequency: "daily", priority: 0.8 },
+  { path: "/announcements", changeFrequency: "daily", priority: 0.6 },
   { path: "/ministries", changeFrequency: "weekly", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.6 },
   { path: "/our-beliefs", changeFrequency: "monthly", priority: 0.6 },
@@ -46,11 +48,12 @@ function sitemapEntry(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [siteSettings, sermons, events, ministries] = await Promise.all([
+  const [siteSettings, sermons, events, ministries, announcements] = await Promise.all([
     getSiteSettings(),
     getSermons(),
     getPublishedEventsForSitemap(),
     getMinistries(),
+    getPublicAnnouncements(),
   ]);
   const { siteUrl } = siteSettingsToSeoSettings(siteSettings);
 
@@ -83,6 +86,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         "monthly",
         0.6,
         ministry.updatedAt,
+      ),
+    ),
+    ...announcements.map((announcement) =>
+      sitemapEntry(
+        siteUrl,
+        `/announcements/${announcement.slug}`,
+        "weekly",
+        0.5,
+        announcement.updatedAt ?? announcement.startDate,
       ),
     ),
   ];

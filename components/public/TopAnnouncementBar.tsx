@@ -1,19 +1,12 @@
 import { AnnouncementBannerCarousel, type BannerItem } from "./AnnouncementBannerCarousel";
 
-const PRIORITY_ORDER: Record<"urgent" | "high" | "normal" | "low", number> = {
-  urgent: 4,
-  high: 3,
-  normal: 2,
-  low: 1,
-};
-
 export async function TopAnnouncementBar() {
-  const [{ getActiveAnnouncements }, { getYoutubeSettings }] = await Promise.all([
-    import("@/lib/data/homepage"),
+  const [{ getAnnouncementBarItems }, { getYoutubeSettings }] = await Promise.all([
+    import("@/lib/data/announcements"),
     import("@/lib/data/youtubeSettings"),
   ]);
   const [activeAnnouncements, youtubeSettings] = await Promise.all([
-    getActiveAnnouncements(),
+    getAnnouncementBarItems(),
     getYoutubeSettings(),
   ]);
 
@@ -32,11 +25,8 @@ export async function TopAnnouncementBar() {
     });
   }
 
-  const sortedAnnouncements = [...activeAnnouncements].sort(
-    (a, b) => PRIORITY_ORDER[b.priority] - PRIORITY_ORDER[a.priority],
-  );
-
-  for (const announcement of sortedAnnouncements) {
+  // Already ordered by priority, then most recent start date.
+  for (const announcement of activeAnnouncements) {
     items.push({
       id: announcement.id,
       title: announcement.title,

@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "migrate:announcement-channels": "tsx scripts/migrateAnnouncementsChannels.ts",
     "seed:firestore": "tsx --env-file=.env.local scripts/seedFirestore.ts",
     "verify:admin-email": "tsx --env-file=.env.local scripts/verifyAdminEmail.ts"
   },
@@ -24,6 +25,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@headlessui/react": "^2.2.10",
+    "@next/env": "^15.5.29",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-autoplay": "^8.6.0",

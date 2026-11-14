@@ -30,6 +30,7 @@ export default async function MenuManagementPage() {
   const knownRoutes = [
     { slug: "sermons", title: "Sermons" },
     { slug: "events", title: "Events" },
+    { slug: "announcements", title: "Announcements" },
     { slug: "ministries", title: "Ministries" },
     { slug: "resources", title: "Resources" },
     { slug: "contact", title: "Contact" },
