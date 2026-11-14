@@ -25,6 +25,7 @@ import {
 } from "@/lib/validators";
 import { PUBLISHED } from "@/types/shared";
 import type { SiteSettingDoc } from "@/types/settings";
+import { normalizeAnnouncement } from "@/lib/announcements";
 import { serializeData, type Serialized, withReadTimeout } from "./utils";
 
 export const CMS_MODULES = [
@@ -420,8 +421,37 @@ function publishAuditPatch(
   return {};
 }
 
-function serializeDocument(id: string, data: DocumentData): CmsDocument {
-  return serializeData({ id, ...data } as Record<string, unknown>);
+function serializeDocument(module: CmsModule, id: string, data: DocumentData): CmsDocument {
+  const normalized =
+    module === "announcements"
+      ? normalizeAnnouncement(data as Record<string, unknown>)
+      : (data as Record<string, unknown>);
+  return serializeData({ id, ...normalized } as Record<string, unknown>);
+}
+
+async function assertUniqueAnnouncementSlug(
+  slug: unknown,
+  excludeId?: string,
+): Promise<void> {
+  if (typeof slug !== "string") return;
+
+  const collection = getAdminFirestore().collection(collections.announcements);
+  const [slugMatches, matchingId] = await Promise.all([
+    withReadTimeout(collection.where("slug", "==", slug).limit(2).get()),
+    withReadTimeout(collection.doc(slug).get()),
+  ]);
+  const conflict =
+    slugMatches.docs.some((doc) => doc.id !== excludeId) ||
+    (matchingId.exists && matchingId.id !== excludeId);
+
+  if (conflict) {
+    throw new CmsAdminError(
+      "DUPLICATE_SLUG",
+      "Another announcement already uses this URL slug.",
+      409,
+      { slug: ["Choose a unique URL slug."] },
+    );
+  }
 }
 
 async function getRawDocument(
@@ -475,7 +505,7 @@ export async function listCmsDocuments(
   }
 
   const snapshot = await withReadTimeout(query.get());
-  return snapshot.docs.map((doc) => serializeDocument(doc.id, doc.data()));
+  return snapshot.docs.map((doc) => serializeDocument(module, doc.id, doc.data()));
 }
 
 export async function getCmsDocument(
@@ -487,7 +517,7 @@ export async function getCmsDocument(
   assertActorPermission(actor, config, "read");
 
   const doc = await getRawDocument(module, id);
-  return doc ? serializeDocument(doc.id, doc.data) : null;
+  return doc ? serializeDocument(module, doc.id, doc.data) : null;
 }
 
 export async function createCmsDocument(
@@ -506,9 +536,17 @@ export async function createCmsDocument(
     requireEditableByEditor(actor, config, { status: "draft" }, data);
   }
 
+  if (module === "announcements") {
+    await assertUniqueAnnouncementSlug(data.slug);
+  }
+
   const docId =
     options?.id ??
-    (module === "siteSettings" && typeof data.key === "string" ? data.key : undefined);
+    (module === "siteSettings" && typeof data.key === "string"
+      ? data.key
+      : module === "announcements" && typeof data.slug === "string"
+        ? data.slug
+        : undefined);
   const docRef = docId
     ? getAdminFirestore().collection(config.collection).doc(normalizeId(docId))
     : getAdminFirestore().collection(config.collection).doc();
@@ -525,14 +563,34 @@ export async function createCmsDocument(
           ...publishAuditPatch(config, null, data),
         };
 
-  await docRef.set(auditData, { merge: false });
+  if (module === "announcements") {
+    try {
+      await docRef.create(auditData);
+    } catch (error) {
+      const code =
+        typeof error === "object" && error !== null && "code" in error
+          ? String((error as { code?: unknown }).code)
+          : "";
+      if (code === "6" || code === "already-exists") {
+        throw new CmsAdminError(
+          "DUPLICATE_SLUG",
+          "Another announcement already uses this URL slug.",
+          409,
+          { slug: ["Choose a unique URL slug."] },
+        );
+      }
+      throw error;
+    }
+  } else {
+    await docRef.set(auditData, { merge: false });
+  }
   const created = await getRawDocument(module, docRef.id);
 
   if (!created) {
     throw new CmsAdminError("CREATE_FAILED", "Document was not created.", 500);
   }
 
-  return serializeDocument(created.id, created.data);
+  return serializeDocument(module, created.id, created.data);
 }
 
 export async function updateCmsDocument(
@@ -567,6 +625,10 @@ export async function updateCmsDocument(
     requireEditableByEditor(actor, config, existing.data, merged);
   }
 
+  if (module === "announcements") {
+    await assertUniqueAnnouncementSlug(merged.slug, existing.id);
+  }
+
   await getAdminFirestore()
     .collection(config.collection)
     .doc(existing.id)
@@ -584,7 +646,7 @@ export async function updateCmsDocument(
     throw new CmsAdminError("UPDATE_FAILED", "Document was not updated.", 500);
   }
 
-  return serializeDocument(updated.id, updated.data);
+  return serializeDocument(module, updated.id, updated.data);
 }
 
 export async function publishCmsDocument(
@@ -628,7 +690,7 @@ export async function publishCmsDocument(
     throw new CmsAdminError("PUBLISH_FAILED", "Document was not published.", 500);
   }
 
-  return serializeDocument(updated.id, updated.data);
+  return serializeDocument(module, updated.id, updated.data);
 }
 
 export async function archiveCmsDocument(
@@ -667,7 +729,7 @@ export async function archiveCmsDocument(
     throw new CmsAdminError("ARCHIVE_FAILED", "Document was not archived.", 500);
   }
 
-  return serializeDocument(updated.id, updated.data);
+  return serializeDocument(module, updated.id, updated.data);
 }
 
 export async function deleteCmsDocument(

@@ -173,6 +173,7 @@ npm run dev
 npm run build
 npm run typecheck
 npm run lint
+npm run migrate:announcement-channels
 npm run seed:firestore
 ```
 
@@ -182,7 +183,24 @@ Script behavior:
 - `build`: runs `next build` after `prebuild` moves `.next` aside.
 - `typecheck`: runs `tsc --noEmit`.
 - `lint`: runs `next lint`. This command is supported by the current package script, though Next.js reports that `next lint` is deprecated in newer Next versions. Follow-up migration should move to ESLint CLI with the flat config, for example `eslint .`.
+- `migrate:announcement-channels`: previews the backwards-compatible announcement channel migration. Add `-- --apply` only after reviewing the dry-run output.
 - `seed:firestore`: runs `scripts/seedFirestore.ts` with `tsx`.
+
+### Announcement Channel Migration
+
+Legacy announcements are normalized at read time and do not require an immediate database migration. To preview the optional idempotent backfill of missing channel, slug, summary, and category fields:
+
+```bash
+npm run migrate:announcement-channels
+```
+
+The command is dry-run by default. To write only fields that are currently missing:
+
+```bash
+npm run migrate:announcement-channels -- --apply
+```
+
+The migration never overwrites an explicitly configured value and reports scanned, changed, and skipped document counts.
 
 ## Firestore Seed
 

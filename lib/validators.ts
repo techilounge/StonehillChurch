@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  ANNOUNCEMENT_CATEGORIES,
+  deriveAnnouncementSummary,
+  slugifyAnnouncementTitle,
+} from "@/lib/announcements";
 
 export const emailSchema = z.string().email();
 
@@ -58,6 +63,7 @@ export const ministryCategorySchema = z.enum([
 ]);
 
 export const announcementPrioritySchema = z.enum(["low", "normal", "high", "urgent"]);
+export const announcementCategorySchema = z.enum(ANNOUNCEMENT_CATEGORIES);
 
 export const resourceCategorySchema = z.enum([
   "bulletin",
@@ -234,21 +240,82 @@ export const leaderCategorySchema = z.object({
 export const announcementSchema = z
   .object({
     title: z.string().min(2).max(160),
+    slug: slugSchema.optional(),
+    summary: z.string().trim().max(300).optional(),
     body: z.string().min(5).max(2000),
+    category: announcementCategorySchema.optional(),
     startDate: isoOrDate,
     endDate: isoOrDate,
     priority: announcementPrioritySchema,
-    ctaLabel: z.string().min(1).max(40).nullable(),
-    ctaHref: z.string().min(1).max(300).nullable(),
+    publishToWebsite: z.boolean().optional(),
+    showInAnnouncementBar: z.boolean().optional(),
+    showOnHomepage: z.boolean().optional(),
+    ctaLabel: z.preprocess(
+      (value) => (value === "" ? null : value),
+      z.string().trim().min(1).max(40).nullable(),
+    ),
+    ctaHref: z.preprocess(
+      (value) => (value === "" ? null : value),
+      z.string().trim().min(1).max(300).nullable(),
+    ),
     openInNewTab: z.boolean().optional(),
-    imageUrl: urlSchema.nullable(),
-    imageAlt: z.string().min(2).max(200).nullable(),
+    imageUrl: z.preprocess(
+      (value) => (value === "" ? null : value),
+      urlSchema.nullable(),
+    ),
+    imageAlt: z.preprocess(
+      (value) => (value === "" ? null : value),
+      z.string().trim().min(2).max(200).nullable(),
+    ),
     status: contentStatusSchema,
+    seoTitle: z.string().trim().max(70).optional(),
+    seoDescription: z.string().trim().max(160).optional(),
   })
-  .refine(
-    (data) => new Date(data.endDate as string | Date) >= new Date(data.startDate as string | Date),
-    { message: "endDate must be on or after startDate", path: ["endDate"] },
-  );
+  .superRefine((data, context) => {
+    if (new Date(data.endDate as string | Date) < new Date(data.startDate as string | Date)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date must be on or after start date.",
+        path: ["endDate"],
+      });
+    }
+
+    const hasCtaLabel = Boolean(data.ctaLabel?.trim());
+    const hasCtaHref = Boolean(data.ctaHref?.trim());
+    if (hasCtaLabel && !hasCtaHref) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Action URL is required when an action label is provided.",
+        path: ["ctaHref"],
+      });
+    }
+    if (hasCtaHref && !hasCtaLabel) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Action label is required when an action URL is provided.",
+        path: ["ctaLabel"],
+      });
+    }
+
+    if (data.imageUrl && (!data.imageAlt || data.imageAlt.trim().length < 8)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Meaningful image alt text of at least 8 characters is required.",
+        path: ["imageAlt"],
+      });
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    slug: data.slug ?? slugifyAnnouncementTitle(data.title),
+    summary: data.summary?.trim() || deriveAnnouncementSummary(data.body),
+    category: data.category ?? "general",
+    publishToWebsite: data.publishToWebsite ?? true,
+    showInAnnouncementBar: data.showInAnnouncementBar ?? true,
+    showOnHomepage: data.showOnHomepage ?? false,
+    seoTitle: data.seoTitle ?? "",
+    seoDescription: data.seoDescription ?? "",
+  }));
 
 // resources
 export const resourceSchema = z

@@ -231,7 +231,10 @@ service cloud.firestore {
     }
 
     match /announcements/{announcementId} {
-      allow read: if publicStatus(resource.data) || viewerOrHigher();
+      // Missing publishToWebsite preserves the legacy public behavior.
+      allow read: if (publicStatus(resource.data) &&
+        (!resource.data.keys().hasAny(["publishToWebsite"]) ||
+          resource.data.publishToWebsite == true)) || viewerOrHigher();
       allow create: if canCreateContent();
       allow update: if canUpdateContent();
       allow delete: if adminOrHigher();

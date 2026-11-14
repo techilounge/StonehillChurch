@@ -51,7 +51,7 @@ export async function getActivePopup(): Promise<Serialized<Popup> | null> {
 
     return null;
   } catch (error) {
-    console.error("[popups] getActivePopup failed:", error);
+    console.warn("[popups] getActivePopup: using fallback after read failure.", error);
     return null;
   }
 }

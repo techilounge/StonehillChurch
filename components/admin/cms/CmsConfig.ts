@@ -21,6 +21,7 @@ export interface FieldConfig {
   name: string;
   label: string;
   type: FieldType;
+  section?: string;
   required?: boolean;
   description?: string;
   /**
@@ -251,28 +252,48 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     singular: "Announcement",
     description: "Manage site-wide announcements and alerts.",
     fields: [
-      { name: "title", label: "Title", type: "text", required: true },
-      { name: "body", label: "Content", type: "textarea", required: true },
-      { name: "startDate", label: "Start Date", type: "date", required: true, tooltip: "Date the announcement starts appearing site-wide." },
-      { name: "endDate", label: "End Date", type: "date", required: true, tooltip: "Date the announcement stops appearing." },
-      { name: "priority", label: "Priority", type: "select", required: true, tooltip: "Sets banner color and stacking order. Urgent shows first and in red.", options: [
+      { name: "title", label: "Title", type: "text", required: true, section: "Basic Content" },
+      { name: "slug", label: "URL Slug", type: "slug", required: true, section: "Basic Content", description: "Used for the announcement's future public URL. Suggested automatically from the title and editable before saving.", tooltip: "Lowercase letters, numbers, and hyphens only." },
+      { name: "summary", label: "Summary", type: "textarea", required: false, section: "Basic Content", defaultValue: "", description: "A concise preview of the announcement, up to 300 characters. If left blank, a summary is derived from the content." },
+      { name: "body", label: "Content", type: "textarea", required: true, section: "Basic Content" },
+      { name: "category", label: "Category", type: "select", required: true, section: "Basic Content", defaultValue: "general", options: [
+        { label: "General", value: "general" },
+        { label: "Worship", value: "worship" },
+        { label: "Ministry", value: "ministry" },
+        { label: "School", value: "school" },
+        { label: "Community", value: "community" },
+        { label: "Prayer", value: "prayer" },
+        { label: "Health", value: "health" },
+        { label: "Service", value: "service" },
+        { label: "Special", value: "special" },
+        { label: "Other", value: "other" },
+      ]},
+      { name: "imageUrl", label: "Image", type: "media", required: false, section: "Basic Content", hiddenOnList: true, tooltip: "Optional thumbnail shown with the announcement where supported." },
+      { name: "imageAlt", label: "Image Alt Text", type: "text", required: false, section: "Basic Content", hiddenOnList: true, description: "Describe the image for screen readers (required when an image is attached).", tooltip: "Required when an image is attached. Describes it for screen readers." },
+      { name: "startDate", label: "Start Date", type: "date", required: true, section: "Display Window", tooltip: "First day the announcement can appear on time-sensitive surfaces." },
+      { name: "endDate", label: "End Date", type: "date", required: true, section: "Display Window", tooltip: "Last day the announcement can appear on time-sensitive surfaces." },
+      { name: "priority", label: "Priority", type: "select", required: true, section: "Display Window", defaultValue: "normal", tooltip: "Sets banner color and stacking order. Urgent shows first and in red.", options: [
         { label: "Low", value: "low" }, { label: "Normal", value: "normal" },
         { label: "High", value: "high" }, { label: "Urgent", value: "urgent" }
       ]},
-      { name: "ctaLabel", label: "Action Label", type: "text", required: false, hiddenOnList: true, tooltip: "Text shown on the action button (e.g. \"Learn more\")." },
-      { name: "ctaHref", label: "Action URL", type: "url", required: false, hiddenOnList: true, tooltip: "Where the action button sends visitors." },
+      { name: "publishToWebsite", label: "Publish to Website", type: "boolean", required: false, section: "Website Placement", defaultValue: true, description: "Make this announcement available on the public Announcements section." },
+      { name: "showInAnnouncementBar", label: "Show in Site-wide Announcement Bar", type: "boolean", required: false, section: "Website Placement", defaultValue: true, description: "Display this announcement in the rotating alert bar while it is active." },
+      { name: "showOnHomepage", label: "Feature on Homepage", type: "boolean", required: false, section: "Website Placement", defaultValue: false, description: "Allow this announcement to appear in homepage news or announcement features." },
+      { name: "ctaLabel", label: "Action Label", type: "text", required: false, section: "Call to Action", hiddenOnList: true, tooltip: "Text shown on the action button (e.g. \"Learn more\")." },
+      { name: "ctaHref", label: "Action URL", type: "url", required: false, section: "Call to Action", hiddenOnList: true, tooltip: "Where the action button sends visitors. An action label is required when this is set." },
       {
         name: "openInNewTab",
         label: "Open Action URL in New Tab",
         type: "boolean",
         required: false,
+        section: "Call to Action",
         defaultValue: false,
         hiddenOnList: true,
         description: "Enable this to open the Action URL in a new browser tab.",
         tooltip: "On: action opens in a new browser tab. Off: stays in the same tab.",
       },
-      { name: "imageUrl", label: "Image", type: "media", required: false, hiddenOnList: true, tooltip: "Optional thumbnail shown next to the announcement text." },
-      { name: "imageAlt", label: "Image Alt Text", type: "text", required: false, hiddenOnList: true, description: "Describe the image for screen readers (required when an image is attached).", tooltip: "Required when an image is attached. Describes it for screen readers." },
+      { name: "seoTitle", label: "SEO Title", type: "text", required: false, section: "SEO", defaultValue: "", hiddenOnList: true, description: "Optional search-result title, up to 70 characters." },
+      { name: "seoDescription", label: "SEO Description", type: "textarea", required: false, section: "SEO", defaultValue: "", hiddenOnList: true, description: "Optional search-result description, up to 160 characters." },
     ],
   },
   resources: {
