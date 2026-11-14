@@ -30,11 +30,13 @@ function handleCmsError(error: unknown): CmsActionResponse<any> {
     };
   }
   
+  // Unexpected errors can carry internal details (Firestore index URLs,
+  // project IDs). Log them server-side only and return a generic message.
   console.error("[CMS Action Error]", error);
   return {
     ok: false,
     error: {
-      message: error instanceof Error ? error.message : "An unexpected error occurred.",
+      message: "Something went wrong while saving. Please try again, or contact a site administrator if it keeps happening.",
     },
   };
 }

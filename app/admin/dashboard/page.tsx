@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { AdminStatCard } from "@/components/admin/shared/AdminStatCard";
 import { Button } from "@/components/shared/Button";
@@ -20,6 +22,11 @@ function formatMetric(value: number | null): string {
 }
 
 export default async function AdminDashboardPage() {
+  // Defense in depth: the admin layout skips its session check for paths the
+  // middleware marks public, so every admin page verifies the session itself.
+  const auth = await getCurrentAdminSession("admin:access");
+  if (!auth.ok) redirect("/admin/login");
+
   const [metrics, recentActivity] = await Promise.all([
     getDashboardMetrics(),
     getRecentAuditEntries(10),

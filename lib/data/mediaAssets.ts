@@ -190,7 +190,7 @@ async function optimizeImage(buffer: Buffer): Promise<{
   if (outputBuffer.length > MAX_OUTPUT_BYTES) {
     throw new MediaUploadError(
       "IMAGE_TOO_LARGE_AFTER_COMPRESSION",
-      "The optimized WEBP image is still larger than 5 MB.",
+      `The optimized WEBP image is still larger than ${MAX_OUTPUT_BYTES / (1024 * 1024)} MB.`,
       413,
     );
   }
@@ -214,7 +214,7 @@ function assertUploadableFile(file: File, inputContentType: string, buffer: Buff
   if (file.size > MAX_SOURCE_BYTES || buffer.length > MAX_SOURCE_BYTES) {
     throw new MediaUploadError(
       "FILE_TOO_LARGE",
-      "Uploaded image must be 12 MB or smaller before compression.",
+      `Uploaded image must be ${MAX_SOURCE_BYTES / (1024 * 1024)} MB or smaller.`,
       413,
     );
   }

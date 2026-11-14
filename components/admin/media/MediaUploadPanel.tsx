@@ -161,7 +161,7 @@ export function MediaUploadPanel({ onUploadSuccess }: MediaUploadPanelProps) {
                   <div className="text-slate-900">
                     <span className="font-medium">Click to browse</span> or drag and drop
                     <span className="text-slate-900/60 text-sm block mt-1">
-                      JPG, PNG, or WEBP (max 12MB)
+                      JPG, PNG, or WEBP (max {MAX_FILE_SIZE_LABEL})
                     </span>
                   </div>
                 </>
