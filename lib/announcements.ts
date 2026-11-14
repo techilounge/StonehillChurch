@@ -120,3 +120,81 @@ export function buildAnnouncementMigrationPatch(
 
   return patch;
 }
+
+export const ANNOUNCEMENT_CATEGORY_LABELS: Record<AnnouncementCategory, string> = {
+  general: "General",
+  worship: "Worship",
+  ministry: "Ministry",
+  school: "School",
+  community: "Community",
+  prayer: "Prayer",
+  health: "Health",
+  service: "Service",
+  special: "Special",
+  other: "Other",
+};
+
+/**
+ * The admin form stores date-only fields as midnight at the start of the
+ * chosen day. The end date is the *last* display day, so an announcement
+ * stays visible until that day is over.
+ */
+export const ANNOUNCEMENT_END_GRACE_MS = 24 * 60 * 60 * 1000;
+
+const PRIORITY_RANK: Record<Announcement["priority"], number> = {
+  urgent: 4,
+  high: 3,
+  normal: 2,
+  low: 1,
+};
+
+export function toAnnouncementDate(value: unknown): Date | null {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value === "string" || typeof value === "number") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toDate" in value &&
+    typeof (value as { toDate?: unknown }).toDate === "function"
+  ) {
+    return (value as { toDate: () => Date }).toDate();
+  }
+  return null;
+}
+
+/** Display window with the end boundary made inclusive of the last day. */
+export function getAnnouncementWindow(announcement: {
+  startDate?: unknown;
+  endDate?: unknown;
+}): { start: Date | null; end: Date | null } {
+  const start = toAnnouncementDate(announcement.startDate);
+  const rawEnd = toAnnouncementDate(announcement.endDate);
+  const end = rawEnd ? new Date(rawEnd.getTime() + ANNOUNCEMENT_END_GRACE_MS - 1) : null;
+  return { start, end };
+}
+
+export function isAnnouncementActive(
+  announcement: { startDate?: unknown; endDate?: unknown },
+  now: Date = new Date(),
+): boolean {
+  const { start, end } = getAnnouncementWindow(announcement);
+  return Boolean(start && end && start <= now && end >= now);
+}
+
+/** Highest priority first, then most recently started. */
+export function compareAnnouncementsForDisplay(
+  left: { priority?: unknown; startDate?: unknown },
+  right: { priority?: unknown; startDate?: unknown },
+): number {
+  const rank = (value: unknown) =>
+    PRIORITY_RANK[value as Announcement["priority"]] ?? PRIORITY_RANK.normal;
+  const priorityDifference = rank(right.priority) - rank(left.priority);
+  if (priorityDifference !== 0) return priorityDifference;
+  return (
+    (toAnnouncementDate(right.startDate)?.getTime() ?? 0) -
+    (toAnnouncementDate(left.startDate)?.getTime() ?? 0)
+  );
+}

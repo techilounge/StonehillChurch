@@ -8,6 +8,7 @@ import { getFeaturedMinistries } from "@/lib/data/ministries";
 import { getCachedSiteSettings, getCachedHomepageSlidesConfig, getCachedMediaSettings } from "@/lib/data/siteSettings";
 import { getLatestSermon } from "@/lib/data/sermons";
 import { getLeaders } from "@/lib/data/leaders";
+import { getHomepageAnnouncements } from "@/lib/data/announcements";
 
 import { HeroCarousel } from "@/components/public/HeroCarousel";
 import { QuickActions } from "@/components/public/QuickActions";
@@ -16,6 +17,7 @@ import { ThisSabbath } from "@/components/public/ThisSabbath";
 import { LatestSermonSection } from "@/components/public/LatestSermonSection";
 import { MinistriesPreview } from "@/components/public/MinistriesPreview";
 import { UpcomingEventsPreview } from "@/components/public/UpcomingEventsPreview";
+import { AnnouncementsPreview } from "@/components/public/AnnouncementsPreview";
 import { ConnectSection } from "@/components/public/ConnectSection";
 import { LocationMapSection } from "@/components/public/LocationMapSection";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
@@ -40,7 +42,8 @@ export default async function HomePage() {
     siteSettings,
     leaders,
     homepageSlidesConfig,
-    mediaSettings
+    mediaSettings,
+    homepageAnnouncements,
   ] = await Promise.all([
     getHomepageSlides(),
     getLatestSermon(),
@@ -50,6 +53,7 @@ export default async function HomePage() {
     getLeaders(),
     getCachedHomepageSlidesConfig(),
     getCachedMediaSettings(),
+    getHomepageAnnouncements(3),
   ]);
 
   return (
@@ -61,6 +65,7 @@ export default async function HomePage() {
       <LatestSermonSection sermon={latestSermon} />
       <MinistriesPreview ministries={featuredMinistries} />
       <UpcomingEventsPreview events={upcomingEvents} />
+      <AnnouncementsPreview announcements={homepageAnnouncements} />
       <ConnectSection />
       <LocationMapSection settings={siteSettings} />
     </>

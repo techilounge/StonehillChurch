@@ -253,7 +253,7 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
     description: "Manage site-wide announcements and alerts.",
     fields: [
       { name: "title", label: "Title", type: "text", required: true, section: "Basic Content" },
-      { name: "slug", label: "URL Slug", type: "slug", required: true, section: "Basic Content", description: "Used for the announcement's future public URL. Suggested automatically from the title and editable before saving.", tooltip: "Lowercase letters, numbers, and hyphens only." },
+      { name: "slug", label: "URL Slug", type: "slug", required: true, section: "Basic Content", description: "Public URL: /announcements/your-slug. Suggested automatically from the title and editable before saving.", tooltip: "Lowercase letters, numbers, and hyphens only." },
       { name: "summary", label: "Summary", type: "textarea", required: false, section: "Basic Content", defaultValue: "", description: "A concise preview of the announcement, up to 300 characters. If left blank, a summary is derived from the content." },
       { name: "body", label: "Content", type: "textarea", required: true, section: "Basic Content" },
       { name: "category", label: "Category", type: "select", required: true, section: "Basic Content", defaultValue: "general", options: [
@@ -276,9 +276,9 @@ export const CMS_CONFIG: Record<Exclude<CmsModule, "siteSettings">, CmsUIConfig>
         { label: "Low", value: "low" }, { label: "Normal", value: "normal" },
         { label: "High", value: "high" }, { label: "Urgent", value: "urgent" }
       ]},
-      { name: "publishToWebsite", label: "Publish to Website", type: "boolean", required: false, section: "Website Placement", defaultValue: true, description: "Make this announcement available on the public Announcements section." },
+      { name: "publishToWebsite", label: "Publish to Website", type: "boolean", required: false, section: "Website Placement", defaultValue: true, description: "List this announcement on the public /announcements page and give it its own page. Turn off to hide it from the website entirely." },
       { name: "showInAnnouncementBar", label: "Show in Site-wide Announcement Bar", type: "boolean", required: false, section: "Website Placement", defaultValue: true, description: "Display this announcement in the rotating alert bar while it is active." },
-      { name: "showOnHomepage", label: "Feature on Homepage", type: "boolean", required: false, section: "Website Placement", defaultValue: false, description: "Allow this announcement to appear in homepage news or announcement features." },
+      { name: "showOnHomepage", label: "Feature on Homepage", type: "boolean", required: false, section: "Website Placement", defaultValue: false, description: "Show this announcement in the homepage Announcements section (up to 3, highest priority first) while it is active." },
       { name: "ctaLabel", label: "Action Label", type: "text", required: false, section: "Call to Action", hiddenOnList: true, tooltip: "Text shown on the action button (e.g. \"Learn more\")." },
       { name: "ctaHref", label: "Action URL", type: "url", required: false, section: "Call to Action", hiddenOnList: true, tooltip: "Where the action button sends visitors. An action label is required when this is set." },
       {
