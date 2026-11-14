@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.2] - 2026-11-14
+
+### Fixed
+- **Production outage (all server routes returned 500).** firebase-admin 14 depends on jwks-rsa 4, which `require()`s the ESM-only `jose` 6. Node 24 can do that; Vercel functions cannot, so every server route crashed with `ERR_REQUIRE_ESM` from the 0.9.0 deploy until this fix. An npm override pins `jose` 4.15.9 (CommonJS) under jwks-rsa ([firebase-admin-node#3181](https://github.com/firebase/firebase-admin-node/issues/3181)).
+
+### Added
+- CI runtime smoke test: starts the production build and requests key routes, with `require()` of ES modules disabled to match Vercel. A green build alone did not catch the outage.
+
 ## [0.9.1] - 2026-11-14
 
 ### Security

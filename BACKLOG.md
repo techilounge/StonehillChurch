@@ -6,18 +6,6 @@ Last reviewed: 2026-11-14.
 
 ## Needs owner action (not code)
 
-### OPS-001 — Deploy updated Firestore rules
-
-- **Status:** Open
-- **Why:** The announcement channels change adds a `publishToWebsite` condition to the `announcements` read rule. The public site reads through the Admin SDK and is already correct without it; the rule closes the same gap for direct client reads.
-- **How:** `firebase deploy --only firestore --project <project_id>` (see README → Firebase Rules Deployment). The Firebase CLI is not installed on the current dev machine.
-
-### OPS-002 — Enable the TTL policy for rate-limit counters
-
-- **Status:** Open
-- **Why:** `rateLimits` documents carry `expiresAt`; without a TTL policy they are never deleted (the limiter still works).
-- **How:** Firestore → Time-to-live → collection group `rateLimits`, field `expiresAt`. Command in README → Rate Limiting.
-
 ### OPS-003 — Require CI before merging to `main`
 
 - **Status:** Open
@@ -91,6 +79,7 @@ Last reviewed: 2026-11-14.
 ### QA-007 — Dependency majors still pending
 
 - **Status:** Open
+- **Note:** `package.json` overrides `jose` to 4.15.9 under `jwks-rsa` because Vercel functions cannot `require()` ESM. Remove the override once jwks-rsa loads jose via `import()` or firebase-admin drops it; the CI smoke test will catch a regression.
 - **Evidence:** `firebase` (client) 12 → 13 clears a grpc-js advisory on code paths the browser does not use; Next.js 16 clears the bundled build-time `postcss` advisory. Neither is exploitable in this app today.
 - **Resolution:** Upgrade deliberately, one major per change, with a preview deployment check.
 
@@ -138,3 +127,6 @@ Last reviewed: 2026-11-14.
 | Announcement channels, public pages, homepage section; announcements no longer end a day early | 2026-11-14 | `4c46b6a`, `6731fa6` | Unit tests; pages verified against production data |
 | SEC-002 App Check verification on `POST /api/forms` (monitor mode; enforcement is OPS-005) | 2026-11-14 | this change | Unit tests; monitor and enforce verified against Firebase with missing/forged tokens |
 | SEC-006 Editor media self-approval: decided to keep auto-approve; storage rule documented as direct-upload defense in depth | 2026-11-14 | this change | Decision by owner |
+| OPS-001 Firestore rules deployed (announcement `publishToWebsite` read rule) | 2026-11-14 | owner | Deployed by owner |
+| OPS-002 TTL policy on `rateLimits.expiresAt` | 2026-11-14 | owner | `ttlConfig.state: ACTIVE` |
+| Fix production outage: ERR_REQUIRE_ESM from jwks-rsa 4 / jose 6 on Vercel | 2026-11-14 | `86d78c6` | Reproduced with require(esm) disabled; all routes 200 in production; CI smoke test now runs the same way |
