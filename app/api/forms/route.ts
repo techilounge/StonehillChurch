@@ -20,13 +20,21 @@ import type {
   PublicFormSubmissionInput,
 } from "@/types/forms";
 import type { FormSubmissionStatus } from "@/types/shared";
+import {
+  clientIpFromHeaders,
+  consumeRateLimit,
+  rateLimitHeaders,
+  type RateLimitRule,
+} from "@/lib/rateLimit";
 
 type PublicFormSubmission = z.infer<typeof publicFormSubmissionSchema>;
 
 const HONEYPOT_FIELDS = ["website", "company", "url", "homepage", "honeypot", "_gotcha"] as const;
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT_MAX_POSTS = 5;
-const submissionAttempts = new Map<string, { count: number; resetAt: number }>();
+const FORM_RATE_LIMIT: RateLimitRule = {
+  scope: "public-forms",
+  limit: 5,
+  windowMs: 10 * 60 * 1000,
+};
 
 function jsonSuccess<T>(data: T, status = 200): NextResponse<FormApiResponse<T>> {
   return NextResponse.json({ ok: true, data }, { status });
@@ -53,26 +61,6 @@ function jsonError(
 
 function jsonAuthError(authResult: Extract<AdminRequestAuthResult, { ok: false }>) {
   return jsonError(authResult.reason, authResult.message, authResult.status);
-}
-
-function requestIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwardedFor || request.headers.get("x-real-ip") || "unknown";
-}
-
-function isRateLimited(request: NextRequest): boolean {
-  const key = requestIp(request);
-  const now = Date.now();
-  const current = submissionAttempts.get(key);
-
-  if (!current || current.resetAt <= now) {
-    submissionAttempts.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-
-  current.count += 1;
-  submissionAttempts.set(key, current);
-  return current.count > RATE_LIMIT_MAX_POSTS;
 }
 
 function hasHoneypotValue(body: unknown): boolean {
@@ -179,12 +167,17 @@ export async function POST(request: NextRequest) {
     return jsonSuccess({ submission: null, accepted: true }, 202);
   }
 
-  if (isRateLimited(request)) {
-    return jsonError(
+  const rateLimit = await consumeRateLimit(FORM_RATE_LIMIT, clientIpFromHeaders(request.headers));
+  if (!rateLimit.allowed) {
+    const response = jsonError(
       "RATE_LIMITED",
       "Too many form submissions were received. Please wait a few minutes and try again.",
       429,
     );
+    for (const [name, value] of Object.entries(rateLimitHeaders(rateLimit))) {
+      response.headers.set(name, value);
+    }
+    return response;
   }
 
   const parsed = publicFormSubmissionSchema.safeParse(normalizeRequestPayload(body));

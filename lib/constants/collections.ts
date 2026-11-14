@@ -17,6 +17,8 @@ export const collections = {
   youtubeSettings: "youtubeSettings",
   auditLogs: "auditLogs",
   menus: "menus",
+  // Server-only (Admin SDK). Not in APPROVED_COLLECTION_NAMES; rules deny clients.
+  rateLimits: "rateLimits",
 } as const;
 
 export type CollectionKey = keyof typeof collections;

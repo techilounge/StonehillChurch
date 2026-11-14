@@ -120,6 +120,18 @@ firebase deploy --only storage
 
 Do not deploy rules to production until public write paths, including form submissions, have been reviewed with App Check and abuse protection in mind.
 
+### Rate Limiting
+
+Public forms (`POST /api/forms`, 5 per 10 minutes) and the invite endpoints (`/api/admin/users/invites/lookup`, 30 per 15 minutes; `/accept`, 10 per 15 minutes) are rate limited per client IP by `lib/rateLimit.ts`. Counters are stored server-side in the `rateLimits` Firestore collection (clients are denied by the catch-all rule) so limits hold across Vercel instances and cold starts. Keys are SHA-256 hashes; raw IPs are not stored. If Firestore is unavailable the limiter fails open and logs a warning.
+
+One-time setup: enable a TTL policy so expired windows are deleted automatically. In the Google Cloud console go to **Firestore → Time-to-live**, create a policy for collection group `rateLimits` on field `expiresAt`, or run:
+
+```bash
+gcloud firestore fields ttls update expiresAt --collection-group=rateLimits --enable-ttl --project your_project_id
+```
+
+Without the policy the limiter still works correctly; old counter documents simply accumulate.
+
 ### App Check Local Development
 
 App Check is initialized in the browser when `NEXT_PUBLIC_FIREBASE_APPCHECK_SITE_KEY` is set. For localhost testing, use Firebase's debug token flow rather than adding `localhost` to reCAPTCHA allowed domains.
