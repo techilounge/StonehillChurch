@@ -62,20 +62,49 @@ function flattenSettingValue(
   flatSettings[prefix] = settingValueToString(value);
 }
 
+type RawSiteSettingEntry = {
+  id: string;
+  key?: unknown;
+  value: unknown;
+};
+
+/**
+ * Flatten raw siteSettings documents so grouped CMS documents (e.g. "contact",
+ * "service_times") always take precedence over legacy dotted seed documents
+ * (e.g. "contact.address") regardless of Firestore document ID sort order.
+ */
+export function flattenSiteSettingDocs(entries: RawSiteSettingEntry[]): SiteSettingsMap {
+  const flatSettings: SiteSettingsMap = {};
+  const normalized = entries.map((entry) => ({
+    key: typeof entry.key === "string" && entry.key.trim() ? entry.key.trim() : entry.id,
+    value: entry.value,
+  }));
+
+  // Pass 1: legacy dotted keys; Pass 2: canonical grouped documents override them.
+  for (const isGroupedPass of [false, true]) {
+    for (const entry of normalized) {
+      if (entry.key.includes(".") === isGroupedPass) continue;
+      flattenSettingValue(entry.key, entry.value, flatSettings);
+    }
+  }
+
+  return flatSettings;
+}
+
 export async function getSiteSettings(): Promise<SiteSettingsMap> {
   try {
     const db = getAdminFirestore();
     const snapshot = await withReadTimeout(db.collection(collections.siteSettings).get());
-    const flatSettings: SiteSettingsMap = {};
-    
-    snapshot.docs.forEach((doc) => {
+    const entries = snapshot.docs.map((doc) => {
       const data = doc.data() as SiteSettingDoc;
-      const key = typeof data.key === "string" && data.key.trim() ? data.key.trim() : doc.id;
-
-      flattenSettingValue(key, data.value, flatSettings);
+      return {
+        id: doc.id,
+        key: data.key,
+        value: data.value,
+      };
     });
 
-    return flatSettings;
+    return flattenSiteSettingDocs(entries);
   } catch (error) {
     logDataFallback("getSiteSettings", error);
     return {};

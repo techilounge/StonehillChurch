@@ -21,7 +21,17 @@ export function YouTubeLiteEmbed({
   buttonLabel,
 }: YouTubeLiteEmbedProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const thumbnail = thumbnailUrl || getYouTubeThumbnailUrl(videoId);
+  const fallbackThumbnail = getYouTubeThumbnailUrl(videoId);
+  const primaryThumbnail = thumbnailUrl || fallbackThumbnail;
+  const [thumbnailState, setThumbnailState] = useState<{
+    src: string;
+    stage: "primary" | "fallback" | "hidden";
+  }>({ src: primaryThumbnail, stage: "primary" });
+
+  const currentStage =
+    thumbnailState.src === primaryThumbnail ? thumbnailState.stage : "primary";
+  const displayedThumbnail =
+    currentStage === "primary" ? primaryThumbnail : fallbackThumbnail;
 
   return (
     <div className={cn("relative aspect-video overflow-hidden rounded-lg bg-slate-900", className)}>
@@ -35,13 +45,23 @@ export function YouTubeLiteEmbed({
         />
       ) : (
         <>
-          <img
-            src={thumbnail}
-            alt=""
-            aria-hidden="true"
-            loading="lazy"
-            className="h-full w-full object-cover opacity-90"
-          />
+          {currentStage !== "hidden" && (
+            <img
+              src={displayedThumbnail}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={() => {
+                if (currentStage === "primary" && primaryThumbnail !== fallbackThumbnail) {
+                  setThumbnailState({ src: primaryThumbnail, stage: "fallback" });
+                } else {
+                  setThumbnailState({ src: primaryThumbnail, stage: "hidden" });
+                }
+              }}
+              className="h-full w-full object-cover opacity-90"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
           <button
             type="button"
