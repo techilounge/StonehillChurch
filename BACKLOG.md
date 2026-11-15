@@ -47,7 +47,7 @@ Last reviewed: 2026-11-14.
 
 ### QA-003 — Expand automated coverage around critical flows
 
-- **Status:** In progress — authorization done 2026-11-14 (`tests/auth/`, 239 tests)
+- **Status:** In progress — authorization (239 tests), invite flow (28) and public forms API (30) done 2026-11-14. Remaining: media validation, page-builder migration, end-to-end smoke suite.
 - **Evidence:** 60 Vitest tests cover popups, announcements and the rate limiter. Authorization (`lib/permissions.ts`, `lib/auth.ts`, the `adminCms` role × action matrix), the invite flow, public forms, media validation and page-builder migration have no tests.
 - **Resolution:** Start with pure authorization logic (highest value, no emulator needed), then route tests for forms and invites, then a small end-to-end smoke suite.
 
