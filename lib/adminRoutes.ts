@@ -5,6 +5,11 @@ export const ADMIN_DEFAULT_PATH = "/admin/dashboard";
 export const ADMIN_SESSION_COOKIE_NAME = "__stonehill_admin_session";
 export const ADMIN_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 5;
 
+// Exact segment match: "/administration" is a public CMS page slug, not admin.
+export function isAdminPath(pathname: string): boolean {
+  return pathname === ADMIN_ROUTE_PREFIX || pathname.startsWith(`${ADMIN_ROUTE_PREFIX}/`);
+}
+
 export function isAdminLoginPath(pathname: string): boolean {
   return pathname === ADMIN_LOGIN_PATH || pathname.startsWith(`${ADMIN_LOGIN_PATH}/`);
 }

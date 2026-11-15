@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.4] - 2026-11-14
+
+### Fixed
+- The admin middleware treated every path starting with `/admin` as admin, so a CMS page with a slug like `administration` or `admin-office` would have sent visitors to the admin login. Only `/admin` and `/admin/...` are gated now.
+
+### Added
+- 239 authorization tests (QA-003, first phase): the full role × permission matrix, session guards, session cookie and ID token verification (profile overrides stale claims, revocation is always checked, a bad bearer token never falls back to a cookie), open-redirect protection on `returnTo`, middleware gating and CSP, the CMS role × action matrix (viewers read-only, editors draft-only, settings admin-only), and the user-management API (SUPER_ADMIN only, no self-modification, claims kept in sync). Firebase is faked in memory; no test touches production.
+
 ## [0.9.3] - 2026-11-14
 
 ### Security
