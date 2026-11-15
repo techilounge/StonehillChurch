@@ -65,6 +65,12 @@
     },
     "isomorphic-dompurify": {
       "jsdom": "26.1.0"
+    },
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.14.7"
+    },
+    "next": {
+      "postcss": "8.5.33"
     }
   }
 }

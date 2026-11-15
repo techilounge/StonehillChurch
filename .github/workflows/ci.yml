@@ -53,4 +53,4 @@ jobs:
         run: bash scripts/smokeTest.sh
 
       - name: Audit production dependencies (critical)
-        run: npm audit --omit=dev --audit-level=critical
+        run: npm audit --omit=dev --audit-level=high
