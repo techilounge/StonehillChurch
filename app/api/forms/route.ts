@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       "VALIDATION_ERROR",
       "Please check the form fields and try again.",
       400,
-      parsed.error.flatten().fieldErrors,
+      z.flattenError(parsed.error).fieldErrors,
     );
   }
 

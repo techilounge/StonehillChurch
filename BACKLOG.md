@@ -25,13 +25,6 @@ Last reviewed: 2026-11-14.
 
 ## P1 — Security and abuse prevention
 
-### SEC-004 — Upgrade zod 3 → 4
-
-- **Status:** Open
-- **Evidence:** `npm audit` reports a high-severity memory-exhaustion advisory for zod < 4.6.6 (oversized constrained collections). zod is used in ~10 server files, including validation of public form input.
-- **Resolution:** Migrate schemas to zod 4 (`error` param, `z.flattenError`, stricter `.default` semantics, etc.), keeping route body sizes bounded in the meantime.
-- **Bring up when:** Touching validators or public APIs.
-
 ### SEC-005 — Enforce (or remove) the `critical` settings permission
 
 - **Status:** Open
@@ -130,3 +123,4 @@ Last reviewed: 2026-11-14.
 | OPS-001 Firestore rules deployed (announcement `publishToWebsite` read rule) | 2026-11-14 | owner | Deployed by owner |
 | OPS-002 TTL policy on `rateLimits.expiresAt` | 2026-11-14 | owner | `ttlConfig.state: ACTIVE` |
 | Fix production outage: ERR_REQUIRE_ESM from jwks-rsa 4 / jose 6 on Vercel | 2026-11-14 | `86d78c6` | Reproduced with require(esm) disabled; all routes 200 in production; CI smoke test now runs the same way |
+| SEC-004 zod 3 → 4 (memory-exhaustion advisory); partial-update default/refinement regressions caught by new characterization tests | 2026-11-14 | branch `chore/zod-4` | 131 tests; schema pass/fail and parsed output identical to zod 3; strict smoke test |

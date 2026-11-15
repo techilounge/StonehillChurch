@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentAdminSession } from "@/lib/api/adminSession";
 import { saveMenu } from "@/lib/data/menus";
@@ -27,7 +28,7 @@ export async function saveMenuAction(
         ok: false,
         error: {
           message: "Invalid menu data.",
-          fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+          fieldErrors: z.flattenError(parsed.error).fieldErrors as Record<string, string[]>,
         },
       };
     }

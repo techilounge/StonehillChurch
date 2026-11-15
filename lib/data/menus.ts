@@ -1,3 +1,4 @@
+import { z } from "zod";
 import "server-only";
 
 import { unstable_cache } from "next/cache";
@@ -64,7 +65,7 @@ export async function saveMenu(
 
   if (!parsed.success) {
     throw new Error(
-      `Invalid menu data: ${parsed.error.flatten().fieldErrors ? JSON.stringify(parsed.error.flatten().fieldErrors) : parsed.error.message}`,
+      `Invalid menu data: ${z.flattenError(parsed.error).fieldErrors ? JSON.stringify(z.flattenError(parsed.error).fieldErrors) : parsed.error.message}`,
     );
   }
 

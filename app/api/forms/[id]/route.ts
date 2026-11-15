@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 import {
   requireAdminSessionForRequest,
@@ -91,7 +92,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       "VALIDATION_ERROR",
       "Please check the status update fields and try again.",
       400,
-      parsed.error.flatten().fieldErrors,
+      z.flattenError(parsed.error).fieldErrors,
     );
   }
 
