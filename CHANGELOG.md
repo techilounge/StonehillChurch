@@ -3,6 +3,13 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.7] - 2026-11-14
+
+### Added
+- 58 tests for the admin invite flow and the public forms API (QA-003 phase 2), run against a shared in-memory Firebase fake (`tests/helpers/fakeFirebase.ts`):
+  - **Invites:** SUPER_ADMIN-only create/list/revoke; SUPER_ADMIN cannot be granted by invite; only a SHA-256 hash of the token is stored and it never leaves the server; links use the configured site URL, not the request Origin; duplicate and expiry rules; Resend success/failure fallbacks; anonymous lookup returns identical 404s for every failure; acceptance creates a verified account with the invite's role only, works once, rejects weak passwords, and rolls back the new account if the invite is revoked or Firestore fails mid-accept; rate limits on lookup and accept.
+  - **Forms:** visitors cannot set status, assignee or notes; honeypot, App Check and rate limit each stop the request before any write; subjects per form type; notification routing (confidential prayer requests reach only the confidential list) and fallbacks; email failures never lose a submission; admin inbox endpoints are ADMIN+ only and status updates cannot rewrite the visitor's submission.
+
 ## [0.9.6] - 2026-11-14
 
 ### Security
