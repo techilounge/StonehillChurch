@@ -1,3 +1,4 @@
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSessionForRequest } from "@/lib/api/adminSession";
 import { getLatestYoutubeUploads, getLiveYoutubeBroadcast } from "@/lib/data/youtubeVideos";
@@ -162,6 +163,13 @@ export async function POST(request: NextRequest) {
   }
 
   await saveYoutubeSettings(parsed.settings, authResult.session.uid);
+
+  revalidateTag("youtube-settings");
+  revalidateTag("youtube-live");
+  revalidatePath("/", "layout");
+  revalidatePath("/live");
+  revalidatePath("/sermons");
+  revalidatePath("/admin/youtube");
 
   return NextResponse.json({
     status: "ok",

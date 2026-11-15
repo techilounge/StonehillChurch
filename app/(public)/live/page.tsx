@@ -9,7 +9,7 @@ import { LiveLabel } from "@/components/public/LiveLabel";
 import { buttonVariants } from "@/lib/buttonVariants";
 import { getSermons } from "@/lib/data/sermons";
 import { getSiteSettings } from "@/lib/data/siteSettings";
-import { getLatestYoutubeUploads, getLiveYoutubeBroadcast } from "@/lib/data/youtubeVideos";
+import { getLatestYoutubeUploads, getCachedLiveYoutubeBroadcast } from "@/lib/data/youtubeVideos";
 import { getYoutubeSettings } from "@/lib/data/youtubeSettings";
 import { createPublicPageMetadata } from "@/lib/seoMetadata";
 import {
@@ -76,7 +76,7 @@ export default async function LiveStreamPage() {
 
   const [latestYoutubeVideos, liveBroadcast] = await Promise.all([
     getLatestYoutubeUploads(youtubeSettings, 3),
-    getLiveYoutubeBroadcast(youtubeSettings),
+    getCachedLiveYoutubeBroadcast({ channelId: youtubeSettings.channelId }),
   ]);
   const channelUrl = getYouTubeChannelUrl(youtubeSettings);
   const liveUrl = getYouTubeLiveUrl(youtubeSettings);

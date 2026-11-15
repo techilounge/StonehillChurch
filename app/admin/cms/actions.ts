@@ -49,6 +49,7 @@ function revalidateCmsModule(module: CmsModule, data?: Record<string, unknown> |
   switch (module) {
     case "siteSettings":
       revalidateTag("site-settings");
+      revalidatePath("/admin/settings");
       revalidatePath("/", "layout");
       revalidatePath("/contact");
       revalidatePath("/im-new");
