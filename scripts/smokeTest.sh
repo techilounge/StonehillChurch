@@ -14,7 +14,7 @@ for _ in $(seq 1 60); do
 done
 
 failed=0
-for path in / /announcements /events /sermons /admin/login /api/live-status /sitemap.xml; do
+for path in / /announcements /events /sermons /admin/login /api/live-status /sitemap.xml /about /our-beliefs /no-such-cms-page; do
   code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60 "http://127.0.0.1:$PORT$path")
   echo "$path -> $code"
   if [ "$code" -ge 500 ] || [ "$code" = "000" ]; then

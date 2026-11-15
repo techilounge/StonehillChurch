@@ -3,6 +3,12 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.5] - 2026-11-14
+
+### Fixed
+- **CMS-rendered pages returned 500 on Vercel** (`/about`, `/our-beliefs` and every `/[slug]` page, including unknown slugs that should 404). isomorphic-dompurify uses jsdom 28, whose `html-encoding-sniffer` 6 `require()`s the ESM-only `@exodus/bytes`; Vercel cannot load that (same failure as 0.9.2). Present since the 2026-08-29 lockfile regeneration. An npm override pins jsdom 26.1.0, whose dependency tree is CommonJS.
+- The runtime smoke test now also requests `/about`, `/our-beliefs` and an unknown CMS slug.
+
 ## [0.9.4] - 2026-11-14
 
 ### Fixed
