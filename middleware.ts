@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
   ADMIN_LOGIN_PATH,
-  ADMIN_ROUTE_PREFIX,
+  isAdminPath,
   ADMIN_SESSION_COOKIE_NAME,
   isAdminPublicPath,
 } from "@/lib/adminRoutes";
@@ -71,7 +71,7 @@ function nextWithAdminPath(request: NextRequest, nonce: string) {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!pathname.startsWith(ADMIN_ROUTE_PREFIX)) {
+  if (!isAdminPath(pathname)) {
     const response = NextResponse.next();
     response.headers.set("Content-Security-Policy", PUBLIC_CSP);
     return response;

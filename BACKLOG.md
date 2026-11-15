@@ -47,7 +47,7 @@ Last reviewed: 2026-11-14.
 
 ### QA-003 — Expand automated coverage around critical flows
 
-- **Status:** Open
+- **Status:** In progress — authorization done 2026-11-14 (`tests/auth/`, 239 tests)
 - **Evidence:** 60 Vitest tests cover popups, announcements and the rate limiter. Authorization (`lib/permissions.ts`, `lib/auth.ts`, the `adminCms` role × action matrix), the invite flow, public forms, media validation and page-builder migration have no tests.
 - **Resolution:** Start with pure authorization logic (highest value, no emulator needed), then route tests for forms and invites, then a small end-to-end smoke suite.
 
@@ -110,6 +110,7 @@ Last reviewed: 2026-11-14.
 | SEC-001 Sanitize CMS-authored HTML (DOMPurify allow-list on all `dangerouslySetInnerHTML` sinks) | 2026-08-29 | `071f35f` | Merged in `5e9ac42` |
 | Close direct client writes to `formSubmissions` | 2026-08-29 | `071f35f` | Rule now `allow create: if false` |
 | Admin console CSP with per-request nonce | 2026-08-29 | `071f35f` | Public site: see SEC-008 |
+| QA-003 phase 1: authorization tests; fixed `/admin` prefix match gating public slugs like `/administration` | 2026-11-14 | branch `test/auth-permissions` | 370 tests pass; built app: `/administration` 404, `/admin/*` 307 to login |
 | DEP: Next.js 15.5.29 (RCE, cache poisoning), sharp 0.35.5, firebase-admin 14 | 2026-11-14 | `607959a` | Build, tests, sharp/firebase-admin runtime smoke tests |
 | SEC-003 Shared Firestore rate limiter for forms; invite lookup/accept limits | 2026-11-14 | `25d4ce7` | Unit tests; 429 + headers verified against Firestore |
 | Delete dead `/api/admin/invites/*` routes (state-leaking validate endpoint) | 2026-11-14 | `25d4ce7` | No references remain |
