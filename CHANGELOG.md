@@ -3,6 +3,14 @@
 All notable changes to the Stonehill Church website will be documented in this file.
 
 
+## [0.9.6] - 2026-11-14
+
+### Security
+- `npm audit --omit=dev` now reports 0 vulnerabilities (was 5 high, 1 moderate). Neither upstream has a fix yet, so both are npm overrides:
+  - `@grpc/grpc-js` 1.9.16 → 1.14.7 under the Firebase client SDK (`firebase` 13.3 still pins ~1.9). The advisories affect gRPC servers; the SDK is a client, so exposure was minimal. Verified against production Firestore from Node.
+  - `postcss` 8.4.31 → 8.5.33 bundled inside Next 15 (only Next 16 updates it). Build-time only; compiled CSS is byte-identical.
+- CI now fails on high-severity production advisories, not only critical ones.
+
 ## [0.9.5] - 2026-11-14
 
 ### Fixed

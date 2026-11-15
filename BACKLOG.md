@@ -72,8 +72,8 @@ Last reviewed: 2026-11-14.
 ### QA-007 — Dependency majors still pending
 
 - **Status:** Open
-- **Note:** `package.json` overrides `jose` to 4.15.9 under `jwks-rsa` because Vercel functions cannot `require()` ESM. Remove the override once jwks-rsa loads jose via `import()` or firebase-admin drops it; the CI smoke test will catch a regression.
-- **Evidence:** `firebase` (client) 12 → 13 clears a grpc-js advisory on code paths the browser does not use; Next.js 16 clears the bundled build-time `postcss` advisory. Neither is exploitable in this app today.
+- **Note:** `package.json` has four overrides. Remove each once upstream catches up (CI smoke test and audit catch regressions): `jose` 4.15.9 under `jwks-rsa` and `jsdom` 26.1.0 under `isomorphic-dompurify` (Vercel functions cannot `require()` ESM); `@grpc/grpc-js` 1.14.7 under `@firebase/firestore` (firebase 13.3 still pins ~1.9); `postcss` 8.5.33 under `next` (Next 15 bundles 8.4.31).
+- **Evidence:** Audit is clean via overrides (2026-11-14). Note: firebase 13 does NOT clear the grpc-js advisory (still pins ~1.9). Next.js 16 is the remaining major; it would let the `postcss` override go.
 - **Resolution:** Upgrade deliberately, one major per change, with a preview deployment check.
 
 ### PERF-002 — Revisit `force-dynamic` on the `[slug]` catch-all route
